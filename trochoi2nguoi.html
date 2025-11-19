@@ -246,7 +246,7 @@ cursor: pointer;
 <!-- Overlay Video -->
 <div id="helpOverlay">
 <video id="helpVideo" controls>
-<source src="huongdan.mp4" type="video/mp4">
+<source src="bắn tàu.mp4" type="video/mp4">
 </video>
 <button id="closeHelp" onclick="closeHelp()">Đóng</button>
 </div>
@@ -500,12 +500,13 @@ function renderPlaceBoard(){
 // ⭐ KIỂM TRA ĐẶT ĐỦ 4 TÀU
 // =========================
 function countShipsPlaced(player){
-    let count=0;
-    document.querySelectorAll(".palette .ship").forEach(s=>{
-        if(s.draggable===false) count++;
+    let count = 0;
+    document.querySelectorAll(".palette .ship").forEach(s => {
+        if (s.dataset.placed === "true") count++;
     });
     return count;
 }
+
 
 function confirmPlacement(){
     let placed = countShipsPlaced(placingPlayer);

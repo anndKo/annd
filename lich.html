@@ -5,6 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lịch Nhật Ký</title>
 <style>
+  #helpBtn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 10px 18px;
+    background: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 11000;
+}
+
+#hideHelpBtn {
+    position: fixed;
+    top: 15px;
+    right: 130px;
+    padding: 10px 18px;
+    background: #ca2222;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    z-index:11000;
+    font-weight: 600;
+}
+
+#helpOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 12000;
+}
+#helpOverlay video {
+    max-width: 90%;
+    max-height: 80%;
+    border-radius: 12px;
+}
+#closeHelp {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background: #e53935;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+}
 body {
   margin:0;
   font-family:Arial,sans-serif;
@@ -209,7 +264,20 @@ textarea{
 </style>
 </head>
 <body>
+  
 <div class="app">
+  <button id="hideHelpBtn" onclick="hideHelpBtnFunction()">X</button>
+
+<!-- NÚT HƯỚNG DẪN -->
+<button id="helpBtn" onclick="showHelp()">Hướng dẫn</button>
+
+<!-- OVERLAY VIDEO -->
+<div id="helpOverlay">
+    <video id="helpVideo" controls>
+        <source src="nhật kí.mp4" type="video/mp4">
+    </video>
+    <button id="closeHelp" onclick="closeHelp()">Đóng</button>
+</div>
   <header>
     <div class="header-top">
       <h2>📅 Lịch Nhật Ký</h2>
@@ -288,6 +356,23 @@ textarea{
 <button id="btnFilterTime">Chọn thời gian</button>
 
 <script>
+  function showHelp(){
+    document.getElementById("helpOverlay").style.display = "flex";
+    const v=document.getElementById("helpVideo");
+    v.currentTime = 0;
+    v.play();
+}
+
+function closeHelp(){
+    document.getElementById("helpOverlay").style.display = "none";
+    document.getElementById("helpVideo").pause();
+}
+
+// ẨN CẢ 2 NÚT
+function hideHelpBtnFunction(){
+    document.getElementById("helpBtn").style.display = "none";
+    document.getElementById("hideHelpBtn").style.display = "none";
+}
 // --- JS giữ nguyên như code gốc ---
 const cells = document.getElementById("cells");
 const selMonth = document.getElementById("selMonth");
