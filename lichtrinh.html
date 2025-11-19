@@ -137,6 +137,9 @@
 
     <button onclick="xem7Ngay()" style="background-color: #aad6f0;">Xem lịch trình 7 ngày tới</button>
     <div id="ketQua" style="margin-top:20px;"></div>
+    <button onclick="xemTatCaLich()" style="background-color: #ffcf96; margin-top:10px;">Xem lịch trình đã đặt</button>
+<div id="tatCaLich" style="margin-top:20px;"></div>
+
 </div>
 
 <!-- Popup sửa lịch -->
@@ -156,6 +159,46 @@
 </div>
 
 <script>
+    // =============================
+//  Xem toàn bộ lịch đã đặt
+// =============================
+function xemTatCaLich() {
+    let div = document.getElementById("tatCaLich");
+    div.innerHTML = "";
+
+    let ds = JSON.parse(localStorage.getItem("lichtrinh") || "[]");
+
+    // Lọc lịch theo user
+    let list = ds.filter(item => item.user === user);
+
+    if (list.length === 0) {
+        div.innerHTML = "<h3>Chưa có lịch nào!</h3>";
+        return;
+    }
+
+    // Sắp xếp theo ngày + giờ
+    list.sort((a, b) => {
+        if (a.ngay === b.ngay) return a.gio.localeCompare(b.gio);
+        return a.ngay.localeCompare(b.ngay);
+    });
+
+    let html = "<h3>TẤT CẢ LỊCH ĐÃ ĐẶT</h3>";
+
+    let ngayHienTai = "";
+
+    list.forEach(item => {
+        if (item.ngay !== ngayHienTai) {
+            ngayHienTai = item.ngay;
+            html += `<div class="ngay7"><b>${item.ngay} (${layThu(item.ngay)})</b><br>`;
+        }
+
+        html += `<div class="lich7">⏰ ${item.gio} — ${item.noidung}</div>`;
+    });
+
+    html += "</div>";
+    div.innerHTML = html;
+}
+
 // =============================
 //   KIỂM TRA ĐĂNG NHẬP
 // =============================
