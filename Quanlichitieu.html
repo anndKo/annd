@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý chi tiêu</title>
+
+    <style>
+        body { font-family: Arial; margin:0; padding:0; background: linear-gradient(120deg,#ffecd2,#fcb69f);}
+        .header {background: rgba(0,0,0,0.75); color:white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;}
+        .logout {background:#ff4444;padding:7px 15px;color:white;border:none;border-radius:5px;cursor:pointer;}
+        h2{text-align:center;margin-top:15px;}
+        .calendar{text-align:center;margin-top:10px;}
+        .overlay, .range-overlay {position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center;}
+        .form-box {background:white;padding:20px; width:330px; border-radius:10px;}
+        input {width:100%; padding:7px; margin-top:5px; margin-bottom:12px;}
+        #records {background:white; width:90%; margin:auto; margin-top:20px; padding:15px; border-radius:10px;}
+        table {width:100%; border-collapse:collapse;}
+        th, td {border:1px solid #ccc; padding:8px; text-align:center;}
+        .action-btn {margin:0 3px; padding:3px 8px; border:none; border-radius:5px; cursor:pointer;}
+        .edit-btn{background:#ffc107; color:black;}
+        .delete-btn{background:#dc3545;color:white;}
+        button {cursor:pointer;}
+        .tong-tien {
+    color: #e74c3c; /* màu đỏ nổi bật, bạn có thể đổi thành màu khác */
+    font-weight: bold;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>Xin chào, <span id="ten_user"></span></div>
+    <button class="logout" onclick="dangXuat()">Đăng xuất</button>
+</div>
+<div style="width: 40px; background-color: #061a07; padding: 10px;border-radius: 8px;" ><a href="trangchu.html" ><img src="ngoinha.jpg" alt="" width="100%" style="border-radius: 10px;"></a> <br><a href="tienichmorong.html" ><img src="muiten.jpg" alt="" width="100%" style="border-radius: 10px; margin-top: 20px;"></a></div>
+<h2>Quản Lý Chi Tiêu</h2>
+
+<div class="calendar">
+    <label>Chọn ngày:</label>
+    <input type="date" id="datePicker" style="width: 70%;">
+    <button onclick="openForm()" style="background:#58cea6;color:black;padding:8px 12px;border-radius:5px;font-weight:600;font-size:20px;">Thêm</button>
+</div>
+
+<!-- Form Thêm/Sửa -->
+<div class="overlay" id="overlay">
+    <div class="form-box">
+        <h3>Thêm / Sửa Chi Tiêu</h3>
+        <label id="label_sp">Tên sản phẩm</label>
+        <input type="text" id="sp">
+        <label id="label_gia" style="display:none;">Giá</label>
+        <input type="number" id="gia" style="display:none;">
+        <label id="label_sl" style="display:none;">Số lượng</label>
+        <input type="number" id="soluong" style="display:none;">
+        <button onclick="addExpense()" style="padding:7px 15px;">Xác nhận</button>
+        <button onclick="closeForm()" style="background:red;color:white;padding:7px 15px;">Đóng</button>
+    </div>
+</div>
+
+<!-- Form Khoảng Ngày -->
+<div class="range-overlay" id="rangeOverlay">
+    <div class="form-box">
+        <h3>Xem tổng chi tiêu</h3>
+        <label>Ngày bắt đầu</label>
+        <input type="date" id="startDate">
+        <label>Ngày kết thúc</label>
+        <input type="date" id="endDate">
+        <button onclick="showRangeTotal()" style="padding:7px 15px;">Xác nhận</button>
+        <button onclick="closeRangeForm()" style="background:red;color:white;padding:7px 15px;">Đóng</button>
+    </div>
+</div>
+
+<div id="records">
+    <h3>Chi tiêu trong ngày</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+    <h3 style="text-align:right;margin-top:10px;">Tổng: <span id="tong">0</span> VNĐ</h3>
+
+    <button onclick="showLast30Days()" style="margin-top:10px;background:#007bff;color:white;padding:8px 15px;border:none;border-radius:5px;">Xem 30 ngày gần nhất</button>
+    <button onclick="openRangeForm()" style="margin-top:10px;background:#28a745;color:white;padding:8px 15px;border:none;border-radius:5px;">Xem tổng theo khoảng</button>
+</div>
+
+<script>
+const user = localStorage.getItem("dangnhap_hien_tai");
+if(!user) window.location.href="dangnhap.html";
+document.getElementById("ten_user").innerText = user;
+
+function dangXuat(){
+    localStorage.removeItem("dangnhap_hien_tai");
+    window.location.href="trangchu.html";
+}
+
+let expenses = {};
+let editIndex = -1;
+let step = 1;
+let tempData = { sp:"", gia:0, sl:0 };
+
+if(localStorage.getItem("expenses_data_"+user)){
+    expenses = JSON.parse(localStorage.getItem("expenses_data_"+user));
+}
+
+function saveData(){
+    localStorage.setItem("expenses_data_"+user, JSON.stringify(expenses));
+}
+
+function formatMoney(n){ return n.toLocaleString('en-US'); }
+function formatDateDMY(dateStr){ 
+    let d = new Date(dateStr);
+    let dd = String(d.getDate()).padStart(2,'0');
+    let mm = String(d.getMonth()+1).padStart(2,'0');
+    let yyyy = d.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+}
+
+function openForm(index=-1){
+    let date=document.getElementById("datePicker").value;
+    if(!date) return alert("Chọn ngày trước!");
+    editIndex=index; step=1; tempData={sp:"",gia:0,sl:0};
+
+    document.getElementById("sp").style.display="block"; document.getElementById("label_sp").style.display="block";
+    document.getElementById("gia").style.display="none"; document.getElementById("label_gia").style.display="none";
+    document.getElementById("soluong").style.display="none"; document.getElementById("label_sl").style.display="none";
+
+    document.getElementById("sp").value=""; document.getElementById("gia").value=""; document.getElementById("soluong").value="";
+    document.getElementById("overlay").style.display="flex";
+}
+
+function closeForm(){ document.getElementById("overlay").style.display="none"; }
+
+function addExpense(){
+    let date=document.getElementById("datePicker").value;
+    if(step===1){
+        let sp=document.getElementById("sp").value.trim();
+        if(!sp) return alert("Nhập tên sản phẩm!");
+        tempData.sp=sp; step=2;
+        document.getElementById("sp").style.display="none"; document.getElementById("label_sp").style.display="none";
+        document.getElementById("gia").style.display="block"; document.getElementById("label_gia").style.display="block";
+        return;
+    }
+    if(step===2){
+        let gia=parseFloat(document.getElementById("gia").value);
+        if(!gia) return alert("Nhập giá!");
+        tempData.gia=gia; step=3;
+        document.getElementById("gia").style.display="none"; document.getElementById("label_gia").style.display="none";
+        document.getElementById("soluong").style.display="block"; document.getElementById("label_sl").style.display="block";
+        return;
+    }
+    if(step===3){
+        let sl=parseInt(document.getElementById("soluong").value);
+        if(!sl) return alert("Nhập số lượng!");
+        tempData.sl=sl; let total=tempData.gia*tempData.sl;
+
+        if(!expenses[date]) expenses[date]=[];
+        expenses[date].push({sp:tempData.sp,gia:tempData.gia,sl:tempData.sl,total:total});
+        saveData(); closeForm(); display(date);
+    }
+}
+
+function display(date){
+    let tbody=document.getElementById("tableBody"); tbody.innerHTML=""; let sum=0;
+    if(expenses[date]){
+        expenses[date].forEach((item,index)=>{
+            tbody.innerHTML+=`
+            <tr>
+                <td>${item.sp}</td>
+                <td>${formatMoney(item.gia)}</td>
+                <td>${item.sl}</td>
+                <td>${formatMoney(item.total)}</td>
+                <td>
+                    <button class="action-btn edit-btn" onclick="editExpense('${date}',${index})">Sửa</button>
+                    <button class="action-btn delete-btn" onclick="deleteExpense('${date}',${index})">Xoá</button>
+                </td>
+            </tr>`;
+            sum+=item.total;
+        });
+    }
+    document.getElementById("tong").innerText=formatMoney(sum);
+}
+
+document.getElementById("datePicker").addEventListener("change",function(){display(this.value);});
+
+function editExpense(date,index){
+    if(!confirm("Bạn chắc chắn muốn sửa?")) return;
+    let item=expenses[date][index];
+    openForm(index); step=3; tempData={sp:item.sp,gia:item.gia,sl:item.sl};
+    document.getElementById("sp").value=item.sp; document.getElementById("gia").value=item.gia; document.getElementById("soluong").value=item.sl;
+    document.getElementById("sp").style.display="none"; document.getElementById("label_sp").style.display="none";
+    document.getElementById("gia").style.display="block"; document.getElementById("label_gia").style.display="block";
+    document.getElementById("soluong").style.display="block"; document.getElementById("label_sl").style.display="block";
+}
+
+function deleteExpense(date,index){
+    if(!confirm("Bạn chắc chắn muốn xoá?")) return;
+    expenses[date].splice(index,1);
+    if(expenses[date].length===0) delete expenses[date];
+    saveData(); display(date);
+}
+
+function showLast30Days(){
+    let tbody=document.getElementById("tableBody"); tbody.innerHTML="";
+    let today=new Date(); let total30=0; let output="";
+    for(let i=0;i<30;i++){
+        let d=new Date(); d.setDate(today.getDate()-i);
+        let key=d.toISOString().split("T")[0];
+        if(expenses[key]){
+            expenses[key].forEach(item=>{
+                output+=`<tr>
+                    <td>${item.sp}</td>
+                    <td>${formatMoney(item.gia)}</td>
+                    <td>${item.sl}</td>
+                    <td>${formatMoney(item.total)}</td>
+                    <td></td>
+                </tr>`;
+                total30+=item.total;
+            });
+        }
+    }
+    tbody.innerHTML=output||`<tr><td colspan="5">Không có dữ liệu 30 ngày gần đây</td></tr>`;
+    document.getElementById("tong").innerText=formatMoney(total30)+" (30 ngày)";
+}
+
+// Khoảng ngày
+function openRangeForm(){
+    document.getElementById("rangeOverlay").style.display="flex";
+    document.getElementById("startDate").value=""; document.getElementById("endDate").value="";
+}
+function closeRangeForm(){ document.getElementById("rangeOverlay").style.display="none"; }
+
+function formatDateLong(dateStr){
+    let d = new Date(dateStr);
+    let dd = String(d.getDate()).padStart(2,'0');
+    let mm = String(d.getMonth()+1).padStart(2,'0');
+    let yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
+
+function showRangeTotal(){
+    let start=document.getElementById("startDate").value;
+    let end=document.getElementById("endDate").value;
+    if(!start||!end) return alert("Chọn đủ ngày bắt đầu và kết thúc!");
+    if(start>end) return alert("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc!");
+
+    let tbody=document.getElementById("tableBody"); tbody.innerHTML="";
+    let total=0; let output="";
+
+    let d=new Date(start);
+    let endDateObj=new Date(end);
+
+    while(d<=endDateObj){
+        let key=d.toISOString().split("T")[0];
+        if(expenses[key]){
+            expenses[key].forEach(item=>{
+                output+=`<tr>
+                    <td>${item.sp}</td>
+                    <td>${formatMoney(item.gia)}</td>
+                    <td>${item.sl}</td>
+                    <td>${formatMoney(item.total)}</td>
+                    <td></td>
+                </tr>`;
+                total+=item.total;
+            });
+        }
+        d.setDate(d.getDate()+1);
+    }
+
+    tbody.innerHTML=output||`<tr><td colspan="5">Không có dữ liệu trong khoảng ngày này</td></tr>`;
+    document.getElementById("tong").innerHTML=`<span class="tong-tien">${formatMoney(total)} VNĐ</span> (Từ ${formatDateLong(start)} → ${formatDateLong(end)})`;
+
+    closeRangeForm();
+}
+
+</script>
+
+</body>
+</html>

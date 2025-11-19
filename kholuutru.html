@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý ảnh & thư mục (Upload nhiều ảnh)</title>
+
+<style>
+body { font-family: sans-serif; padding: 20px; background: #4db391; }
+h2 { margin-bottom: 10px; }
+.btn { padding: 8px 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin: 5px; }
+.btn:hover { background: #1e40af; }
+input[type=text] { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+.thumb { max-width: 120px; margin: 5px; border-radius: 6px; cursor: pointer; }
+.del { background: #dc2626; margin-top: 4px; }
+.folder { background:#fff; padding:12px; border-radius:10px; margin-top:12px; box-shadow:0 4px 15px rgba(0,0,0,0.07);}
+#header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+#uploadPopup { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); display:none; justify-content:center; align-items:center; z-index:9999; }
+#popupBox { background: #fff; padding: 20px; width: 360px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
+#searchBar { padding: 8px; width: 300px; border-radius: 6px; border: 1px solid #aaa; margin-bottom: 20px; }
+#imageOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:9999; }
+#imageOverlay img { max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5); }
+#imageOverlay .closeBtn, #imageOverlay .downloadBtn { position:absolute; top:20px; padding:10px 16px; font-size:16px; border:none; border-radius:6px; cursor:pointer; }
+#imageOverlay .closeBtn { right:20px; background:#dc2626; color:#fff; }
+#imageOverlay .downloadBtn { right:140px; background:#16a34a; color:#fff; }
+.imageBox { background:#e7e7bc; padding:8px; border-radius:8px; margin:8px 0; width: fit-content; box-shadow:0 2px 6px rgba(0,0,0,0.12);}
+[id^="images-"] { display:grid; grid-template-columns: repeat(2, auto); gap:12px; align-items:start;}
+</style>
+</head>
+
+<body>
+
+<div id="header">
+<h2>Kho lưu trữ</h2>
+<div>
+<span id="userDisplay"></span>
+<button class="btn" id="logoutBtn">Đăng xuất</button>
+</div>
+</div>
+
+<div style="width:100%; background-color:black; padding:10px; border-radius:5px; height:40px;">
+<input id="searchBar" type="text" placeholder="Tìm theo tên, loại, ngày giờ..." style="margin-top:5px;width: 70%;">
+<label for="" style="background-color: #2563eb; color: white; padding: 10px;">Tìm kiếm</label>
+</div>
+
+<div style="width:100%; background-color:rgb(163, 8, 137); padding:10px; border-radius:5px; height:40px; margin-top:5px;">
+<input type="text" id="folderNameInput" placeholder="Nhập tên thư mục" style="height:20px; width:60%;">
+<button class="btn" id="createFolderBtn" style="background-color: rgb(240,154,43); color:black; font-weight:600;">Tạo thư mục</button>
+</div>
+
+<div id="folderList"></div>
+
+<!-- Popup upload -->
+<div id="uploadPopup">
+<div id="popupBox">
+<h3>Thông tin ảnh</h3>
+<label>Loại ảnh:</label>
+<select id="imgType" style="padding:6px; width:100%; border-radius:6px;">
+<option value="Cá nhân">Cá nhân</option>
+<option value="Nhóm">Khác</option>
+</select>
+<br><br>
+<label>Đặt tên (để trống để lấy tên file):</label>
+<input id="imgTitle" type="text" placeholder="Nhập tên ảnh..." style="padding:6px; width:100%; border-radius:6px;">
+<br><br>
+<button class="btn" id="confirmUpload">Xác nhận</button>
+<button class="btn del" onclick="closePopup()">Hủy</button>
+</div>
+</div>
+
+<!-- Overlay ảnh -->
+<div id="imageOverlay">
+<img id="fullImage" src="">
+<button class="downloadBtn" id="downloadBtn">Tải xuống</button>
+<button class="closeBtn" onclick="closeOverlay()">Đóng</button>
+</div>
+
+<script>
+/* ========== IndexedDB setup ========== */
+const DB_NAME = "UserFolderDB";
+const DB_VERSION = 1;
+const STORE_NAME = "users";
+let db;
+let username = localStorage.getItem("dangnhap_hien_tai") || "testUser"; // demo
+
+document.getElementById("userDisplay").textContent = username;
+document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("dangnhap_hien_tai"); location.reload(); };
+
+function openDB() {
+  return new Promise((resolve,reject)=>{
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = e => {
+      db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME,{keyPath:"username"});
+    };
+    request.onsuccess = e => { db = e.target.result; resolve(db); };
+    request.onerror = reject;
+  });
+}
+
+function getUserData() {
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE_NAME,"readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.get(username);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = reject;
+  });
+}
+
+function putUserData(data) {
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE_NAME,"readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const req = store.put(data);
+    req.onsuccess=()=>resolve();
+    req.onerror=reject;
+  });
+}
+
+/* ========== Thư mục ========== */
+document.getElementById("createFolderBtn").onclick = async ()=>{
+  const folderName = document.getElementById("folderNameInput").value.trim();
+  if(!folderName) return alert("Nhập tên thư mục");
+  let data = await getUserData();
+  if(!data) data={username,folders:[]};
+  if(data.folders.find(f=>f.name===folderName)) return alert("Tên thư mục đã tồn tại!");
+  data.folders.unshift({name:folderName,images:[]});
+  await putUserData(data);
+  document.getElementById("folderNameInput").value="";
+  loadFolders();
+};
+
+async function deleteFolder(name){
+  if(!confirm("Xóa thư mục này?")) return;
+  let data = await getUserData();
+  data.folders = data.folders.filter(f=>f.name!==name);
+  await putUserData(data);
+  loadFolders();
+}
+
+/* ========== Ảnh ========== */
+let tempFiles = null;
+let tempFolder = null;
+
+function uploadImage(folderName){
+  const fileInput = document.getElementById(`file-${encodeURIComponent(folderName)}`);
+  tempFiles = fileInput.files;
+  if(!tempFiles || tempFiles.length===0) return alert("Chọn ảnh!");
+  tempFolder = folderName;
+  document.getElementById("uploadPopup").style.display="flex";
+}
+
+document.getElementById("confirmUpload").onclick = async ()=>{
+  const type = document.getElementById("imgType").value;
+  const titleInput = document.getElementById("imgTitle").value.trim();
+  const data = await getUserData();
+  const folder = data.folders.find(f=>f.name===tempFolder);
+  for(let i=0;i<tempFiles.length;i++){
+    const file = tempFiles[i];
+    const reader = new FileReader();
+    reader.onload = async (e)=>{
+      folder.images.push({
+        src:e.target.result,
+        type,
+        title: titleInput || file.name,
+        datetime:new Date().toLocaleString("vi-VN")
+      });
+      await putUserData(data);
+      loadFolders();
+    };
+    reader.readAsDataURL(file);
+  }
+  closePopup();
+};
+
+function closePopup(){ document.getElementById("uploadPopup").style.display="none"; document.getElementById("imgTitle").value=""; tempFiles=null; tempFolder=null; }
+
+async function deleteImage(folderName,index){
+  if(!confirm("Bạn có chắc muốn xóa ảnh này?")) return;
+  const data = await getUserData();
+  const folder = data.folders.find(f=>f.name===folderName);
+  folder.images.splice(index,1);
+  await putUserData(data);
+  loadFolders();
+}
+
+/* ========== Render thư mục & ảnh ========== */
+async function loadFolders(){
+  const container = document.getElementById("folderList");
+  container.innerHTML="";
+  const data = await getUserData();
+  if(!data || !data.folders) return;
+  data.folders.forEach(folder=>{
+    const safeName = encodeURIComponent(folder.name);
+    const div = document.createElement("div");
+    div.className="folder";
+    div.innerHTML=`
+      <h3>📂 ${folder.name} <span id="count-${safeName}" style="color:blue;font-size:14px;">(${folder.images.length} ảnh)</span>
+      <button class="btn del" onclick="deleteFolder('${folder.name}')">Xóa thư mục</button></h3>
+      <input type="file" id="file-${safeName}" accept="image/*" multiple style="display:none">
+      <label for="file-${safeName}" class="btn">Chọn ảnh</label>
+      <button class="btn" onclick="uploadImage('${folder.name}')">Tải ảnh</button>
+      <div id="images-${safeName}"></div>
+    `;
+    container.appendChild(div);
+    renderImages(folder.name,folder.images);
+  });
+}
+
+function renderImages(folderName,images){
+  const wrap = document.getElementById("images-"+encodeURIComponent(folderName));
+  wrap.innerHTML="";
+  images.forEach((imgData,idx)=>{
+    const box=document.createElement("div"); box.className="imageBox";
+    const img=document.createElement("img"); img.src=imgData.src; img.className="thumb";
+    img.onclick=()=>openOverlay(imgData);
+    const info=document.createElement("div");
+    info.innerHTML=`<small><b>Tên:</b> ${imgData.title}</small><br>
+                    <small><b>Loại:</b> ${imgData.type}</small><br>
+                    <small><b>Ngày giờ:</b> ${imgData.datetime}</small><br>`;
+    const delBtn=document.createElement("button"); delBtn.className="btn del"; delBtn.innerText="Xóa";
+    delBtn.onclick=()=>deleteImage(folderName,idx);
+    box.append(img,info,delBtn);
+    wrap.appendChild(box);
+  });
+  updateImageCount(folderName);
+}
+
+/* ========== Overlay ảnh ========== */
+function openOverlay(imgData){
+  const overlay=document.getElementById("imageOverlay");
+  const fullImg=document.getElementById("fullImage");
+  fullImg.src=imgData.src; overlay.style.display="flex";
+  document.getElementById("downloadBtn").onclick=()=>{ const a=document.createElement("a"); a.href=imgData.src; a.download=imgData.title+".png"; a.click();};
+}
+function closeOverlay(){ document.getElementById("imageOverlay").style.display="none"; }
+
+/* ========== Tìm kiếm ========== */
+document.getElementById("searchBar").oninput=async function(){
+  const key=this.value.toLowerCase().trim();
+  const data=await getUserData();
+  if(!data||!data.folders) return;
+  data.folders.forEach(folder=>{
+    const safeName=encodeURIComponent(folder.name);
+    const folderBox=document.querySelector(`div.folder:has(div#images-${safeName})`);
+    const images=folder.images;
+    if(key===""){ folderBox.style.display=""; renderImages(folder.name,images); return; }
+    const folderMatch=folder.name.toLowerCase().includes(key);
+    const filteredImages=images.filter(img=>img.title.toLowerCase().includes(key)||img.type.toLowerCase().includes(key)||img.datetime.toLowerCase().includes(key));
+    if(folderMatch){ folderBox.style.display=""; renderImages(folder.name,images); }
+    else if(filteredImages.length>0){ folderBox.style.display=""; renderImages(folder.name,filteredImages); }
+    else folderBox.style.display="none";
+  });
+};
+
+/* ========== Cập nhật số lượng ảnh ========== */
+function updateImageCount(folderName){
+  const wrap=document.getElementById("images-"+encodeURIComponent(folderName));
+  const countSpan=document.getElementById("count-"+encodeURIComponent(folderName));
+  if(!wrap||!countSpan) return;
+  countSpan.textContent=`(${wrap.querySelectorAll(".imageBox").length} ảnh)`;
+}
+
+/* ========== Khởi tạo DB ========== */
+openDB().then(loadFolders).catch(console.error);
+</script>
+</body>
+</html>

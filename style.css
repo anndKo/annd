@@ -1,0 +1,50 @@
+.bang1{
+  background-color: rgb(73, 224, 224);
+  border: 2px solid rgb(253, 19, 19);
+  width: 30%;
+  height: auto;
+  padding: 20px;
+  overflow: hidden;
+}
+.khoichinh{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  
+.bang1 > p{
+  text-align: center;
+  font-weight: 600;
+  color: rgb(180, 21, 140);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 30px;
+  
+  
+  
+}
+.bang1 > label{
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  color: rgb(1, 9, 15);
+  
+
+}
+.bang1 > input{
+  width: 90%;
+  height: 20px;
+}
+.dangnhap > button{
+  background-color: rgb(58, 58, 233);
+  color: white;
+  width: 50%px;
+  height: 30px;
+  text-align: center;
+  
+  margin: 20px ;
+}
+.dangnhap{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

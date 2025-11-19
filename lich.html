@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch Nhật Ký</title>
+<style>
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0f172a;
+  color:#fff;
+}
+.app{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:10px;
+}
+header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-bottom:20px;
+}
+header h2{
+  margin:10px 0;
+}
+header .user-controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+button{
+  background:#7c3aed;
+  border:none;
+  padding:8px 14px;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+}
+button.secondary{background:#222;}
+.calendar{
+  width:100%;
+  overflow-x:auto;
+}
+.month{
+  background:#111829;
+  padding:16px;
+  border-radius:12px;
+}
+.controls{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+  gap:6px;
+}
+select,input[type="date"]{
+  padding:6px;
+  border-radius:6px;
+  background:#1b2236;
+  color:#fff;
+  border:1px solid #444;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.dayHead{
+  text-align:center;
+  font-size:12px;
+  color:#9aa2b2;
+}
+.cell{
+  padding:10px;
+  min-height:70px;
+  border-radius:8px;
+  cursor:pointer;
+  position:relative;
+  background:#162040;
+  word-break:break-word;
+}
+.cell.out{opacity:0.25;}
+.cell:hover{background:#1e2a55;}
+.date{position:absolute;top:6px;right:8px;font-size:12px;}
+textarea{
+  width:100%;
+  height:180px;
+  background:#0c1326;
+  color:#fff;
+  border:1px solid #344;
+  padding:8px;
+  border-radius:8px;
+  resize: vertical;
+  box-sizing:border-box;
+}
+.modal, #filterModal, #quickViewOverlay{
+  position:fixed;inset:0;display:none;
+  align-items:center;justify-content:center;
+  z-index:100;
+}
+.modal,#filterModal{background:#0008;}
+.card{
+  background:#0f1a32;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:500px;
+  box-sizing:border-box;
+}
+#quickViewOverlay{
+  background:#000e;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:10px;
+  box-sizing:border-box;
+}
+.quickViewCard{
+  background:#0f1a32;
+  border-radius:12px;
+  width:100%;
+  max-width:600px;
+  max-height:90vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-sizing:border-box;
+}
+#quickEntries{
+  flex:1;
+  overflow-y:auto;
+  margin-top:10px;
+}
+.quick-entry{
+  background:#1b2236;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:12px;
+  white-space: pre-wrap;
+  border:1px solid #2a3550;
+  word-break:break-word;
+  max-width:100%;
+}
+.quick-entry .date-label{
+  background:#7c3aed;
+  padding:4px 8px;
+  border-radius:6px;
+  color:#fff;
+  font-weight:bold;
+  display:inline-block;
+  margin-bottom:6px;
+}
+.quick-entry .content{
+  background:#e9ff97;
+  padding:12px;
+  border-radius:6px;
+  color:#000;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size:32px; /* font lớn hơn */
+}
+#closeQuickView{
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#222;
+  color:#fff;
+  width:100%;
+  flex-shrink:0;
+}
+#btnQuickView{
+  position:fixed;right:10px;bottom:10px;
+  background:#7c3aed;padding:10px 14px;
+  border:none;border-radius:8px;color:#fff;cursor:pointer;z-index:101;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+#btnFilterTime{
+  position:fixed;
+  right:10px;
+  bottom:70px;
+  background-color:orange;
+  color:black;
+  padding:10px 14px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:101;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+#filterModal .card{max-width:400px;}
+@media(max-width:600px){
+  .controls{flex-direction:column;align-items:flex-start;}
+  .grid{gap:4px;}
+  .cell{min-height:50px;padding:6px;font-size:12px;}
+  textarea{height:140px;}
+  button{padding:6px 10px;font-size:14px;}
+  #btnQuickView{padding:8px 12px;bottom:10px;right:10px;}
+  #btnFilterTime{font-size:14px;}
+  .quick-entry{padding:8px;}
+  .quick-entry .content{padding:8px;font-size:28px;}
+  .quickViewCard{max-width:95%; max-height:95vh;}
+  #closeQuickView{padding:10px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-top">
+      <h2>📅 Lịch Nhật Ký</h2>
+      <div class="user-controls">
+        <span id="userInfo">Chưa đăng nhập</span>
+        <button id="btnLogin" class="secondary">Đăng nhập</button>
+        <button id="btnLogout" class="secondary" style="display:none;background-color: rgb(197, 26, 26);">Đăng xuất</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="calendar">
+    <div class="month">
+      <div class="controls">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <select id="selMonth"></select>
+          <select id="selYear"></select>
+        </div>
+        <button id="today">Hôm nay</button>
+      </div>
+      <div class="grid">
+        <div class="dayHead">T2</div><div class="dayHead">T3</div><div class="dayHead">T4</div>
+        <div class="dayHead">T5</div><div class="dayHead">T6</div><div class="dayHead">T7</div><div class="dayHead">CN</div>
+      </div>
+      <div class="grid" id="cells"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nhật ký -->
+<div id="modal" class="modal">
+  <div class="card">
+    <h3 id="modalTitle"></h3>
+    <textarea id="entry"></textarea>
+    <div style="margin-top:10px;text-align:right;display:flex;gap:10px;justify-content:flex-end;">
+      <button id="saveEntry">Lưu</button>
+      <button id="closeModal" class="secondary">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick view overlay -->
+<div id="quickViewOverlay" >
+  <div class="card quickViewCard" style="display: flex;justify-content: center;">
+    <h2>Nhật ký nhanh </h2>
+    
+    <div id="quickEntries"></div>
+    <button id="closeQuickView" style="width: 100%;height: 40px;background-color: #3ec6cf; color: black; font-size: 20px; font-family: Arial, Helvetica, sans-serif; ">Đóng</button>
+  </div>
+</div>
+
+<!-- Filter modal -->
+<div id="filterModal" class="modal">
+  <div class="card">
+    <h3>Chọn khoảng thời gian</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <div>
+        <label>Từ ngày:</label>
+        <input type="date" id="startDate">
+      </div>
+      <div>
+        <label>Đến ngày:</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+    <div style="margin-top:10px;text-align:right;display:flex;gap:10px;justify-content:flex-end;">
+      <button id="applyFilter">Xác nhận</button>
+      <button id="closeFilter" class="secondary">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nút mở quick view -->
+<button id="btnQuickView" style="background-color: #1be99a;color: #000;">Xem nhật ký nhanh</button>
+<!-- Nút chọn thời gian -->
+<button id="btnFilterTime">Chọn thời gian</button>
+
+<script>
+// --- JS giữ nguyên như code gốc ---
+const cells = document.getElementById("cells");
+const selMonth = document.getElementById("selMonth");
+const selYear = document.getElementById("selYear");
+const userInfo = document.getElementById("userInfo");
+const btnLogin = document.getElementById("btnLogin");
+const btnLogout = document.getElementById("btnLogout");
+const modal = document.getElementById("modal");
+const entry = document.getElementById("entry");
+const modalTitle = document.getElementById("modalTitle");
+const btnQuickView = document.getElementById("btnQuickView");
+const quickViewOverlay = document.getElementById("quickViewOverlay");
+const quickEntries = document.getElementById("quickEntries");
+const closeQuickView = document.getElementById("closeQuickView");
+
+const btnFilterTime = document.getElementById("btnFilterTime");
+const filterModal = document.getElementById("filterModal");
+const startDateInput = document.getElementById("startDate");
+const endDateInput = document.getElementById("endDate");
+const applyFilter = document.getElementById("applyFilter");
+const closeFilter = document.getElementById("closeFilter");
+
+let view = new Date();
+let selectedDate = null;
+
+// --- KIỂM TRA ĐĂNG NHẬP ---
+function getCurrentUser() {
+  return localStorage.getItem("dangnhap_hien_tai") || null;
+}
+function checkLogin(){
+  const user = getCurrentUser();
+  if(!user){
+    alert("Vui lòng đăng nhập trước!");
+    window.location.href = "dangnhap.html";
+    return false;
+  }
+  return true;
+}
+function updateUserHeader(){
+  const user = getCurrentUser();
+  if(user){
+    userInfo.textContent = "Người dùng: " + user;
+    btnLogin.style.display = "none";
+    btnLogout.style.display = "inline-block";
+  } else {
+    userInfo.textContent = "Chưa đăng nhập";
+    btnLogin.style.display = "inline-block";
+    btnLogout.style.display = "none";
+  }
+}
+btnLogout.onclick = ()=>{ localStorage.removeItem("userId"); localStorage.removeItem("dangnhap_hien_tai"); window.location.href = "trangchu.html"; };
+btnLogin.onclick = ()=>{ window.location.href = "dangnhap.html"; };
+
+// Month & Year options
+for(let m=1;m<=12;m++){
+  const opt = document.createElement("option");
+  opt.value = m-1;
+  opt.textContent = "Tháng " + m;
+  selMonth.appendChild(opt);
+}
+for(let y=1970;y<=2070;y++){
+  const opt = document.createElement("option");
+  opt.value = y;
+  opt.textContent = y;
+  selYear.appendChild(opt);
+}
+
+// Date key theo user
+function dateKey(d){
+  const userId = getCurrentUser();
+  return `${userId}-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+// Render Calendar
+function renderCalendar(){
+  if(!checkLogin()) return;
+  selMonth.value = view.getMonth();
+  selYear.value = view.getFullYear();
+  cells.innerHTML = "";
+  let start = new Date(view.getFullYear(), view.getMonth(), 1);
+  let offset = (start.getDay()+6)%7;
+  let first = new Date(start);
+  first.setDate(first.getDate() - offset);
+
+  for(let i=0;i<42;i++){
+    let d = new Date(first);
+    d.setDate(first.getDate()+i);
+    let div = document.createElement("div");
+    div.className = "cell" + (d.getMonth()!==view.getMonth()?" out":"");
+    div.innerHTML = `<div class='date'>${d.getDate()}</div>`;
+    if(localStorage.getItem(dateKey(d))) div.style.background = "#1e7e34";
+    else div.style.background = d.getMonth()!==view.getMonth() ? "#16204044" : "#162040";
+    div.onclick = ()=>openEntry(d);
+    cells.appendChild(div);
+  }
+}
+selMonth.onchange = ()=>{ view.setMonth(parseInt(selMonth.value)); renderCalendar(); };
+selYear.onchange = ()=>{ view.setFullYear(parseInt(selYear.value)); renderCalendar(); };
+document.getElementById("today").onclick = ()=>{ view = new Date(); renderCalendar(); };
+
+// Modal nhật ký
+function openEntry(d){
+  if(!checkLogin()) return;
+  selectedDate = d;
+  modal.style.display = "flex";
+  modalTitle.textContent = "Nhật ký - " + d.toLocaleDateString("vi-VN");
+  entry.value = localStorage.getItem(dateKey(d)) || "";
+}
+document.getElementById("closeModal").onclick = ()=>modal.style.display="none";
+document.getElementById("saveEntry").onclick = ()=>{
+  localStorage.setItem(dateKey(selectedDate), entry.value);
+  modal.style.display = "none";
+  renderCalendar();
+};
+
+// Quick view
+function renderQuickView(filterStart=null, filterEnd=null){
+  quickEntries.innerHTML = "";
+  const userId = getCurrentUser();
+  let items = [];
+
+  if(filterStart) filterStart.setHours(0,0,0,0);
+  if(filterEnd) filterEnd.setHours(23,59,59,999);
+
+  for(let i=0;i<localStorage.length;i++){
+    const key = localStorage.key(i);
+    if(!key.startsWith(userId+"-")) continue;
+    const value = localStorage.getItem(key);
+    const parts = key.split("-");
+    const y = parseInt(parts[1]);
+    const m = parseInt(parts[2]);
+    const d = parseInt(parts[3]);
+    const dateObj = new Date(y,m-1,d);
+    dateObj.setHours(12,0,0,0);
+    if(filterStart && dateObj < filterStart) continue;
+    if(filterEnd && dateObj > filterEnd) continue;
+    const dd = d.toString().padStart(2, "0");
+    const mm = m.toString().padStart(2, "0");
+    const yyyy = y.toString();
+    items.push({date:dateObj,textDate:`${dd}-${mm}-${yyyy}`,content:value});
+  }
+  items.sort((a,b)=>a.date-b.date);
+  items.forEach(item=>{
+    const div = document.createElement("div");
+    div.className="quick-entry";
+    div.innerHTML = `<div class="date-label">${item.textDate}</div><div class="content">${item.content}</div>`;
+    quickEntries.appendChild(div);
+  });
+}
+btnQuickView.onclick = ()=>{
+  if(!checkLogin()) return;
+  renderQuickView();
+  quickViewOverlay.style.display="flex";
+};
+closeQuickView.onclick = ()=>quickViewOverlay.style.display="none";
+
+// Filter modal
+btnFilterTime.onclick = ()=>filterModal.style.display="flex";
+closeFilter.onclick = ()=>filterModal.style.display="none";
+applyFilter.onclick = ()=>{
+  const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
+  const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
+  renderQuickView(startDate,endDate);
+  filterModal.style.display="none";
+  quickViewOverlay.style.display="flex";
+};
+
+// INIT
+updateUserHeader();
+renderCalendar();
+</script>
+</body>
+</html>

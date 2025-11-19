@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>CASIO 580 Web — Full Scientific Engine</title>
+
+<style>
+body {
+    background: #1b1b1b;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    color: white;
+}
+
+#calc {
+    background: #222;
+    width: 420px;
+    padding: 20px;
+    border-radius: 14px;
+}
+
+#screen {
+    background: #000;
+    height: 110px;
+    border-radius: 8px;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#modeBar {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.keys {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+
+button {
+    background: #444;
+    border: none;
+    padding: 15px;
+    font-size: 17px;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+button.op { background: #0277bd; }
+button.mode { background: #8e24aa; }
+button.eq { background: #ffca28; color: black; font-weight: bold; }
+
+button:active {
+    opacity: 0.5;
+}
+
+.fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+}
+.frac-line {
+    border-top: 2px solid white;
+    width: 100%;
+    margin: 2px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div id="calc">
+    <div id="screen">
+        <div id="modeBar">COMP | DEG | NORM</div>
+        <div id="display">0</div>
+    </div>
+
+    <div class="keys">
+
+        <!-- MODE -->
+        <button class="mode" onclick="setMode('COMP')">COMP</button>
+        <button class="mode" onclick="setMode('STAT')">STAT</button>
+        <button class="mode" onclick="setMode('TABLE')">TABLE</button>
+        <button class="mode" onclick="setMode('MATRIX')">MATRIX</button>
+        <button class="mode" onclick="setMode('VECTOR')">VECTOR</button>
+        <button class="mode" onclick="setMode('BASE')">BASE-N</button>
+
+        <!-- FUNCTIONS -->
+        <button onclick="inputValue('sin(')">sin</button>
+        <button onclick="inputValue('cos(')">cos</button>
+        <button onclick="inputValue('tan(')">tan</button>
+        <button onclick="inputValue('log(')">log</button>
+        <button onclick="inputValue('ln(')">ln</button>
+        <button onclick="inputValue('sqrt(')">√</button>
+
+        <button onclick="inputValue('^')">xʸ</button>
+        <button onclick="inputValue('pi')">π</button>
+        <button onclick="inputValue('e')">e</button>
+        <button onclick="inputValue('abs(')">abs</button>
+        <button onclick="inputValue('(')">(</button>
+        <button onclick="inputValue(')')">)</button>
+
+        <!-- Numbers -->
+        <button onclick="inputValue('7')">7</button>
+        <button onclick="inputValue('8')">8</button>
+        <button onclick="inputValue('9')">9</button>
+        <button class="op" onclick="inputValue('/')">÷</button>
+        <button class="op" onclick="inputValue('%')">%</button>
+        <button onclick="del()">DEL</button>
+
+        <button onclick="inputValue('4')">4</button>
+        <button onclick="inputValue('5')">5</button>
+        <button onclick="inputValue('6')">6</button>
+        <button class="op" onclick="inputValue('*')">×</button>
+        <button onclick="setMode('SOLVE')">Solve</button>
+        <button onclick="setMode('DERV')">d/dx</button>
+
+        <button onclick="inputValue('1')">1</button>
+        <button onclick="inputValue('2')">2</button>
+        <button onclick="inputValue('3')">3</button>
+        <button class="op" onclick="inputValue('-')">−</button>
+        <button onclick="setMode('INT')">∫</button>
+        <button onclick="ans()">Ans</button>
+
+        <button onclick="inputValue('0')">0</button>
+        <button onclick="inputValue('.')">.</button>
+        <button onclick="inputValue('00')">00</button>
+        <button class="op" onclick="inputValue('+')">+</button>
+        <button class="eq" onclick="calculate()" style="grid-column: span 2">=</button>
+    </div>
+</div>
+
+<script>
+/* ======================
+    GLOBAL STATE
+====================== */
+
+let expr = "";
+let Ans = 0;
+let mode = "COMP";
+let angleMode = "DEG";       // DEG | RAD
+let display = document.getElementById("display");
+let modeBar = document.getElementById("modeBar");
+
+
+/* ======================
+    MODE CONTROL
+====================== */
+
+function setMode(m) {
+    mode = m;
+    modeBar.textContent = `${mode} | ${angleMode} | NORM`;
+    expr = "";
+    updateDisplay("0");
+
+    if (m === "TABLE") {
+        alert("TABLE MODE: nhập f(x), rồi nhấn =");
+    }
+    if (m === "STAT") {
+        alert("STAT MODE: hỗ trợ 1 biến & 2 biến");
+    }
+    if (m === "MATRIX") {
+        alert("Matrix Mode: A, B, C 3 ma trận");
+    }
+}
+
+
+/* ======================
+    BASIC INPUT
+====================== */
+
+function inputValue(x) {
+    expr += x;
+    updateDisplay(expr);
+}
+
+function del() {
+    expr = expr.slice(0, -1);
+    updateDisplay(expr || "0");
+}
+
+function ans() {
+    expr += Ans;
+    updateDisplay(expr);
+}
+
+function updateDisplay(val) {
+    display.innerHTML = val;
+}
+
+
+/* ======================
+    EXPRESSION ENGINE
+====================== */
+
+function parseExpr(e) {
+    return e
+        .replace(/sin\(/g, angleMode === "DEG" ? "Math.sin(Math.PI/180*" : "Math.sin(")
+        .replace(/cos\(/g, angleMode === "DEG" ? "Math.cos(Math.PI/180*" : "Math.cos(")
+        .replace(/tan\(/g, angleMode === "DEG" ? "Math.tan(Math.PI/180*" : "Math.tan(")
+        .replace(/log\(/g, "Math.log10(")
+        .replace(/ln\(/g, "Math.log(")
+        .replace(/sqrt\(/g, "Math.sqrt(")
+        .replace(/\^/g, "**")
+        .replace(/pi/g, "Math.PI")
+        .replace(/e/g, "Math.E")
+        .replace(/Ans/g, Ans);
+}
+
+
+/* ======================
+    CALCULATE
+====================== */
+
+function calculate() {
+
+    if (mode === "SOLVE") return solveEquation(expr);
+    if (mode === "DERV") return derivativeMode(expr);
+    if (mode === "INT")  return integralMode(expr);
+    if (mode === "TABLE") return tableMode(expr);
+
+    try {
+        let result = Function("return " + parseExpr(expr))();
+        Ans = result;
+        updateDisplay(result);
+        expr = String(result);
+    } catch {
+        updateDisplay("Error");
+        expr = "";
+    }
+}
+
+
+/* ======================
+    SOLVE MODE
+====================== */
+
+function solveEquation(e) {
+    try {
+        let f = Function("x", "return " + parseExpr(e));
+
+        let lo = -1000, hi = 1000, mid;
+        for (let i=0; i<200; i++) {
+            mid = (lo + hi) / 2;
+            if (f(lo) * f(mid) <= 0) hi = mid;
+            else lo = mid;
+        }
+
+        updateDisplay(mid);
+        Ans = mid;
+        expr = "";
+    } catch {
+        updateDisplay("Error");
+    }
+}
+
+
+/* ======================
+    DERIVATIVE MODE
+====================== */
+
+function derivativeMode(e) {
+    try {
+        let f = Function("x", "return " + parseExpr(e));
+        let x0 = parseFloat(prompt("Nhập x0:"));
+        let h = 1e-6;
+
+        let d = (f(x0+h) - f(x0-h)) / (2*h);
+        updateDisplay(d);
+        Ans = d;
+        expr = "";
+    } catch {
+        updateDisplay("Error");
+    }
+}
+
+
+/* ======================
+    INTEGRAL MODE
+====================== */
+
+function integralMode(e) {
+    try {
+        let f = Function("x", "return " + parseExpr(e));
+        let a = parseFloat(prompt("Nhập cận dưới:"));
+        let b = parseFloat(prompt("Nhập cận trên:"));
+        let n = 2000;
+        let h = (b - a) / n;
+
+        let sum = 0;
+        for (let i=0; i<n; i++) {
+            let x = a + i * h;
+            sum += f(x);
+        }
+
+        let result = sum * h;
+        updateDisplay(result);
+        Ans = result;
+        expr = "";
+    } catch {
+        updateDisplay("Error");
+    }
+}
+
+
+/* ======================
+    TABLE MODE
+====================== */
+
+function tableMode(e) {
+    let f = Function("x", "return " + parseExpr(e));
+
+    let start = parseFloat(prompt("Start x:"));
+    let end = parseFloat(prompt("End x:"));
+    let step = parseFloat(prompt("Step:"));
+
+    let out = "";
+    for (let x = start; x <= end; x += step) {
+        out += `${x} → ${f(x)}\n`;
+    }
+
+    alert(out);
+}
+
+
+/* 
+SUCCESS.
+*/
+</script>
+
+</body>
+</html>

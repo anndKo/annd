@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lịch Âm - Dương</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#9ca3af;color-scheme:dark}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,#071022 0%, #081226 100%);
+      color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .app{width:100%;max-width:980px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .controls{display:flex;gap:8px;align-items:center}
+    select,input[type=number],button{background:var(--card);border:1px solid rgba(255,255,255,0.04);
+      padding:8px 10px;border-radius:8px;color:inherit}
+    button{cursor:pointer}
+    .calendar{background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .dayname{padding:6px;text-align:center;font-weight:600;color:var(--muted)}
+    .cell{min-height:88px;padding:6px;border-radius:8px;background:rgb(208, 240, 64);color:black;display:flex;flex-direction:column;justify-content:space-between}
+    .cell .solar{font-weight:700;font-size:16px}
+    .cell .lunar{font-size:12px;color:red;font-weight:600;}
+    .today{outline:2px solid var(--accent);padding:6px;border-radius:6px}
+    .legend{display:flex;gap:10px;margin-top:12px;align-items:center}
+    .legend span{font-size:13px;color:var(--muted)}
+
+    /* Popup */
+    .popup-bg{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.75);
+      display:flex;align-items:center;justify-content:center;
+      visibility:hidden;opacity:0;transition:.25s;
+    }
+    .popup-bg.show{visibility:visible;opacity:1;}
+    .popup{
+      background:#0b1220;padding:20px;border-radius:12px;min-width:300px;max-width:90%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6);text-align:center;
+    }
+    .popup h3{margin-top:0;}
+    .popup input, .popup select{
+      width:100%;margin-top:10px;padding:10px;border-radius:8px;
+      background:#ffffff;color:black;font-weight:600;
+    }
+    .close-btn{
+      margin-top:15px;background:#06b6d4;padding:10px 20px;border-radius:8px;border:none;
+      cursor:pointer;font-weight:700;color:#000;
+    }
+    #popupResult{margin-top:12px;font-weight:700;color:red;}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <h2>Lịch Âm - Dương</h2>
+      <div class="controls">
+        <select id="month" style="background-color: aliceblue; color: #03060e; font-weight: 600;">
+          <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
+          <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
+          <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
+          <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+        </select>
+
+        <input id="year" type="number" value="2025" min="1900" max="2199" 
+               style="background-color:white;font-weight:600;color:black;">
+
+        <button id="show" style="background-color:#06b6d4;">Hiện</button>
+      </div>
+    </div>
+
+    <div class="calendar" id="calendar">
+      <div class="grid" id="header">
+        <div class="dayname">T2</div><div class="dayname">T3</div><div class="dayname">T4</div>
+        <div class="dayname">T5</div><div class="dayname">T6</div><div class="dayname">T7</div>
+        <div class="dayname">CN</div>
+      </div>
+
+      <div class="grid" id="days"></div>
+
+      <div class="legend">
+        <div><span>Ô viền xanh:</span> <strong>Hôm nay</strong></div>
+        <div><span>Chữ nhỏ:</span> <strong>Ngày âm</strong></div>
+      </div>
+
+      <br>
+
+      <button id="btnSolar" style="background:#15eeb8;margin-right:6px;font-weight: 600; color: black;">Tra ngày Dương → Âm</button>
+      <button id="btnLunar" style="background:#06b6d4;font-weight: 600;color: black;">Tra ngày Âm → Dương</button>
+
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div class="popup-bg" id="popupBg">
+    <div class="popup" id="popupBox">
+      <h3 id="popupTitle">Tra cứu</h3>
+
+      <div id="solarInput">
+        <input type="date" id="solarDate">
+      </div>
+
+      <div id="lunarInput" style="display:none;">
+        <input type="number" id="lDay" placeholder="Ngày" min="1" max="30">
+        <input type="number" id="lMonth" placeholder="Tháng" min="1" max="12">
+        <input type="number" id="lYear" placeholder="Năm" min="1900" max="2199">
+        <select id="lLeap">
+          <option value="0">Thường</option>
+          <option value="1">Nhuận</option>
+        </select>
+      </div>
+
+      <!-- KẾT QUẢ POPUP (MÀU ĐỎ) -->
+      <div id="popupResult"></div>
+
+      <button class="close-btn" id="popupClose">Đóng</button>
+    </div>
+  </div>
+
+<script>
+/* ==== CÁC HÀM CHUYỂN ĐỔI GIỮ NGUYÊN ==== */
+function jdFromDate(dd, mm, yy) {
+  var a = Math.floor((14 - mm) / 12);
+  var y = yy + 4800 - a;
+  var m = mm + 12 * a - 3;
+  var jd = dd + Math.floor((153 * m + 2) / 5) +
+    365 * y + Math.floor(y / 4) -
+    Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+  if (jd < 2299161) {
+    jd = dd + Math.floor((153 * m + 2) / 5) + 
+      365 * y + Math.floor(y / 4) - 32083;
+  }
+  return jd;
+}
+
+function jdToDate(jd) {
+  var Z = jd, A = jd;
+  if (Z >= 2299161) {
+    var alpha = Math.floor((Z - 1867216.25) / 36524.25);
+    A = Z + 1 + alpha - Math.floor(alpha / 4);
+  }
+  var B = A + 1524;
+  var C = Math.floor((B - 122.1) / 365.25);
+  var D = Math.floor(365.25 * C);
+  var E = Math.floor((B - D) / 30.6001);
+  var dd = B - D - Math.floor(30.6001 * E);
+  var mm = (E < 14) ? E - 1 : E - 13;
+  var yy = mm > 2 ? C - 4716 : C - 4715;
+  return [dd, mm, yy];
+}
+
+function getNewMoonDay(k, timeZone) {
+  var T = k / 1236.85;
+  var T2 = T * T;
+  var T3 = T2 * T;
+  var dr = Math.PI / 180;
+  var Jd1 = 2415020.75933 + 29.53058868*k +
+    0.0001178*T2 - 0.000000155*T3;
+  Jd1 += 0.00033*Math.sin((166.56 + 132.87*T - 0.009173*T2)*dr);
+  var M = 359.2242 + 29.10535608*k -
+    0.0000333*T2 - 0.00000347*T3;
+  var Mpr = 306.0253 + 385.81691806*k +
+    0.0107306*T2 + 0.00001236*T3;
+  var F = 21.2964 + 390.67050646*k -
+    0.0016528*T2 - 0.00000239*T3;
+  var C1 = (0.1734 - 0.000393*T)*Math.sin(dr*M)
+    + 0.0021*Math.sin(2*dr*M)
+    - 0.4068*Math.sin(dr*Mpr)
+    + 0.0161*Math.sin(dr*2*Mpr)
+    - 0.0004*Math.sin(dr*3*Mpr)
+    + 0.0104*Math.sin(dr*2*F)
+    - 0.0051*Math.sin(dr*(M + Mpr))
+    - 0.0074*Math.sin(dr*(M - Mpr))
+    + 0.0004*Math.sin(dr*(2*F + M))
+    - 0.0004*Math.sin(dr*(2*F - M))
+    - 0.0006*Math.sin(dr*(2*F + Mpr))
+    + 0.001*Math.sin(dr*(2*F - Mpr))
+    + 0.0005*Math.sin(dr*(2*Mpr + M));
+  var deltat;
+  if (T < -11) deltat = 0.001 + 0.000839*T +
+    0.0002261*T2 - 0.00000845*T3 - 0.000000081*T*T3;
+  else deltat = -0.000278 + 0.000265*T + 0.000262*T2;
+  return Math.floor(Jd1 + C1 - deltat + 0.5 + timeZone/24);
+}
+
+function getSunLongitude(jdn, timeZone) {
+  var T = (jdn - 2451545.5 - timeZone/24) / 36525;
+  var dr = Math.PI / 180;
+  var M = 357.52910 + 35999.05030*T 
+    - 0.0001559*T*T 
+    - 0.00000048*T*T*T;
+  var L0 = 280.46645 + 36000.76983*T + 0.0003032*T*T;
+  var DL = (1.914600 - 0.004817*T - 0.000014*T*T)*Math.sin(dr*M)
+    + (0.019993 - 0.000101*T)*Math.sin(dr*2*M)
+    + 0.000290*Math.sin(dr*3*M);
+  var L = (L0 + DL) * dr;
+  L = L - Math.PI*2 * Math.floor(L/(Math.PI*2));
+  return Math.floor(L/Math.PI*6);
+}
+
+function getLunarMonth11(yy, timeZone) {
+  var off = jdFromDate(31, 12, yy) - 2415021;
+  var k = Math.floor(off/29.530588853);
+  var nm = getNewMoonDay(k, timeZone);
+  var sunLong = getSunLongitude(nm, timeZone);
+  if (sunLong >= 9) nm = getNewMoonDay(k - 1, timeZone);
+  return nm;
+}
+
+function getLeapMonthOffset(a11, timeZone) {
+  var k = Math.floor(0.5 + (a11 - 2415021.076998695)/29.530588853);
+  var last = 0;
+  var i = 1;
+  var arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
+  do {
+    last = arc;
+    i++;
+    arc = getSunLongitude(getNewMoonDay(k + i, timeZone), timeZone);
+  } while (arc !== last && i < 14);
+  return i - 1;
+}
+
+function convertSolar2Lunar(dd, mm, yy, timeZone) {
+  var dayNumber = jdFromDate(dd, mm, yy);
+  var k = Math.floor((dayNumber - 2415021.076998695)/29.530588853);
+  var monthStart = getNewMoonDay(k + 1, timeZone);
+  if (monthStart > dayNumber) monthStart = getNewMoonDay(k, timeZone);
+
+  var a11 = getLunarMonth11(yy, timeZone);
+  var b11 = a11, lunarYear = 0;
+  if (a11 >= monthStart) {
+    lunarYear = yy;
+    a11 = getLunarMonth11(yy - 1, timeZone);
+  } else {
+    lunarYear = yy + 1;
+    b11 = getLunarMonth11(yy + 1, timeZone);
+  }
+
+  var lunarDay = dayNumber - monthStart + 1;
+  var diff = Math.floor((monthStart - a11) / 29);
+  var lunarMonth = diff + 11;
+  var lunarLeap = 0;
+
+  if (b11 - a11 > 365) {
+    var leapMonthDiff = getLeapMonthOffset(a11, timeZone);
+    if (diff >= leapMonthDiff) {
+      lunarMonth = diff + 10;
+      if (diff == leapMonthDiff) lunarLeap = 1;
+    }
+  }
+
+  if (lunarMonth > 12) lunarMonth -= 12;
+  if (lunarMonth >= 11 && diff < 4) lunarYear = yy;
+  if (lunarMonth <= 2 && diff > 8) lunarYear = yy + 1;
+
+  return {day:lunarDay, month:lunarMonth, year:lunarYear, leap:lunarLeap};
+}
+
+function convertLunar2Solar(dd, mm, yy, leap, timeZone) {
+  var a11 = getLunarMonth11(yy, timeZone);
+  var b11 = a11;
+  if (mm < 11) a11 = getLunarMonth11(yy - 1, timeZone);
+  var k = Math.floor(0.5 + (a11 - 2415021.076998695)/29.530588853);
+
+  var off = mm - 11;
+  if (off < 0) off += 12;
+
+  if (b11 - a11 > 365) {
+    var leapOff = getLeapMonthOffset(a11, timeZone);
+    var leapMonth = leapOff - 2;
+    if (leapMonth < 0) leapMonth += 12;
+    if (leap != 0 && mm != leapMonth) return null;
+    if (leap != 0 || off >= leapOff) off++;
+  }
+
+  var monthStart = getNewMoonDay(k + off, timeZone);
+  return jdToDate(monthStart + dd - 1);
+}
+
+/* Lấy thứ trong tuần (0 = CN, 1 = T2...) */
+function getWeekdayName(dd, mm, yy){
+  const d = new Date(yy, mm-1, dd);
+  const names = ['CN','T2','T3','T4','T5','T6','T7'];
+  return names[d.getDay()];
+}
+
+/* ==== UI ==== */
+const tz = 7;
+const monthSel = document.getElementById('month');
+const yearInp = document.getElementById('year');
+const showBtn = document.getElementById('show');
+const daysEl = document.getElementById('days');
+
+// Popup
+const popupBg = document.getElementById('popupBg');
+const popupTitle = document.getElementById('popupTitle');
+const popupResult = document.getElementById('popupResult');
+const solarInput = document.getElementById('solarInput');
+const lunarInput = document.getElementById('lunarInput');
+
+function render(month, year) {
+  daysEl.innerHTML = '';
+
+  const first = new Date(year, month - 1, 1);
+  let startDow = first.getDay();
+  startDow = (startDow + 6) % 7;
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  for (let i = 0; i < startDow; i++) {
+    const e = document.createElement('div'); 
+    e.className = 'cell'; 
+    daysEl.appendChild(e);
+  }
+
+  const today = new Date();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+
+    const solar = document.createElement('div');
+    solar.className = 'solar';
+    solar.textContent = d;
+
+    const l = convertSolar2Lunar(d, month, year, tz);
+    const lunar = document.createElement('div');
+    lunar.className = 'lunar';
+    lunar.textContent = `${l.day}${l.leap?' (N)':''} Th ${l.month}`;
+
+    if (d === today.getDate() && month === (today.getMonth()+1) && year === today.getFullYear()) {
+      cell.classList.add('today');
+    }
+
+    cell.appendChild(solar);
+    cell.appendChild(lunar);
+
+    daysEl.appendChild(cell);
+  }
+}
+
+function init() {
+  const now = new Date();
+  monthSel.value = now.getMonth()+1;
+  yearInp.value = now.getFullYear();
+  render(now.getMonth()+1, now.getFullYear());
+}
+init();
+
+showBtn.addEventListener('click', ()=>{
+  render(+monthSel.value, +yearInp.value);
+});
+
+/* ===========================
+   NÚT TRA DƯƠNG → ÂM
+=========================== */
+document.getElementById('btnSolar').addEventListener('click', ()=>{
+  popupTitle.textContent = "Tra ngày Dương → Âm";
+  solarInput.style.display = "block";
+  lunarInput.style.display = "none";
+  popupResult.textContent = "";
+  popupBg.classList.add("show");
+
+  document.getElementById('solarDate').onchange = function(){
+    const v = this.value;
+    if(!v) return;
+    const [y,m,d] = v.split("-").map(Number);
+    const l = convertSolar2Lunar(d,m,y,tz);
+
+    const weekdaySolar = getWeekdayName(d,m,y);
+    const sDate = convertLunar2Solar(l.day,l.month,l.year,l.leap,tz);
+    const weekdayLunar = getWeekdayName(sDate[0],sDate[1],sDate[2]);
+
+    popupResult.innerHTML = 
+      `Dương: ${d}/${m}/${y} (${weekdaySolar}) → Âm: ${l.day}/${l.month}/${l.year}${l.leap?' (nhuận)':''} (${weekdayLunar})`;
+  };
+});
+
+/* ===========================
+   NÚT TRA ÂM → DƯƠNG
+=========================== */
+document.getElementById('btnLunar').addEventListener('click', ()=>{
+  popupTitle.textContent = "Tra ngày Âm → Dương";
+  solarInput.style.display = "none";
+  lunarInput.style.display = "block";
+  popupResult.textContent = "";
+  popupBg.classList.add("show");
+
+  const fn = function(){
+    const dd = +document.getElementById('lDay').value;
+    const mm = +document.getElementById('lMonth').value;
+    const yy = +document.getElementById('lYear').value;
+    const lp = +document.getElementById('lLeap').value;
+
+    if(!dd || !mm || !yy) return;
+
+    const s = convertLunar2Solar(dd,mm,yy,lp,tz);
+    if(!s){ popupResult.textContent = "Ngày âm không hợp lệ!"; return; }
+
+    const weekdaySolar = getWeekdayName(s[0], s[1], s[2]);
+    const l = convertSolar2Lunar(s[0], s[1], s[2], tz);
+    const weekdayLunar = getWeekdayName(s[0], s[1], s[2]);
+
+    popupResult.innerHTML =
+      `Âm: ${dd}/${mm}/${yy}${lp?' (nhuận)':''} (${weekdayLunar}) → Dương: ${s[0]}/${s[1]}/${s[2]} (${weekdaySolar})`;
+  };
+
+  document.getElementById('lDay').onchange = fn;
+  document.getElementById('lMonth').onchange = fn;
+  document.getElementById('lYear').onchange = fn;
+  document.getElementById('lLeap').onchange = fn;
+});
+
+/* Nút đóng popup */
+document.getElementById('popupClose').addEventListener('click', ()=>{
+  popupBg.classList.remove("show");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý tài khoản</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #d9e2af;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.container {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 500px;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header span {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.header button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #DE5555;
+  color: white;
+  cursor: pointer;
+}
+
+.header button:hover {
+  background-color: #B03939;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button#addBtn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: #5563DE;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button#addBtn:hover { background-color: #3946B0; }
+
+table {
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #5563DE;
+  color: white;
+}
+
+.deleteBtn {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+#searchBtn, #resetBtn {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background-color: #2d9e39;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#searchBtn:hover, #resetBtn:hover {
+  background-color: #1e6e27;
+}
+.editBtn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.editBtn:hover {
+  background-color: #217dbb;
+}
+/* Popup xác nhận xoá */
+#deletePopup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#deleteBox {
+  background: rgb(192, 236, 109);
+  padding: 20px 25px;
+  border-radius: 10px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  color: rgb(7, 4, 4);
+}
+
+#deleteBox p {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#confirmDeleteBtn {
+  background-color: red;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+#closePopupBtn {
+  background-color: gray;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="width: 50px; background-color: #061a07; padding: 10px;border-radius: 8px;" ><a href="trangchu.html" ><img src="ngoinha.jpg" alt="" width="100%" style="border-radius: 10px;"></a> <br><a href="tienichmorong.html" ><img src="muiten.jpg" alt="" width="100%" style="border-radius: 10px; margin-top: 20px;"></a></div>
+
+  <div class="header">
+    <span id="currentUser"></span>
+    <button id="logoutBtn">Đăng xuất</button>
+  </div>
+
+  <h2>Quản lý tài khoản</h2>
+
+  <label for="app">Tên ứng dụng:</label>
+  <input type="text" id="app" placeholder="Ví dụ: Facebook,Zalo,...">
+
+  <label for="username">Tên tài khoản:</label>
+  <input type="text" id="username" placeholder="Tên đăng nhập">
+
+  <label for="password">Mật khẩu:</label>
+  <input type="text" id="password" placeholder="Mật khẩu">
+
+  <button id="addBtn">Thêm tài khoản</button>
+  <label for="searchApp">Tìm kiếm ứng dụng:</label>
+<input type="text" id="searchApp" placeholder="Nhập tên ứng dụng...">
+<button id="searchBtn">Tìm kiếm</button>
+<button id="resetBtn">Hiển thị tất cả</button>
+
+
+  <table>
+    <thead>
+      <tr>
+        <th>Ứng dụng</th>
+        <th>Tài khoản</th>
+        <th>Mật khẩu</th>
+        <th>Hành động</th>
+      </tr>
+    </thead>
+    <tbody id="accountList"></tbody>
+  </table>
+</div>
+<div id="deletePopup">
+  <div id="deleteBox">
+    <p>Bạn có chắc muốn xóa tài khoản?</p>
+    <div id="deleteInfo"></div>
+    <br>
+    <button id="confirmDeleteBtn">Xác nhận</button>
+    <button id="closePopupBtn">Đóng</button>
+  </div>
+</div>
+
+<script>
+  let deleteIndex = null;
+
+// Mở popup xác nhận
+function deleteAccount(index) {
+  const accounts = getAccounts();
+  const acc = accounts[index];
+
+  deleteIndex = index;
+
+  document.getElementById("deleteInfo").innerHTML = `
+  <table style="width:100%; border-collapse: collapse; text-align:center;">
+    <tr>
+      <th style="border:1px solid black; padding:5px;">Ứng dụng</th>
+      <th style="border:1px solid black; padding:5px;">Tài khoản</th>
+      <th style="border:1px solid black; padding:5px;">Mật khẩu</th>
+    </tr>
+    <tr>
+      <td style="border:1px solid black; padding:5px;">${acc.app}</td>
+      <td style="border:1px solid black; padding:5px;">${acc.username}</td>
+      <td style="border:1px solid black; padding:5px;">${acc.password}</td>
+    </tr>
+  </table>
+`;
+
+
+  document.getElementById("deletePopup").style.display = "flex";
+}
+
+// Nút xác nhận xoá
+document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+  const accounts = getAccounts();
+  accounts.splice(deleteIndex, 1);
+  saveAccounts(accounts);
+  renderAccounts();
+  document.getElementById("deletePopup").style.display = "none";
+});
+
+// Nút đóng popup
+document.getElementById("closePopupBtn").addEventListener("click", () => {
+  document.getElementById("deletePopup").style.display = "none";
+});
+  const searchInput = document.getElementById('searchApp');
+const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+// Tìm kiếm theo tên ứng dụng
+searchBtn.addEventListener('click', () => {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const accounts = getAccounts();
+
+  const filtered = accounts.filter(acc => acc.app.toLowerCase().includes(keyword));
+
+  accountList.innerHTML = '';
+  filtered.forEach((acc, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${acc.app}</td>
+      <td>${acc.username}</td>
+      <td>${acc.password}</td>
+      <td>
+  <button class="editBtn" onclick="editAccount(${index})">Sửa</button>
+  <button class="deleteBtn" onclick="deleteAccount(${index})">Xóa</button>
+</td>
+
+    `;
+    accountList.appendChild(tr);
+  });
+});
+
+// Nút hiển thị tất cả
+resetBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  renderAccounts();
+});
+
+const currentUser = document.getElementById("currentUser");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const appInput = document.getElementById('app');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const addBtn = document.getElementById('addBtn');
+const accountList = document.getElementById('accountList');
+
+// Kiểm tra đăng nhập
+const user = localStorage.getItem("dangnhap_hien_tai");
+if(!user) {
+  // Chưa đăng nhập → quay về trang chủ
+  window.location.href = "trangchu.html";
+} else {
+  currentUser.textContent = user;
+}
+
+// Đăng xuất
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("dangnhap_hien_tai");
+  window.location.href = "trangchu.html";
+});
+
+// LocalStorage cho các tài khoản
+function getAccounts() {
+  return JSON.parse(localStorage.getItem('accounts_' + user) || '[]'); // riêng cho từng user
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem('accounts_' + user, JSON.stringify(accounts));
+}
+
+function renderAccounts() {
+  const accounts = getAccounts();
+  accountList.innerHTML = '';
+  accounts.forEach((acc, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${acc.app}</td>
+      <td>${acc.username}</td>
+      <td>${acc.password}</td>
+      <td><button class="deleteBtn" onclick="deleteAccount(${index})">Xóa</button></td>
+    `;
+    accountList.appendChild(tr);
+  });
+}
+
+// Thêm tài khoản
+addBtn.addEventListener('click', () => {
+  const app = appInput.value.trim();
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  if(!app || !username || !password) {
+    alert("Vui lòng nhập đầy đủ thông tin!");
+    return;
+  }
+
+  const accounts = getAccounts();
+  accounts.push({app, username, password});
+  saveAccounts(accounts);
+  renderAccounts();
+
+  appInput.value = '';
+  usernameInput.value = '';
+  passwordInput.value = '';
+});
+
+// Xóa tài khoản
+
+// Hiển thị lần đầu
+renderAccounts();
+</script>
+</body>
+</html>
