@@ -2,12 +2,52 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<title>Battleship 2 Người (FULL FIX)</title>
+<title>Game 2 Người </title>
 
 <style>
 body { font-family: Arial; padding: 20px; background:#f2f2f2 }
 h1{text-align:center;font-size:26px;margin-bottom:10px}
+#helpBtn {
+position: fixed;
+top: 15px;
+right: 15px;
+padding: 10px 18px;
+background: #ff9800;
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 16px;
+cursor: pointer;
+z-index: 11000;
+}
 
+
+#helpOverlay {
+position: fixed;
+top: 0; left: 0;
+width: 100%; height: 100%;
+background: rgba(0,0,0,0.8);
+display: none;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+z-index: 12000;
+}
+#helpOverlay video {
+max-width: 90%;
+max-height: 80%;
+border-radius: 12px;
+}
+#closeHelp {
+margin-top: 20px;
+padding: 12px 20px;
+background: #e53935;
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 18px;
+cursor: pointer;
+}
 /* BOARD */
 .board{
     display: grid;
@@ -194,6 +234,22 @@ h1{text-align:center;font-size:26px;margin-bottom:10px}
 </head>
 
 <body>
+    <button id="hideHelpBtn" onclick="hideHelpBtnFunction()" 
+    style="position: fixed; top: 15px; right: 130px;
+    padding: 10px 18px; background:#c52525; color:white;
+    border:none; border-radius:8px; font-size:16px; cursor:pointer; z-index:11000;font-weight: 600;">
+    X
+</button>
+    <button id="helpBtn" onclick="showHelp()">Hướng dẫn</button>
+
+
+<!-- Overlay Video -->
+<div id="helpOverlay">
+<video id="helpVideo" controls>
+<source src="huongdan.mp4" type="video/mp4">
+</video>
+<button id="closeHelp" onclick="closeHelp()">Đóng</button>
+</div>
 
 <h1>Bắn tàu 2 Người</h1>
 
@@ -204,7 +260,7 @@ h1{text-align:center;font-size:26px;margin-bottom:10px}
     <div class="palette" id="palette"></div>
 
     <div style="text-align:center">
-        <button class="rotate-btn" onclick="rotateShip()">Xoay tàu</button>
+        <button class="rotate-btn" onclick="rotateShip()" style="margin-top: 10px; font-size: 20px;background-color: #4caf50;">Xoay tàu</button>
     </div>
 
     <h3 style="text-align:center">Lưới đặt</h3>
@@ -247,7 +303,41 @@ h1{text-align:center;font-size:26px;margin-bottom:10px}
 </div>
 
 <script>
-    
+    function hideHelpBtnFunction(){
+    const help = document.getElementById("helpBtn");
+    const hide = document.getElementById("hideHelpBtn");
+
+    help.style.display = "none";
+    hide.style.display = "none";
+}
+
+    function showHelp(){
+document.getElementById("helpOverlay").style.display = "flex";
+const v=document.getElementById("helpVideo");
+v.currentTime = 0;
+v.play();
+}
+function closeHelp(){
+document.getElementById("helpOverlay").style.display = "none";
+document.getElementById("helpVideo").pause();
+}
+
+
+// ẨN NÚt hướng dẫn sau khi xác nhận đặt tàu
+const _oldConfirmPlacement = confirmPlacement;
+confirmPlacement = function(){
+_oldConfirmPlacement();
+
+
+// nếu chuyển sang người xanh thì chưa ẩn
+if (placingPlayer === "blue") return;
+
+
+// khi người xanh cũng đặt xong → vào chơi → ẩn
+if(document.getElementById("helpBtn")){
+document.getElementById("helpBtn").style.display = "none";
+}
+}
 const SIZE=10;
 const SHIPS=[4,3,2,1];
 
