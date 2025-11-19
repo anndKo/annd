@@ -40,7 +40,7 @@ input[type=text] { padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
 
 <div style="width:100%; background-color:black; padding:10px; border-radius:5px; height:40px;">
 <input id="searchBar" type="text" placeholder="Tìm theo tên, loại, ngày giờ..." style="margin-top:5px;width: 70%;">
-<button for="" style="background-color: #2563eb; color: white; padding: 10px;font-weight: 600;border-radius: 10px;font-family:Arial, Helvetica, sans-serif;">Tìm</button>
+<label for="" style="background-color: #2563eb; color: white; padding: 10px;font-weight: 600;border-radius: 10px;font-family:Arial, Helvetica, sans-serif;">Tìm</label>
 </div>
 
 <div style="width:100%; background-color:rgb(163, 8, 137); padding:10px; border-radius:5px; height:40px; margin-top:5px;">
@@ -84,7 +84,11 @@ let db;
 let username = localStorage.getItem("dangnhap_hien_tai") || "testUser"; // demo
 
 document.getElementById("userDisplay").textContent = username;
-document.getElementById("logoutBtn").onclick = () => { localStorage.removeItem("dangnhap_hien_tai"); location.reload(); };
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("dangnhap_hien_tai");
+  window.location.href = "trangchu.html"; 
+};
+
 
 function openDB() {
   return new Promise((resolve,reject)=>{
@@ -237,22 +241,54 @@ function openOverlay(imgData){
 function closeOverlay(){ document.getElementById("imageOverlay").style.display="none"; }
 
 /* ========== Tìm kiếm ========== */
-document.getElementById("searchBar").oninput=async function(){
-  const key=this.value.toLowerCase().trim();
-  const data=await getUserData();
-  if(!data||!data.folders) return;
-  data.folders.forEach(folder=>{
-    const safeName=encodeURIComponent(folder.name);
-    const folderBox=document.querySelector(`div.folder:has(div#images-${safeName})`);
-    const images=folder.images;
-    if(key===""){ folderBox.style.display=""; renderImages(folder.name,images); return; }
-    const folderMatch=folder.name.toLowerCase().includes(key);
-    const filteredImages=images.filter(img=>img.title.toLowerCase().includes(key)||img.type.toLowerCase().includes(key)||img.datetime.toLowerCase().includes(key));
-    if(folderMatch){ folderBox.style.display=""; renderImages(folder.name,images); }
-    else if(filteredImages.length>0){ folderBox.style.display=""; renderImages(folder.name,filteredImages); }
-    else folderBox.style.display="none";
+/* ========== Tìm kiếm ========== */
+document.getElementById("searchBar").oninput = async function () {
+  const key = this.value.toLowerCase().trim();
+  const data = await getUserData();
+  if (!data || !data.folders) return;
+
+  data.folders.forEach(folder => {
+    const safeName = encodeURIComponent(folder.name);
+
+    // Lấy folderBox theo cách tương thích MỌI TRÌNH DUYỆT
+    const folderBox = document.getElementById("images-" + safeName).parentElement;
+
+    const images = folder.images;
+
+    // Nếu thanh tìm kiếm trống → hiện tất cả
+    if (key === "") {
+      folderBox.style.display = "";
+      renderImages(folder.name, images);
+      return;
+    }
+
+    // Tìm theo tên thư mục
+    const folderMatch = folder.name.toLowerCase().includes(key);
+
+    // Lọc ảnh theo TÊN + LOẠI + NGÀY GIỜ
+    const filteredImages = images.filter(img =>
+      img.title.toLowerCase().includes(key) ||
+      img.type.toLowerCase().includes(key) ||
+      img.datetime.toLowerCase().includes(key)
+    );
+
+    // Nếu tên thư mục khớp
+    if (folderMatch) {
+      folderBox.style.display = "";
+      renderImages(folder.name, images);
+    }
+    // Nếu có ảnh khớp
+    else if (filteredImages.length > 0) {
+      folderBox.style.display = "";
+      renderImages(folder.name, filteredImages);
+    }
+    // Không khớp gì → ẩn
+    else {
+      folderBox.style.display = "none";
+    }
   });
 };
+
 
 /* ========== Cập nhật số lượng ảnh ========== */
 function updateImageCount(folderName){
