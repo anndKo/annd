@@ -31,13 +31,14 @@
     /* Dành cho màn hình rất nhỏ */
     @media (max-width: 450px) {
         .container {
-            grid-template-columns: repeat(1, 1fr); /* 1 hàng 1 khối */
+            grid-template-columns: repeat(1, 1fr);
+            width: 90%; /* 1 hàng 1 khối */
         }
     }
 
     .item {
         width: 100%;
-        max-width: 200px; /* Giới hạn để không quá to */
+        max-width:1000px ; /* Giới hạn để không quá to */
         background: white;
         border-radius: 10px;
         box-shadow: 0 3px 8px rgba(0,0,0,0.15);
