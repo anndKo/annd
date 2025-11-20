@@ -303,26 +303,26 @@ cursor: pointer;
 </div>
 
 <script>
-
-    // Fix âm thanh trên iPhone Safari
-document.addEventListener("touchstart", function unlockAudio() {
-    [hitSound, missSound, winSound].forEach(s => {
-        if (s) {
-            s.play().then(() => {
-                s.pause();
-                s.currentTime = 0;
-            }).catch(e => {});
-        }
+    let standbyBullet=null;
+const hitSound=new Audio("bum.mp3");
+const missSound=new Audio("xoet.mp3");
+const winSound = new Audio("reoho.mp3");
+let audioUnlocked = false;
+    // Fix âm thanh trên iPhone Safarilet audioUnlocked = false;
+function unlockAudio(){
+    if(audioUnlocked) return;
+    [hitSound, missSound, winSound].forEach(s=>{
+        s.play().then(()=>{ s.pause(); s.currentTime=0; }).catch(e=>{});
     });
-
-    // chỉ chạy 1 lần
+    audioUnlocked = true;
     document.removeEventListener("touchstart", unlockAudio);
-}, { passive: true });
-hitSound.muted = false;
-missSound.muted = false;
-winSound.muted = false;
-hitSound.currentTime = 0;
-hitSound.play().catch(()=>{});
+    document.removeEventListener("click", unlockAudio);
+}
+
+document.addEventListener("touchstart", unlockAudio, {passive:true});
+document.addEventListener("click", unlockAudio);
+
+
 
 
 
@@ -351,20 +351,7 @@ document.getElementById("helpVideo").pause();
 
 
 // ẨN NÚt hướng dẫn sau khi xác nhận đặt tàu
-const _oldConfirmPlacement = confirmPlacement;
-confirmPlacement = function(){
-_oldConfirmPlacement();
 
-
-// nếu chuyển sang người xanh thì chưa ẩn
-if (placingPlayer === "blue") return;
-
-
-// khi người xanh cũng đặt xong → vào chơi → ẩn
-if(document.getElementById("helpBtn")){
-document.getElementById("helpBtn").style.display = "none";
-}
-}
 const SIZE=10;
 const SHIPS=[4,3,2,1];
 
@@ -533,28 +520,34 @@ function countShipsPlaced(player){
     });
     return count;
 }
-
-
 function confirmPlacement(){
-    let placed = countShipsPlaced(placingPlayer);
-
-    if(placed < SHIPS.length){
-        alert("Bạn phải đặt đủ 4 tàu mới được xác nhận!");
+    // kiểm tra đủ 4 tàu
+    if(countShipsPlaced(placingPlayer) < SHIPS.length){
+        alert("Bạn phải đặt đủ 4 tàu!");
         return;
     }
 
-    // chuyển người đặt
+    // đổi người
     if(placingPlayer==="red"){
         placingPlayer="blue";
-        buildPalette();
+        elem("placeLabel").innerHTML =
+          "Người <span style='color:blue'>XANH</span> đặt tàu";
         draggingShipSize=null;
-        elem("placeLabel").innerHTML=
-            "Người <span style='color:blue'>XANH</span> đặt tàu";
+
+        buildPalette();
         renderPlaceBoard();
-    } else {
+    }
+    else {
+        // Xanh đặt xong → vào chơi → ẩn nút hướng dẫn
+        document.getElementById("helpBtn").style.display = "none";
+        document.getElementById("hideHelpBtn").style.display = "none";
         startGame();
     }
 }
+
+
+// ⭐ ẨN NÚT HƯỚNG DẪN SAU KHI ĐẶT XONG 2 BÊN
+
 
 // START GAME
 function startGame(){
@@ -581,10 +574,7 @@ function startGame(){
     updateTurnText();
 }
 
-let standbyBullet=null;
-const hitSound=new Audio("bum.mp3");
-const missSound=new Audio("xoet.mp3");
-const winSound = new Audio("reoho.mp3");
+
 
 
 function updateTurnText(){
