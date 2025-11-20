@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tạo QR Code từ Link</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f4f8;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 20px;
+    }
+    h1 {
+        margin-bottom: 30px;
+    }
+    button {
+        padding: 12px 20px;
+        margin: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background-color: #0a74da;
+        color: white;
+        transition: 0.2s;
+    }
+    button:hover {
+        background-color: #084e8a;
+    }
+    input {
+        padding: 10px;
+        font-size: 16px;
+        width: 300px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-right: 10px;
+    }
+    #qrcode {
+        margin-top: 20px; /* margin top 20px */
+    }
+    #qrcode canvas {
+        width: 250px;
+        height: 250px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        display: block;
+    }
+</style>
+</head>
+<body>
+
+<h1 style="font-family: Arial, Helvetica, sans-serif;">Tạo QR Code </h1>
+<button id="openDrive" style="background-color: rgb(74, 231, 26);color: black; font-weight: 600;">Mở Google Drive</button>
+
+<div style="width: 100%;background-color: aquamarine; padding: 10px 10px 10px 20px;margin-top: 10px;border-radius: 5px;">
+    <input type="text" id="urlInput" placeholder="Dán link của bạn" style="width: 50%;border: 2px solid black;height: 20px;">
+    <button id="generate">Tạo QR Code</button>
+</div>
+
+<div id="qrcode">
+    <canvas id="qrCanvas" width="250" height="250"></canvas>
+</div>
+
+<button id="download" style="display:none;">Tải QR Code xuống</button>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+const canvas = document.getElementById("qrCanvas");
+const ctx = canvas.getContext("2d");
+const downloadBtn = document.getElementById("download");
+const openDriveBtn = document.getElementById("openDrive");
+
+// Ảnh nền cố định
+const background = new Image();
+background.src = "nenqr.jpg"; 
+
+document.getElementById("generate").onclick = async () => {
+    const url = document.getElementById("urlInput").value.trim();
+    if(!url){ alert("Vui lòng nhập link!"); return; }
+
+    try {
+        const qrDataURL = await QRCode.toDataURL(url, { width: 180 });
+        const qrImg = new Image();
+        qrImg.src = qrDataURL;
+
+        qrImg.onload = () => {
+            // VẼ TRÊN CANVAS HIỂN THỊ (250x250)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Tỉ lệ để ảnh nền vừa canvas
+            const scale = Math.min(canvas.width / background.width, canvas.height / background.height);
+            const bgWidth = background.width * scale;
+            const bgHeight = background.height * scale;
+            const bgX = (canvas.width - bgWidth)/2;
+            const bgY = (canvas.height - bgHeight)/2;
+
+            ctx.drawImage(background, bgX, bgY, bgWidth, bgHeight);
+
+            const qrSize = 180;
+            const x = (canvas.width - qrSize)/2;
+            const y = (canvas.height - qrSize)/2;
+            ctx.drawImage(qrImg, x, y, qrSize, qrSize);
+
+            downloadBtn.style.display = "inline-block";
+
+            // Khi tải xuống, tạo canvas lớn để chất lượng cao
+            downloadBtn.onclick = () => {
+    const hiResCanvas = document.createElement("canvas");
+    const size = 1000; // canvas 1000x1000 để PNG nét
+    hiResCanvas.width = size;
+    hiResCanvas.height = size;
+    const hiCtx = hiResCanvas.getContext("2d");
+
+    // Vẽ nền tỉ lệ lớn
+    const scaleHi = Math.min(size / background.width, size / background.height);
+    const bgW = background.width * scaleHi;
+    const bgH = background.height * scaleHi;
+    const bgXHi = (size - bgW)/2;
+    const bgYHi = (size - bgH)/2;
+    hiCtx.drawImage(background, bgXHi, bgYHi, bgW, bgH);
+
+    // Vẽ QR code tỉ lệ lớn
+    const qrHiSize = 180 / 250 * size; // scale QR code theo canvas hi-res
+    const xHi = (size - qrHiSize)/2;
+    const yHi = (size - qrHiSize)/2;
+    hiCtx.drawImage(qrImg, xHi, yHi, qrHiSize, qrHiSize);
+
+    // Xuất PNG chất lượng cao với tên luôn là Annd.png
+    const link = document.createElement("a");
+    link.download = "Annd.png";
+    link.href = hiResCanvas.toDataURL("image/png");
+    link.click();
+};
+
+        };
+
+    } catch(err){
+        console.error(err);
+        alert("Có lỗi khi tạo QR Code.");
+    }
+};
+
+
+// Tải cả ảnh nền + QR code
+downloadBtn.onclick = () => {
+    const link = document.createElement("a");
+    link.download = "qr_with_bg.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+};
+
+// Mở Google Drive
+openDriveBtn.onclick = () => {
+    window.open("https://drive.google.com", "_blank");
+};
+</script>
+
+</body>
+</html>
