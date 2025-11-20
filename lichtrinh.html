@@ -5,155 +5,221 @@
 <title>Quản lý lịch trình</title>
 
 <style>
+    /* ==============================
+       NÚT HƯỚNG DẪN
+    =============================== */
     #helpBtn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    padding: 10px 18px;
-    background: #ff9800;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 11000;
-    width: 120px;
-}
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        padding: 12px 20px;
+        background: #ff9800;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 11000;
+        width: 140px;
+    }
 
-#hideHelpBtn {
-    position: fixed;
-    top: 15px;
-    right: 130px;
-    padding: 10px 18px;
-    background: #ca2222;
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    cursor:pointer;
-    z-index:11000;
-    font-weight: 600;
-    width: 50px;
-}
+    #hideHelpBtn {
+        position: fixed;
+        top: 15px;
+        right: 165px;
+        padding: 12px 18px;
+        background: #ca2222;
+        color:white;
+        border:none;
+        border-radius:10px;
+        font-size:18px;
+        cursor:pointer;
+        z-index:11000;
+        font-weight: 600;
+        width: 60px;
+    }
 
-#helpOverlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 12000;
-}
-#helpOverlay video {
-    max-width: 90%;
-    max-height: 80%;
-    border-radius: 12px;
-}
-#closeHelp {
-    margin-top: 20px;
-    padding: 12px 20px;
-    background: #e53935;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    cursor: pointer;
-}
+    #helpOverlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 12000;
+        padding: 10px;
+    }
+    #helpOverlay video {
+        width: 95%;
+        max-height: 75%;
+        border-radius: 12px;
+    }
+
+    #closeHelp {
+        margin-top: 20px;
+        padding: 14px 20px;
+        background: #e53935;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    /* ==============================
+       GIAO DIỆN CHUNG
+    =============================== */
     body {
         font-family: Arial;
         background: #6deb93;
-        padding: 20px;
-    }
-    .container {
-        width: 90%;
-        background: rgb(238, 221, 190);
-        padding: 20px;
-        margin: auto;
-        border-radius: 10px;
-        box-shadow: 0 0 10px #0002;
-    }
-    input, button {
-        padding: 8px;
-        margin: 6px 0;
-        width: 100%;
+        padding: 12px;
+        font-size: 18px;
     }
 
-    /* Thanh trên */
+    .container {
+        width: 100%;
+        background: rgb(238, 221, 190);
+        padding: 18px;
+        margin: auto;
+        border-radius: 12px;
+        box-shadow: 0 0 10px #0003;
+    }
+
+    input, button {
+        padding: 14px;
+        margin: 10px 0;
+        width: 100%;
+        font-size: 18px;
+        border-radius: 8px;
+    }
+
+    /* ==============================
+       THANH TRÊN
+    =============================== */
     #topbar {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 15px;
+        margin-bottom: 18px;
         background: #6064a7;
-        padding: 10px;
+        padding: 14px;
         border-radius: 10px;
         font-weight: bold;
         color: bisque;
+        font-size: 20px;
     }
+
     #dangxuat {
         background: red;
         color: white;
         width: auto;
-        padding: 5px 12px;
-        border-radius: 5px;
+        padding: 10px 16px;
+        border-radius: 8px;
         cursor: pointer;
+        font-size: 18px;
     }
 
+    /* ==============================
+       LỊCH TRONG NGÀY
+    =============================== */
     #thuHienTai {
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         color: #333;
-    }
-    .lich-item {
-        background: #f0f0f0;
-        padding: 8px;
-        margin: 6px 0;
-        border-radius: 5px;
-    }
-    .btn-small {
-        padding: 5px 10px;
-        width: auto;
-        margin-right: 5px;
+        font-size: 20px;
     }
 
-    /* Popup sửa */
+    .lich-item {
+        background: #f0f0f0;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        font-size: 18px;
+    }
+
+    .btn-small {
+        padding: 10px 14px;
+        width: auto;
+        margin-right: 10px;
+        font-size: 17px;
+    }
+
+    /* ==============================
+       POPUP SỬA
+    =============================== */
     #popupSua {
         display:none;
         position: fixed;
-        top: 0;
-        left: 0;
-        right:0;
-        bottom:0;
+        top: 0; left:0;
+        width: 100%; height:100%;
         background: rgba(0,0,0,0.4);
         justify-content: center;
         align-items: center;
-    }
-    #khungSua {
-        background: white;
         padding: 20px;
-        width: 350px;
-        border-radius: 10px;
     }
 
-    /* ======= NỀN & CHỮ TO CHO PHẦN 7 NGÀY ======= */
-    .ngay7 {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 12px;
-        margin-bottom: 12px;
-        border-radius: 10px;
+    #khungSua {
+        background: white;
+        padding: 25px;
+        width: 92%;
+        border-radius: 12px;
         font-size: 18px;
-        line-height: 1.5;
     }
+
+    /* ==============================
+       PHẦN 7 NGÀY TỚI
+    =============================== */
+    .ngay7 {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 16px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        font-size: 20px;
+        line-height: 1.6;
+    }
+
     .lich7 {
         background: #f9f2c8;
-        padding: 6px 10px;
-        margin: 5px 0;
+        padding: 10px 12px;
+        margin: 8px 0;
         border-radius: 6px;
-        font-size: 17px;
+        font-size: 19px;
+    }
+
+    /* ==============================
+       TỐI ƯU CHO ĐIỆN THOẠI
+    =============================== */
+    @media (max-width: 600px) {
+        body { font-size: 20px; }
+
+        #helpBtn, #hideHelpBtn {
+            font-size: 20px;
+            padding: 14px;
+        }
+
+        #topbar {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .btn-small {
+            font-size: 20px;
+            padding: 12px 16px;
+        }
+
+        input, button {
+            font-size: 20px;
+            padding: 16px;
+        }
+
+        .lich-item { font-size: 20px; }
+        .lich7 { font-size: 20px; }
+        .ngay7 { font-size: 22px; }
     }
 </style>
+
 </head>
 <body>
   
@@ -187,8 +253,9 @@
 
     <h2>Quản lý lịch trình</h2>
 
-    <label>Chọn ngày:</label>
-    <input type="date" id="chonNgay">
+    <label style="font-weight: 600;">Chọn ngày:</label><br>
+
+    <input type="date" id="chonNgay" style="width: 90%;">
 
     <div id="thuHienTai"></div>
 

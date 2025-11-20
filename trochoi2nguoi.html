@@ -303,6 +303,33 @@ cursor: pointer;
 </div>
 
 <script>
+
+    // Fix âm thanh trên iPhone Safari
+document.addEventListener("touchstart", function unlockAudio() {
+    [hitSound, missSound, winSound].forEach(s => {
+        if (s) {
+            s.play().then(() => {
+                s.pause();
+                s.currentTime = 0;
+            }).catch(e => {});
+        }
+    });
+
+    // chỉ chạy 1 lần
+    document.removeEventListener("touchstart", unlockAudio);
+}, { passive: true });
+hitSound.muted = false;
+missSound.muted = false;
+winSound.muted = false;
+hitSound.currentTime = 0;
+hitSound.play().catch(()=>{});
+
+
+
+
+
+
+
     function hideHelpBtnFunction(){
     const help = document.getElementById("helpBtn");
     const hide = document.getElementById("hideHelpBtn");
