@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Tạo Thiệp</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto&family=Oswald&family=Lobster&family=Dancing+Script&family=Pacifico&family=Playfair+Display&family=Bebas+Neue&family=Montserrat&family=Yanone+Kaffeesatz&family=Indie+Flower&family=Merriweather&family=Poppins&family=Rowdies&family=Shadows+Into+Light&family=Alfa+Slab+One&family=Abril+Fatface&family=Amatic+SC&family=Caveat&family=Cinzel&family=Cormorant+Garamond&family=Fira+Sans&family=Barlow&family=IBM+Plex+Sans&family=Josefin+Sans&family=Kanit&family=Lora&family=Mochiy+Pop+One&family=Noto+Sans&family=Noto+Serif&family=Overpass&family=Quicksand&family=Raleway&family=Saira&family=Source+Sans+3&family=Vollkorn&family=Work+Sans&family=Acme&family=Anton&family=Baloo+2&display=swap" rel="stylesheet">
+
+<style>
+    body { font-family: Arial; background:#0f172a; color:#fff; padding:20px; }
+    .container { max-width:900px; margin:auto; }
+    button { padding:10px 16px; background:#0af; border:none; border-radius:8px; cursor:pointer; }
+    textarea { width:100%; height:80px; padding:10px; background:#10233d; color:#fff; border:1px solid #345; }
+    select, input { padding:6px 10px; border-radius:6px; border:none; }
+    canvas { max-width:100%; cursor:grab; border:1px solid #345; }
+</style>
+</head>
+<body>
+
+
+<div class="container">
+    <a href="taoqr.html"><p style="background-color: rgb(189, 157, 204); width: 20%; text-align: center;padding: 10px;color: black;font-weight: 600;">Tạo QR ảnh</p></a>
+
+<h1>Tạo Ảnh — Chữ nâng cao</h1>
+<!-- Nút chọn ảnh -->
+<div style="margin: 10px 0;">
+    <!-- Popup chọn ảnh -->
+<div id="suggestBox" style="
+    display:none;
+    background:#1e293b;
+    padding:15px;
+    border-radius:10px;
+    margin:10px 0;
+">
+    <h3>Chọn ảnh gợi ý</h3>
+    <div id="suggestGrid" style="
+        display:grid;
+        grid-template-columns:repeat(auto-fill, minmax(120px,1fr));
+        gap:10px;
+        margin-top:10px;
+    ">
+        <!-- 🔥 Thêm ảnh gợi ý ở đây -->
+        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện.png" class="gImg">
+         <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang.png" class="gImg">
+          <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (2).png" class="gImg">
+           <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (1).png" class="gImg">
+            <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (4).png" class="gImg">
+             <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (6).png" class="gImg">
+              <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (5).png" class="gImg">
+               <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (8).png" class="gImg">
+
+        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (1).png" class="gImg">
+        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (2).png" class="gImg">
+        <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (10).png" class="gImg">
+        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (4).png" class="gImg">
+        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (3).png" class="gImg">
+        <img src="Gemini_Generated_Image_mtftu6mtftu6mtft.png" class="gImg">
+        <img src="Gemini_Generated_Image_h90ltrh90ltrh90l.png" class="gImg">
+        <img src="Gemini_Generated_Image_4bt49d4bt49d4bt4.png" class="gImg">
+                <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (7).png" class="gImg">
+                <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (3).png" class="gImg">
+                 <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (9).png" class="gImg">
+                
+    </div>
+</div>
+    <button id="suggestBtn" style="width: 43%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(18, 221, 154);font-weight: 600;">Ảnh gợi ý</button>
+    <button id="uploadBtn" style="width: 40%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(179, 21, 16);font-weight: 600;color: white;">Tải ảnh lên</button>
+    <input type="file" id="uploadInput" accept="image/*" style="display:none;">
+</div>
+
+
+<label>Nội dung chữ:</label>
+<textarea id="text" style="margin-bottom: 10px;"></textarea>
+
+<label>Căn lề:</label>
+<select id="align">
+    <option value="center">Giữa</option>
+    <option value="left">Trái</option>
+    <option value="right">Phải</option>
+</select>
+
+<label>Font chữ:</label>
+<select id="font" style="width: 20%;">
+    <option>Arial</option>
+    <option style="font-family:Roboto">Roboto</option>
+    <option style="font-family:Oswald">Oswald</option>
+    <option style="font-family:Lobster">Lobster</option>
+    <option style="font-family:Pacifico">Pacifico</option>
+    <option style="font-family:'Playfair Display'">Playfair Display</option>
+    <option style="font-family:'Bebas Neue'">Bebas Neue</option>
+    <option style="font-family:Montserrat">Montserrat</option>
+    <option style="font-family:'Yanone Kaffeesatz'">Yanone Kaffeesatz</option>
+    <option style="font-family:'Indie Flower'">Indie Flower</option>
+    <option style="font-family:Merriweather">Merriweather</option>
+    <option style="font-family:Poppins">Poppins</option>
+    <option style="font-family:Rowdies">Rowdies</option>
+    <option style="font-family:'Shadows Into Light'">Shadows Into Light</option>
+    <option style="font-family:'Alfa Slab One'">Alfa Slab One</option>
+    <option style="font-family:'Abril Fatface'">Abril Fatface</option>
+    <option style="font-family:'Amatic SC'">Amatic SC</option>
+    <option style="font-family:Caveat">Caveat</option>
+    <option style="font-family:Cinzel">Cinzel</option>
+    <option style="font-family:'Cormorant Garamond'">Cormorant Garamond</option>
+    <option style="font-family:'Fira Sans'">Fira Sans</option>
+    <option style="font-family:Barlow">Barlow</option>
+    <option style="font-family:'IBM Plex Sans'">IBM Plex Sans</option>
+    <option style="font-family:'Josefin Sans'">Josefin Sans</option>
+    <option style="font-family:Kanit">Kanit</option>
+    <option style="font-family:Lora">Lora</option>
+    <option style="font-family:'Mochiy Pop One'">Mochiy Pop One</option>
+    <option style="font-family:'Noto Sans'">Noto Sans</option>
+    <option style="font-family:'Noto Serif'">Noto Serif</option>
+    <option style="font-family:Overpass">Overpass</option>
+    <option style="font-family:Quicksand">Quicksand</option>
+    <option style="font-family:Raleway">Raleway</option>
+    <option style="font-family:Saira">Saira</option>
+    <option style="font-family:'Source Sans 3'">Source Sans 3</option>
+    <option style="font-family:Vollkorn">Vollkorn</option>
+    <option style="font-family:'Work Sans'">Work Sans</option>
+    <option style="font-family:Acme">Acme</option>
+    <option style="font-family:Anton">Anton</option>
+    <option style="font-family:'Baloo 2'">Baloo 2</option>
+</select>
+<br><br>
+<label>Màu chữ:</label>
+<input type="color" id="color" value="#ffffff">
+
+<label>Màu nền:</label>
+<input type="color" id="bgcolor" value="#000000">
+<button id="noBg">Không nền</button>
+
+<br><br>
+<label>Bo góc nền:</label>
+<input type="range" id="radius" min="0" max="100" value="0">
+<span id="radiusValue">0</span>px
+
+<br><br>
+
+<label>Cỡ chữ:</label>
+<input type="range" id="size" min="10" max="200" value="60">
+<span id="sizeValue">60</span>px
+
+<br><br>
+<div>
+<!-- 🔥 GIỮ NGUYÊN CODE – CHỈ THAY input number → range slider -->
+
+<br>
+
+
+    <button id="generate" style="margin-bottom: 10px; width: 30%;font-size: 20px;font-weight: 600;background-color: rgb(233, 162, 70);">Tạo ảnh</button>
+    <!-- Nút tải ảnh xuống -->
+    <button id="download" style="margin-left: 10px; width: 200px; font-size: 20px; font-weight: 600; background-color: rgb(34, 197, 94); color: rgb(1, 2, 0);">Tải ảnh xuống</button>
+</div>
+<canvas id="canvas" style="width: 90vw; height: auto;"></canvas>
+
+</div>
+
+<script>
+    document.getElementById("download").onclick = () => {
+    const link = document.createElement("a");
+    link.download = "image.png"; // tên file khi tải xuống
+    link.href = canvas.toDataURL("image/png"); // chuyển canvas thành hình PNG
+    link.click();
+};
+
+    document.getElementById("radius").addEventListener("input", () => {
+    document.getElementById("radiusValue").textContent =
+        document.getElementById("radius").value;
+    render();
+});
+
+
+let posX = 100, posY = 100;
+let dragging = false;
+let resizing = false;
+let rotation = 0;
+let sizeFactor = 1;
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+
+
+/* Mở khung chọn ảnh */
+
+
+/* Render danh sách ảnh gợi ý */
+const suggestGrid = document.getElementById("suggestGrid");
+
+
+
+// Mở / đóng popup khi bấm nút
+document.getElementById("suggestBtn").onclick = () => {
+    let box = document.getElementById("suggestBox");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+};
+
+// Lấy tất cả ảnh gợi ý trong HTML
+document.querySelectorAll("#suggestGrid .gImg").forEach(el => {
+    el.style.width = "100%";
+    el.style.borderRadius = "8px";
+    el.style.cursor = "pointer";
+    el.style.transition = "0.2s";
+
+    el.onmouseover = () => el.style.transform = "scale(1.05)";
+    el.onmouseout  = () => el.style.transform = "scale(1.0)";
+
+    el.onclick = () => {
+    img.src = el.src;  // đổi ảnh
+    img.onload = () => render(); // vẽ lại canvas khi ảnh load xong
+    document.getElementById("suggestBox").style.display = "none";
+};
+});
+
+
+/* Nút tải ảnh lên */
+document.getElementById("uploadBtn").onclick = () => {
+    document.getElementById("uploadInput").click();
+};
+
+/* Xử lý file upload */
+document.getElementById("uploadInput").onchange = e => {
+    let file = e.target.files[0];
+    if(!file) return;
+
+    let reader = new FileReader();
+    reader.onload = () => {
+        img.src = reader.result;   // đổi ảnh
+        img.onload = () => render(); // vẽ lại canvas khi ảnh load xong
+    };
+    reader.readAsDataURL(file);
+};
+
+const img = new Image();
+img.crossOrigin = "anonymous";
+img.src = "thongbao.png"; // ảnh mặc định
+img.onload = () => {
+    // Khi tạo ảnh, canvas sẽ bằng kích thước màn hình
+    canvas.width = img.width;
+canvas.height = img.height;
+
+    render();
+};
+
+
+
+document.getElementById("noBg").onclick = () => {
+    document.getElementById("bgcolor").value = "#00000000";
+    render();
+};
+
+/* Drag */
+canvas.addEventListener("mousedown", e => {
+    let rect = canvas.getBoundingClientRect();
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
+
+    const textSize = parseInt(document.getElementById('size').value) * sizeFactor;
+    const textWidth = ctx.measureText(document.getElementById('text').value).width * sizeFactor;
+    const textHeight = textSize;
+
+    if(mouseX > posX + textWidth/2 - 10 && mouseX < posX + textWidth/2 + 10 &&
+       mouseY > posY - textHeight/2 - 10 && mouseY < posY - textHeight/2 + 10){
+        resizing = true;
+    } else {
+        dragging = true;
+    }
+
+    canvas.style.cursor = dragging ? "grabbing" : "nwse-resize";
+});
+
+canvas.addEventListener("mousemove", e => {
+    if(!dragging && !resizing) return;
+
+    let rect = canvas.getBoundingClientRect();
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
+
+    if(dragging){
+        posX = mouseX;
+        posY = mouseY;
+    } else if(resizing){
+        let newSize = Math.max(8, Math.abs(mouseX - posX) * 2);
+        sizeFactor = newSize / parseInt(document.getElementById("size").value);
+    }
+
+    render();
+});
+
+canvas.addEventListener("mouseup", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
+canvas.addEventListener("mouseleave", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
+
+/* ---------------------- HỖ TRỢ ĐIỆN THOẠI (TOUCH) ---------------------- */
+
+let touchStart = false;
+let lastTouchX = 0, lastTouchY = 0;
+
+// —— DI CHUYỂN KHI 1 NGÓN ——
+canvas.addEventListener("touchstart", e => {
+    if (e.touches.length === 1) {
+        touchStart = true;
+        let rect = canvas.getBoundingClientRect();
+        lastTouchX = e.touches[0].clientX - rect.left;
+        lastTouchY = e.touches[0].clientY - rect.top;
+    }
+});
+
+// —— DI CHUYỂN —
+canvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    let rect = canvas.getBoundingClientRect();
+
+    // ----- 1 NGÓN → DRAG -----
+    if (e.touches.length === 1 && touchStart) {
+        let t = e.touches[0];
+        let mouseX = t.clientX - rect.left;
+        let mouseY = t.clientY - rect.top;
+
+        posX += mouseX - lastTouchX;
+        posY += mouseY - lastTouchY;
+
+        lastTouchX = mouseX;
+        lastTouchY = mouseY;
+
+        render();
+    }
+
+    // ----- 2 NGÓN → PHÓNG TO + XOAY -----
+    if (e.touches.length === 2) {
+        let t1 = e.touches[0];
+        let t2 = e.touches[1];
+
+        // khoảng cách 2 ngón
+        let dx = t2.clientX - t1.clientX;
+        let dy = t2.clientY - t1.clientY;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (!canvas._lastDist) canvas._lastDist = dist;
+
+        // pinch zoom
+        let zoom = dist / canvas._lastDist;
+        sizeFactor *= zoom;
+        canvas._lastDist = dist;
+
+        // xoay
+        let angle = Math.atan2(dy, dx);
+        if (!canvas._lastAngle) canvas._lastAngle = angle;
+        rotation += angle - canvas._lastAngle;
+        canvas._lastAngle = angle;
+
+        render();
+    }
+});
+
+canvas.addEventListener("touchend", () => {
+    touchStart = false;
+    canvas._lastDist = null;
+    canvas._lastAngle = null;
+});
+
+/* Zoom with wheel */
+canvas.addEventListener("wheel", e => {
+    e.preventDefault();
+    let sizeInput = document.getElementById("size");
+    let size = parseInt(sizeInput.value);
+
+    size += e.deltaY < 0 ? 2 : -2;
+    if(size < 8) size = 8;
+
+    sizeInput.value = size;
+    document.getElementById("sizeValue").textContent = size;
+
+    render();
+});
+
+/* Rotate */
+let rotating = false;
+canvas.addEventListener("contextmenu", e => e.preventDefault());
+canvas.addEventListener("mousedown", e => { if(e.button===2) rotating=true; });
+document.addEventListener("mousemove", e=>{
+    if(!rotating) return;
+    let rect = canvas.getBoundingClientRect();
+    rotation = Math.atan2(e.clientY - rect.top - posY, e.clientX - rect.left - posX);
+    render();
+});
+document.addEventListener("mouseup", ()=> rotating=false);
+
+/* 🔥 Thanh kéo thay đổi cỡ chữ trực tiếp */
+document.getElementById("size").addEventListener("input", () => {
+    document.getElementById("sizeValue").textContent = document.getElementById("size").value;
+    render();
+});
+
+/* Render */
+/* Render */
+function render(){
+    const text = document.getElementById("text").value;
+    const font = document.getElementById("font").value;
+    const baseSize = parseInt(document.getElementById("size").value);
+    const size = baseSize * sizeFactor;
+    const color = document.getElementById("color").value;
+    const bgcolor = document.getElementById("bgcolor").value;
+    const align = document.getElementById("align").value;
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+// Tắt smoothing để giữ nét gốc (pixel)
+ctx.imageSmoothingEnabled = false;
+
+// Tính tỉ lệ nếu muốn scale (hoặc dùng img gốc)
+let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+let imgW = img.width * scale;
+let imgH = img.height * scale;
+let imgX = (canvas.width - imgW) / 2;
+let imgY = 0;
+
+ctx.drawImage(img, imgX, imgY, imgW, imgH);
+
+    let lines = text.split("\n");
+    ctx.font = size + 'px "'+font+'"';
+// ――― TÍNH NỀN TỰ CO THEO CHỮ ―――
+let paddingX = 30;          // padding ngang
+let paddingY = 20;          // padding dọc
+
+// tính độ rộng max 1 dòng
+let maxWidth = 0;
+lines.forEach(l=>{
+    let w = ctx.measureText(l).width;
+    if(w > maxWidth) maxWidth = w;
+});
+
+let lineHeight = size * 1.2;
+let totalTextHeight = lines.length * lineHeight;
+
+// nền auto theo chữ
+let blockW = maxWidth + paddingX * 2;
+let blockH = totalTextHeight + paddingY * 2;
+  // chiếm 20% chiều cao ảnh (tùy chỉnh)
+
+    ctx.save();
+    ctx.translate(posX,posY);
+    ctx.rotate(rotation);
+
+    let radius = parseInt(document.getElementById("radius").value);
+
+if(bgcolor !== "#000000") {
+    ctx.fillStyle = bgcolor;
+    drawRoundRect(ctx, -blockW/2, -blockH/2, blockW, blockH, radius);
+    ctx.fill();
+}
+
+
+    ctx.fillStyle = color;
+
+// Tổng chiều cao text thực
+
+
+
+// bắt đầu từ giữa nền
+let startY = -totalTextHeight / 2 + size * 0.85;
+
+lines.forEach(line=>{
+    let w = ctx.measureText(line).width;
+    let x = 0;
+
+    if(align=="left") x = -blockW/2 + paddingX;
+    if(align=="right") x = blockW/2 - padding - w;
+
+    // ✔ CENTER CHUẨN TUYỆT ĐỐI
+    if(align=="center") x = -w/2;
+
+    ctx.fillText(line, x, startY);
+    startY += lineHeight;
+    });
+
+    ctx.restore();
+}
+function drawRoundRect(ctx, x, y, w, h, r){
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+}
+
+
+document.getElementById("generate").onclick = () => {
+    // Canvas khớp đúng độ phân giải ảnh gốc
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // ⭐ Đặt chữ vào đúng tâm ảnh
+    posX = canvas.width / 2;
+    posY = canvas.height / 2;
+
+    render();
+};
+
+// Chặn pinch zoom
+document.addEventListener('touchmove', function (e) {
+    if (e.scale !== undefined && e.scale !== 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Chặn double-tap zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (e) {
+    let now = new Date().getTime();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+</script>
+
+</body>
+</html>

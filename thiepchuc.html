@@ -153,7 +153,7 @@
     <!-- Nút tải ảnh xuống -->
     <button id="download" style="margin-left: 10px; width: 200px; font-size: 20px; font-weight: 600; background-color: rgb(34, 197, 94); color: rgb(1, 2, 0);">Tải ảnh xuống</button>
 </div>
-<canvas id="canvas" style="width: auto; height: auto;"></canvas>
+<canvas id="canvas" style="width: 90vw; height: auto;"></canvas>
 
 </div>
 
@@ -238,8 +238,9 @@ img.crossOrigin = "anonymous";
 img.src = "thongbao.png"; // ảnh mặc định
 img.onload = () => {
     // Khi tạo ảnh, canvas sẽ bằng kích thước màn hình
-    canvas.width = window.innerWidth * 0.9; // 90% chiều rộng màn hình
-    canvas.height = window.innerHeight * 0.8; // 80% chiều cao màn hình
+    canvas.width = img.width;
+canvas.height = img.height;
+
     render();
 };
 
@@ -404,9 +405,12 @@ function render(){
     const bgcolor = document.getElementById("bgcolor").value;
     const align = document.getElementById("align").value;
 
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    
-// Tính tỉ lệ vừa canvas mà giữ nguyên tỉ lệ gốc
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+// Tắt smoothing để giữ nét gốc (pixel)
+ctx.imageSmoothingEnabled = false;
+
+// Tính tỉ lệ nếu muốn scale (hoặc dùng img gốc)
 let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
 let imgW = img.width * scale;
 let imgH = img.height * scale;
@@ -491,11 +495,17 @@ function drawRoundRect(ctx, x, y, w, h, r){
 
 
 document.getElementById("generate").onclick = () => {
-    // resize canvas trước khi render
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = window.innerHeight * 0.8;
+    // Canvas khớp đúng độ phân giải ảnh gốc
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // ⭐ Đặt chữ vào đúng tâm ảnh
+    posX = canvas.width / 2;
+    posY = canvas.height / 2;
+
     render();
 };
+
 // Chặn pinch zoom
 document.addEventListener('touchmove', function (e) {
     if (e.scale !== undefined && e.scale !== 1) {
