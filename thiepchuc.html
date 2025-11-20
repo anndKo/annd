@@ -2,8 +2,9 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tạo Ảnh — Kéo chữ + Xuống dòng + Căn lề + Phóng to/Xoay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Tạo Thiệp</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Oswald&family=Lobster&family=Dancing+Script&family=Pacifico&family=Playfair+Display&family=Bebas+Neue&family=Montserrat&family=Yanone+Kaffeesatz&family=Indie+Flower&family=Merriweather&family=Poppins&family=Rowdies&family=Shadows+Into+Light&family=Alfa+Slab+One&family=Abril+Fatface&family=Amatic+SC&family=Caveat&family=Cinzel&family=Cormorant+Garamond&family=Fira+Sans&family=Barlow&family=IBM+Plex+Sans&family=Josefin+Sans&family=Kanit&family=Lora&family=Mochiy+Pop+One&family=Noto+Sans&family=Noto+Serif&family=Overpass&family=Quicksand&family=Raleway&family=Saira&family=Source+Sans+3&family=Vollkorn&family=Work+Sans&family=Acme&family=Anton&family=Baloo+2&display=swap" rel="stylesheet">
 
@@ -64,8 +65,8 @@
                 
     </div>
 </div>
-    <button id="suggestBtn" style="width: 30%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(18, 221, 154);font-weight: 600;">Ảnh gợi ý</button>
-    <button id="uploadBtn" style="width: 30%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(179, 21, 16);font-weight: 600;color: white;">Tải ảnh lên</button>
+    <button id="suggestBtn" style="width: 43%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(18, 221, 154);font-weight: 600;">Ảnh gợi ý</button>
+    <button id="uploadBtn" style="width: 40%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(179, 21, 16);font-weight: 600;color: white;">Tải ảnh lên</button>
     <input type="file" id="uploadInput" accept="image/*" style="display:none;">
 </div>
 
@@ -81,7 +82,7 @@
 </select>
 
 <label>Font chữ:</label>
-<select id="font">
+<select id="font" style="width: 20%;">
     <option>Arial</option>
     <option style="font-family:Roboto">Roboto</option>
     <option style="font-family:Oswald">Oswald</option>
@@ -122,10 +123,10 @@
     <option style="font-family:Anton">Anton</option>
     <option style="font-family:'Baloo 2'">Baloo 2</option>
 </select>
-
+<br><br>
 <label>Màu chữ:</label>
 <input type="color" id="color" value="#ffffff">
-<br><br>
+
 <label>Màu nền:</label>
 <input type="color" id="bgcolor" value="#000000">
 <button id="noBg">Không nền</button>
@@ -138,14 +139,11 @@
 <br><br>
 <div>
 <!-- 🔥 GIỮ NGUYÊN CODE – CHỈ THAY input number → range slider -->
-<label>Cỡ chữ:</label>
-<input type="range" id="size" min="8" max="200" value="42">
-<span id="sizeValue">42</span>px
 
-<br><br>
+<br>
 
 
-    <button id="generate" style="margin-bottom: 10px; width: 25%;font-size: 20px;font-weight: 600;background-color: rgb(233, 162, 70);">Tạo ảnh</button>
+    <button id="generate" style="margin-bottom: 10px; width: 30%;font-size: 20px;font-weight: 600;background-color: rgb(233, 162, 70);">Tạo ảnh</button>
     <!-- Nút tải ảnh xuống -->
     <button id="download" style="margin-left: 10px; width: 200px; font-size: 20px; font-weight: 600; background-color: rgb(34, 197, 94); color: rgb(1, 2, 0);">Tải ảnh xuống</button>
 </div>
@@ -287,6 +285,75 @@ canvas.addEventListener("mousemove", e => {
 canvas.addEventListener("mouseup", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
 canvas.addEventListener("mouseleave", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
 
+/* ---------------------- HỖ TRỢ ĐIỆN THOẠI (TOUCH) ---------------------- */
+
+let touchStart = false;
+let lastTouchX = 0, lastTouchY = 0;
+
+// —— DI CHUYỂN KHI 1 NGÓN ——
+canvas.addEventListener("touchstart", e => {
+    if (e.touches.length === 1) {
+        touchStart = true;
+        let rect = canvas.getBoundingClientRect();
+        lastTouchX = e.touches[0].clientX - rect.left;
+        lastTouchY = e.touches[0].clientY - rect.top;
+    }
+});
+
+// —— DI CHUYỂN —
+canvas.addEventListener("touchmove", e => {
+    e.preventDefault();
+
+    let rect = canvas.getBoundingClientRect();
+
+    // ----- 1 NGÓN → DRAG -----
+    if (e.touches.length === 1 && touchStart) {
+        let t = e.touches[0];
+        let mouseX = t.clientX - rect.left;
+        let mouseY = t.clientY - rect.top;
+
+        posX += mouseX - lastTouchX;
+        posY += mouseY - lastTouchY;
+
+        lastTouchX = mouseX;
+        lastTouchY = mouseY;
+
+        render();
+    }
+
+    // ----- 2 NGÓN → PHÓNG TO + XOAY -----
+    if (e.touches.length === 2) {
+        let t1 = e.touches[0];
+        let t2 = e.touches[1];
+
+        // khoảng cách 2 ngón
+        let dx = t2.clientX - t1.clientX;
+        let dy = t2.clientY - t1.clientY;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (!canvas._lastDist) canvas._lastDist = dist;
+
+        // pinch zoom
+        let zoom = dist / canvas._lastDist;
+        sizeFactor *= zoom;
+        canvas._lastDist = dist;
+
+        // xoay
+        let angle = Math.atan2(dy, dx);
+        if (!canvas._lastAngle) canvas._lastAngle = angle;
+        rotation += angle - canvas._lastAngle;
+        canvas._lastAngle = angle;
+
+        render();
+    }
+});
+
+canvas.addEventListener("touchend", () => {
+    touchStart = false;
+    canvas._lastDist = null;
+    canvas._lastAngle = null;
+});
+
 /* Zoom with wheel */
 canvas.addEventListener("wheel", e => {
     e.preventDefault();
@@ -423,6 +490,22 @@ document.getElementById("generate").onclick = () => {
     canvas.height = window.innerHeight * 0.8;
     render();
 };
+// Chặn pinch zoom
+document.addEventListener('touchmove', function (e) {
+    if (e.scale !== undefined && e.scale !== 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Chặn double-tap zoom
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (e) {
+    let now = new Date().getTime();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
 
 </script>
 
