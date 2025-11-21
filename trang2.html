@@ -1,854 +1,107 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<title>Game Bắn tàu</title>
-
+<meta charset="UTF-8">
+<title>Tạo Sơ Đồ Cây</title>
 <style>
-body { 
-    font-family: Arial; 
-    padding: 20px; 
-    background:#f2f2f2; 
-    
-}
-
-h1 {
-    text-align:center;
-    font-size:26px;
-    margin-bottom:10px;
-}
-
-#helpBtn {
-    position: fixed; 
-    top: 15px; 
-    right: 15px;
-    padding: 10px 18px; 
-    background: #ff9800; 
-    color: white;
-    border: none; 
-    border-radius: 8px; 
-    font-size: 16px; 
-    cursor: pointer;
-    z-index: 11000;
-}
-
-#helpOverlay {
-    position: fixed; 
-    top: 0; 
-    left: 0;
-    width: 100%; 
-    height: 100%; 
-    background: rgba(0,0,0,0.8);
-    display: none; 
-    justify-content: center; 
-    align-items: center;
-    flex-direction: column; 
-    z-index: 12000;
-}
-
-#helpOverlay video { 
-    max-width: 90%; 
-    max-height: 80%; 
-    border-radius: 12px; 
-}
-
-#closeHelp {
-    margin-top: 20px; 
-    padding: 12px 20px; 
-    background: #e53935;
-    color: white; 
-    border: none; 
-    border-radius: 8px; 
-    font-size: 18px; 
-    cursor: pointer;
-}
-
-/* ==== BẢNG 9×7 ==== */
-.board{
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);   /* 9 CỘT */
-    grid-template-rows: repeat(7, 1fr);      /* 7 HÀNG */
-    gap: 5px;
-    width: 90vw;
-    max-width: 500px;
-    aspect-ratio: 9 / 7; /* giữ đúng tỉ lệ */
-    background: #caa98a;
-    padding: 10px;
-    border-radius: 10px;
-    margin: 0 auto;
-     width: calc(90vw - 20px); /* trừ padding */
-}
-
-.cell{
-    width: 100%; 
-    height: 100%;
-    border-radius: 6px;
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    font-weight: 700; 
-    color: white; 
-    cursor: pointer;
-}
-
-.covered{ cursor:pointer; }
-.hit{ background:black !important; }
-.miss{ color:white !important; font-weight:bold; }
-.preview-ok{ background:#4caf50 !important; }
-.preview-bad{ background:#e53935 !important; }
-.ship-cell{}
-
-/* Bảng đỏ */
-#redBoard .covered { background:#c62828 !important; }
-#redBoard .hit { background:black !important; }
-#redBoard .miss { background:#ffcdd2 !important; color:red !important; }
-#redBoard .ship-cell { background:#b71c1c !important; }
-
-/* Bảng xanh */
-#blueBoard .covered { background:#1565c0 !important; }
-#blueBoard .hit { background:black !important; }
-#blueBoard .miss { background:#bbdefb !important; color:blue !important; }
-#blueBoard .ship-cell { background:#0d47a1 !important; }
-
-/* palette */
-.palette { 
-    display:flex; 
-    flex-direction:row; 
-    justify-content:center; 
-    gap:14px; 
-    white-space:nowrap; 
-    overflow:hidden; 
-    width:100%; 
-}
-
-.ship { 
-    display:flex; 
-    gap:4px; 
-    flex-shrink:1; 
-    min-width:0; 
-}
-
-.ship-block {
-    aspect-ratio: 1;
-    width: 11vw;
-    max-width: 50px;
-    background:#1565c0;
-    border-radius:5px;
-}
-
-.hidden { display:none; }
-
-.rotate-btn {
-    padding:6px 10px; 
-    background:#1565c0; 
-    color:white;
-    border:none; 
-    border-radius:6px; 
-    cursor:pointer; 
-    margin-top:5px;
-}
-
-#status{ 
-    text-align:center; 
-    font-size:18px; 
-    margin:15px 0; 
-    font-weight:700; 
-}
-
-.blur-board {
-    opacity: 0.35;
-    filter: blur(1.5px);
-    transition: 0.4s;
-}
-
-.bullet{
-    position:absolute;
-    width: 14px;
-    height: 14px;
-    background: yellow;
-    border-radius: 50%;
-    pointer-events:none;
-    z-index:9999;
-    transition: transform 0.45s linear;
-}
-
-.fire-hit { 
-    box-shadow:0 0 12px 5px orange, 0 0 20px 10px red;
-    animation: firePulse 0.8s ease-out forwards; 
-}
-
-@keyframes firePulse {
-    0% { box-shadow:0 0 5px 2px orange; }
-    100%{ box-shadow:0 0 22px 12px red; }
-}
-
-.ship-dead-purple { 
-    background:#6a1b9a !important; 
-    border-radius:4px !important; 
-}
-
-.shake { 
-    animation: shakeAnim 0.4s; 
-}
-
-@keyframes shakeAnim {
-    0%{transform:translate(0);}
-    20%{transform:translate(-5px,0);}
-    40%{transform:translate(5px,0);}
-    60%{transform:translate(-5px,0);}
-    80%{transform:translate(5px,0);}
-    100%{transform:translate(0);}
-}
-
-#winnerOverlay {
-    position:fixed; 
-    top:0; 
-    left:0; 
-    width:100%; 
-    height:100%;
-    background:rgba(0,0,0,0.75); 
-    display:none;
-    justify-content:center; 
-    align-items:center; 
-    flex-direction:column;
-    color:white; 
-    font-size:28px; 
-    font-weight:bold; 
-    z-index:10000;
-}
-
-#winnerOverlay img { 
-    max-width:300px; 
-    margin-top:20px; 
-    border-radius:12px; 
-}
-
-#winnerOverlay button {
-    margin-top:30px; 
-    padding:12px 25px; 
-    font-size:18px;
-    border:none; 
-    border-radius:8px; 
-    background:#4caf50; 
-    color:white;
-    cursor:pointer;
-}
+    body { font-family: Arial; margin: 20px; }
+    #tree-container {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #aaa;
+        overflow: auto;
+    }
+    textarea {
+        width: 100%;
+        height: 150px;
+    }
+    button { margin-top: 10px; padding: 8px 14px; }
 </style>
 </head>
-
 <body>
-    
-    <audio id="placeSound" src="an.mp3" preload="auto"></audio>
 
-  <audio id="hitSound" src="bum.mp3" preload="auto"></audio>
-<audio id="missSound" src="xoet.mp3" preload="auto"></audio>
-<audio id="winSound" src="reoho.mp3" preload="auto"></audio>
+<h2>🌳 Tạo Sơ Đồ Cây</h2>
 
-<button id="hideHelpBtn" onclick="hideHelpBtnFunction()" 
-style="position: fixed; top: 15px; right: 130px;
-padding: 10px 18px; background:#c52525; color:white;
-border:none; border-radius:8px; font-size:16px; cursor:pointer; z-index:11000;font-weight: 600;">
-X
-</button>
+<p>Nhập cấu trúc cây theo dạng JSON:</p>
+<textarea id="jsonInput">{
+  "name": "Gia đình",
+  "children": [
+    {
+      "name": "Ba",
+      "children": [
+        { "name": "Con A" },
+        { "name": "Con B" }
+      ]
+    },
+    {
+      "name": "Mẹ",
+      "children": [
+        { "name": "Con C" }
+      ]
+    }
+  ]
+}</textarea>
 
-<button id="helpBtn" onclick="showHelp()">Hướng dẫn</button>
+<button onclick="renderTree()">Vẽ sơ đồ</button>
 
-<!-- Overlay -->
-<div id="helpOverlay">
-<video id="helpVideo" controls>
-<source src="bắn tàu.mp4" type="video/mp4">
-</video>
-<button id="closeHelp" onclick="closeHelp()">Đóng</button>
-</div>
+<div id="tree-container"></div>
 
-<h1>Bắn tàu 2 Người</h1>
+<!-- Thư viện D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
 
-<!-- ĐẶT TÀU -->
-<div id="placeArea">
-    <h3 id="placeLabel" style="text-align:center;color:red;font-size:36px;">Người ĐỎ đặt tàu</h3>
-
-    <div class="palette" id="palette"></div>
-
-    <div style="text-align:center">
-        <button class="rotate-btn" onclick="rotateShip()" style="margin-top:10px;font-size:20px;background-color:#4caf50;">Xoay tàu</button>
-    </div>
-
-    <h3 style="text-align:center">Lưới đặt</h3>
-    <div id="placeBoard" class="board"></div>
-
-    <div style="text-align:center;margin-top:15px">
-        <button onclick="confirmPlacement()" style="padding:10px 20px;border:none;background:#4caf50;color:white;border-radius:8px;font-size:16px;cursor:pointer">
-            Xác nhận đặt
-        </button>
-        <button onclick="resetPlacement()" style="padding:10px 20px;border:none;background:#e53935;color:white;border-radius:8px;font-size:16px;cursor:pointer;margin-left:10px">
-            Đặt lại
-        </button>
-    </div>
-</div>
-
-<!-- CHƠI GAME -->
-<div id="playArea" class="hidden">
-
-    <div style="text-align:center; margin-bottom:15px;">
-        <button onclick="restartGame()" 
-            style="padding:10px 20px;border:none;background:#9c27b0;color:white;border-radius:8px;font-size:16px;cursor:pointer;">
-            Chơi lại từ đầu
-        </button>
-    </div>
-
-    <div id="playBoardsWrapper">
-        <div class="boardWrapper"><div id="redBoard" class="board"></div></div>
-
-        <div id="status"></div>
-
-        <div class="boardWrapper"><div id="blueBoard" class="board"></div></div>
-    </div>
-</div>
-
-<div id="winnerOverlay">
-    <div id="winnerText">Người ĐỎ thắng!</div>
-    <img src="winner.png" alt="win">
-    <button onclick="confirmWinner()">Xác nhận</button>
-</div>
 <script>
-  // Chặn pinch zoom
-document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
+function renderTree() {
+    document.getElementById("tree-container").innerHTML = ""; 
 
-// Chặn phóng to bằng Ctrl + wheel
-window.addEventListener("wheel", function(e){
-    if(e.ctrlKey) e.preventDefault();
-}, {passive:false});
-
-// Chặn pinch-zoom bằng touchmove
-window.addEventListener("touchmove", function(e){
-    if(e.scale !== undefined && e.scale !== 1) e.preventDefault();
-}, {passive:false});
-
-// Chặn double-tap zoom trên iOS
-let lastTouchEnd = 0;
-document.addEventListener("touchend", function(event) {
-    let now = (new Date()).getTime();
-    if(now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
-  /* ====================== CẤU HÌNH BẢNG 7×9 ====================== */
-const ROWS = 7;   // số hàng
-const COLS = 9;   // số cột
-
-const SHIPS = [4,3,2,1];
-
-let placingPlayer = "red";      // đang đặt tàu của ai
-let rotateDir = "h";            // hướng đặt tàu
-let currentTurn = "red";        // lượt chơi
-
-let boards = { red: emptyBoard(), blue: emptyBoard() };
-let shots = { red: emptyBoard(), blue: emptyBoard() };
-
-let draggingShipSize = null;
-let playerShips = { red: [], blue: [] };
-
-let standbyBullet = null;
-
-
-let audioUnlocked = false;
-
-/* Unlock audio trên iPhone */
-function unlockAudio(){
-    if(audioUnlocked) return;
-    audioUnlocked = true;
-    
-    // Chỉ unlock mà không play
-    [hitSound, missSound, winSound, placeSound].forEach(s=>{
-
-        s.pause(); 
-        s.currentTime = 0;
-    });
-
-    document.removeEventListener("touchstart", unlockAudio);
-    document.removeEventListener("click", unlockAudio);
-}
-
-document.addEventListener("touchstart", unlockAudio, {passive:true});
-document.addEventListener("click", unlockAudio);
-
-
-/* ================= GRID BUILDING ================== */
-function emptyBoard(){
-    return Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
-}
-function elem(id){ return document.getElementById(id); }
-
-const placeBoardEl = elem("placeBoard");
-buildBoard(placeBoardEl, onPlaceCellEnter, onPlaceCellClick);
-
-function buildBoard(boardEl, enterFunc, clickFunc){
-    boardEl.innerHTML = "";
-    for(let r=0; r<ROWS; r++){
-        for(let c=0; c<COLS; c++){
-            let cell = document.createElement("div");
-            cell.className = "cell";
-            cell.dataset.r = r;
-            cell.dataset.c = c;
-            if(enterFunc) cell.addEventListener("mouseenter", enterFunc);
-            if(clickFunc) cell.addEventListener("click", clickFunc);
-            boardEl.appendChild(cell);
-        }
-    }
-}
-
-/* ================= SHIP PALETTE ================== */
-function buildPalette(){
-    let pal = elem("palette");
-    pal.innerHTML = "";
-    SHIPS.forEach(sz=>{
-        let ship = document.createElement("div");
-        ship.className = "ship";
-        ship.dataset.size = sz;
-        ship.dataset.placed = "false";
-
-        for(let i=0;i<sz;i++){
-            let b = document.createElement("div");
-            b.className = "ship-block";
-            ship.appendChild(b);
-        }
-
-        ship.addEventListener("click", ()=>{
-            if(ship.dataset.placed === "true") return;
-            draggingShipSize = sz;
-            document.querySelectorAll(".palette .ship").forEach(s=>{
-                if(s.dataset.placed==="false") s.style.opacity="1";
-            });
-            ship.style.opacity="0.3";
-        });
-
-        pal.appendChild(ship);
-    });
-}
-buildPalette();
-
-/* ==================== ROTATE SHIP ==================== */
-function rotateShip(){
-    rotateDir = (rotateDir === "h" ? "v" : "h");
-}
-
-/* ==================== PLACE SHIP ===================== */
-function onPlaceCellEnter(){
-    if(!draggingShipSize) return;
-    clearPreview();
-    const r = parseInt(this.dataset.r);
-    const c = parseInt(this.dataset.c);
-
-    const ok = canPlaceShip(placingPlayer, r, c, draggingShipSize);
-    const cells = getShipCells(r, c, draggingShipSize);
-
-    cells.forEach(p=>{
-        if(p.r<0 || p.c<0 || p.r>=ROWS || p.c>=COLS) return;
-        let idx = p.r * COLS + p.c;     
-        let cell = placeBoardEl.children[idx];
-        if(cell) cell.classList.add(ok ? "preview-ok":"preview-bad");
-    });
-}
-
-function onPlaceCellClick(){
-    if(!draggingShipSize) return;
-    const r = parseInt(this.dataset.r);
-    const c = parseInt(this.dataset.c);
-
-    if(!canPlaceShip(placingPlayer, r, c, draggingShipSize)){
-        alert("Không thể đặt tại đây!");
+    let data;
+    try {
+        data = JSON.parse(document.getElementById("jsonInput").value);
+    } catch (e) {
+        alert("JSON không hợp lệ!");
         return;
     }
 
-    placeShip(placingPlayer, r, c, draggingShipSize);
-    placeSound.currentTime = 0;
-placeSound.play();
+    const width = 1000, height = 800;
+    const svg = d3.select("#tree-container")
+                  .append("svg")
+                  .attr("width", width)
+                  .attr("height", height)
+                  .append("g")
+                  .attr("transform", "translate(40,0)");
 
-    const shipDiv = [...document.querySelectorAll(".palette .ship")]
-        .find(s => parseInt(s.dataset.size) === draggingShipSize);
+    const root = d3.hierarchy(data);
+    const treeLayout = d3.tree().size([height - 50, width - 200]);
+    treeLayout(root);
 
-    if(shipDiv){
-        shipDiv.dataset.placed = "true";
-        shipDiv.style.opacity = "0.3";
-        shipDiv.style.pointerEvents = "none";
-    }
+    // Nối
+    svg.selectAll("path")
+        .data(root.links())
+        .enter()
+        .append("path")
+        .attr("d", d3.linkHorizontal()
+                      .x(d => d.y)
+                      .y(d => d.x))
+        .attr("fill", "none")
+        .attr("stroke", "#555");
 
-    draggingShipSize = null;
-    clearPreview();
-    renderPlaceBoard();
+    // Node
+    const nodes = svg.selectAll("g.node")
+        .data(root.descendants())
+        .enter()
+        .append("g")
+        .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    nodes.append("circle")
+         .attr("r", 18)
+         .attr("fill", "#4CAF50");
+
+    nodes.append("text")
+         .attr("dy", 5)
+         .attr("x", d => d.children ? -25 : 25)
+         .style("text-anchor", d => d.children ? "end" : "start")
+         .text(d => d.data.name);
 }
-
-function clearPreview(){
-    [...placeBoardEl.children].forEach(c => c.classList.remove("preview-ok","preview-bad"));
-}
-
-function getShipCells(r,c,sz){
-    let arr = [];
-    for(let i=0;i<sz;i++){
-        if(rotateDir==="h") arr.push({r, c:c+i});
-        else arr.push({r:r+i, c});
-    }
-    return arr;
-}
-
-function canPlaceShip(player,r,c,sz){
-    const cells = getShipCells(r,c,sz);
-    for(let p of cells){
-        if(p.r<0 || p.c<0 || p.r>=ROWS || p.c>=COLS) return false;
-        if(boards[player][p.r][p.c] != null) return false;
-    }
-    return true;
-}
-
-function placeShip(player, r, c, sz){
-    const cells = getShipCells(r,c,sz);
-    cells.forEach(p => boards[player][p.r][p.c] = "ship");
-    playerShips[player].push(cells);
-}
-
-function renderPlaceBoard(){
-    for(let r=0; r<ROWS; r++){
-        for(let c=0; c<COLS; c++){
-            let cell = placeBoardEl.children[r*COLS + c];
-            cell.style.background = boards[placingPlayer][r][c] ? "#003049" : "#8a5a44";
-        }
-    }
-}
-
-/* ======================== CONFIRM ======================= */
-function countShipsPlaced(player){
-    let count = 0;
-    document.querySelectorAll(".palette .ship").forEach(s=>{
-        if(s.dataset.placed==="true") count++;
-    });
-    return count;
-}
-
-function confirmPlacement(){
-    if(countShipsPlaced(placingPlayer) < SHIPS.length){
-        alert("Bạn phải đặt đủ 4 tàu!");
-        return;
-    }
-
-    if(placingPlayer==="red"){
-        placingPlayer="blue";
-        elem("placeLabel").innerHTML="Người <span style='color:blue'>XANH</span> đặt tàu";
-        draggingShipSize=null;
-        buildPalette();
-        renderPlaceBoard();
-    } else {
-        elem("helpBtn").style.display="none";
-        elem("hideHelpBtn").style.display="none";
-        startGame();
-    }
-}
-
-/* ======================== START GAME ======================= */
-function startGame(){
-    elem("placeArea").classList.add("hidden");
-    elem("playArea").classList.remove("hidden");
-
-    ["red","blue"].forEach(player=>{
-        let boardEl = elem(player+"Board");
-        boardEl.innerHTML="";
-
-        for(let r=0; r<ROWS; r++){
-            for(let c=0; c<COLS; c++){
-                let cell=document.createElement("div");
-                cell.className="cell covered";
-                cell.dataset.r=r;
-                cell.dataset.c=c;
-                cell.dataset.player=player;
-                cell.addEventListener("click", onShoot);
-                boardEl.appendChild(cell);
-            }
-        }
-    });
-
-    renderPlayBoards();
-    updateTurnText();
-}
-
-/* ===================== TURN TEXT + BLUR ===================== */
-function updateTurnText(){
-    elem("status").innerHTML =
-        currentTurn==="red"
-        ? "<span style='color:red'>Lượt của ĐỎ</span>"
-        : "<span style='color:blue'>Lượt của XANH</span>";
-
-    elem("redBoard").classList.remove("blur-board");
-    elem("blueBoard").classList.remove("blur-board");
-
-    setTimeout(()=>{
-        if(currentTurn==="red") elem("redBoard").classList.add("blur-board");
-        else elem("blueBoard").classList.add("blur-board");
-    }, 300);
-
-    setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
-}
-
-/* ======================== BULLET SPAWN ======================= */
-function spawnStandbyBullet(player){
-    if(standbyBullet) standbyBullet.remove();
-
-    standbyBullet = document.createElement("div");
-    standbyBullet.className = "bullet";
-    standbyBullet.style.width = "60px";
-    standbyBullet.style.height = "60px";
-
-    const centerIndex = (Math.floor(ROWS/2) * COLS) + Math.floor(COLS/2);
-    const cell = elem(player+"Board").children[centerIndex].getBoundingClientRect();
-    const cx = cell.left + cell.width/2;
-    const cy = cell.top + cell.height/2;
-
-    standbyBullet.style.left = (cx-30)+"px";
-    standbyBullet.style.top  = (cy-30)+"px";
-
-    standbyBullet.dataset.originX = cx;
-    standbyBullet.dataset.originY = cy;
-
-    document.body.appendChild(standbyBullet);
-}
-
-/* ======================== BULLET SHOOT ======================= */
-function shootBullet(toCell){
-    if(!standbyBullet) return;
-
-    const rect = toCell.getBoundingClientRect();
-    const targetX = rect.left + rect.width/2 + window.scrollX;
-    const targetY = rect.top  + rect.height/2 + window.scrollY;
-
-    const originX = parseFloat(standbyBullet.dataset.originX);
-    const originY = parseFloat(standbyBullet.dataset.originY);
-
-    let bullet = standbyBullet;
-    let controlX = (originX+targetX)/2 + (Math.random()*200-100);
-    let controlY = originY - 150;
-
-    let duration = 800;
-    let start = performance.now();
-
-    function animate(t){
-        let p = (t-start)/duration; if(p>1) p=1;
-
-        let x = (1-p)*(1-p)*originX + 2*(1-p)*p*controlX + p*p*targetX;
-        let y = (1-p)*(1-p)*originY + 2*(1-p)*p*controlY + p*p*targetY;
-
-        bullet.style.left = (x-bullet.offsetWidth/2)+"px";
-        bullet.style.top  = (y-bullet.offsetHeight/2)+"px";
-
-        bullet.style.width  = (60 - p*46) + "px";
-        bullet.style.height = (60 - p*46) + "px";
-
-        if(p<1) requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-
-    const before = currentTurn;
-
-    setTimeout(()=>{
-
-    const r = parseInt(toCell.dataset.r);
-    const c = parseInt(toCell.dataset.c);
-    const opp = currentTurn === "red" ? "blue" : "red";
-
-    const isHit = boards[opp][r][c] === "ship";
-
-    // ✔ Phát âm thanh đúng thời điểm chạm ô
-    if(isHit){
-    hitSound.load();
-    hitSound.currentTime = 0;
-    hitSound.play();
-} else {
-    missSound.load();
-    missSound.currentTime = 0;
-    missSound.play();
-}
-
-
-    // chạy xử lý cũ
-    oldOnShoot.call(toCell);
-
-    if(currentTurn !== before){
-        setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
-    }
-}, duration+30);
-
-}
-
-/* ======================== SHOOT ======================= */
-const oldOnShoot = function(){
-    const r = parseInt(this.dataset.r);
-    const c = parseInt(this.dataset.c);
-    const boardPlayer = this.dataset.player;
-    const opp = currentTurn==="red" ? "blue" : "red";
-
-    if(boardPlayer !== opp) return;
-    if(shots[opp][r][c]) return;
-
-    if(boards[opp][r][c]==="ship"){
-        shots[opp][r][c]="hit";
-        renderPlayBoards();
-        cellHit(r,c,opp);
-
-        markShipIfDestroyed(opp,r,c);
-
-        if(checkWin(opp)){
-            showWinner(currentTurn);
-        }
-
-    } else {
-        shots[opp][r][c]="miss";
-        renderPlayBoards();
-
-        // ❌ XOÁ missSound ở đây
-        // missSound.play();
-
-        currentTurn = opp;
-        updateTurnText();
-    }
-};
-
-
-function onShoot(){
-    const opp = currentTurn==="red" ? "blue" : "red";
-    if(this.dataset.player !== opp) return;
-    if(shots[opp][this.dataset.r][this.dataset.c]) return;
-
-    // --- NEW ---
-    const r = parseInt(this.dataset.r);
-    const c = parseInt(this.dataset.c);
-    const willHit = boards[opp][r][c] === "ship";
-    
-    
-
-    // tiếp tục bắn đạn như cũ
-    shootBullet(this);
-}
-
-/* ======================== EFFECTS ======================= */
-function cellHit(r,c,player){
-    const boardEl = elem(player+"Board");
-    const cell = boardEl.children[r*COLS + c];
-    cell.classList.add("fire-hit");
-    setTimeout(()=>cell.classList.remove("fire-hit"),900);
-}
-
-function checkWin(player){
-    for(let r=0; r<ROWS; r++)
-        for(let c=0; c<COLS; c++)
-            if(boards[player][r][c]==="ship" && !shots[player][r][c])
-                return false;
-    return true;
-}
-
-/* ================== SHIP DESTROY DETECTION ================== */
-function markShipIfDestroyed(player,r,c){
-    const ship = playerShips[player].find(s=>s.some(p=>p.r===r && p.c===c));
-    if(!ship) return;
-
-    const destroyed = ship.every(p=>shots[player][p.r][p.c]==="hit");
-    if(!destroyed) return;
-
-    const boardEl = elem(player+"Board");
-    ship.forEach(p=>{
-        const cell = boardEl.children[p.r*COLS + p.c];
-        cell.classList.add("ship-dead-purple");
-    });
-
-    const playArea = elem("playArea");
-    playArea.classList.add("shake");
-    setTimeout(()=>playArea.classList.remove("shake"),400);
-}
-
-/* ======================== RENDER ======================= */
-function renderPlayBoards(){
-    ["red","blue"].forEach(player=>{
-        const boardEl = elem(player+"Board");
-        for(let r=0; r<ROWS; r++){
-            for(let c=0; c<COLS; c++){
-                const idx = r*COLS + c;
-                const cell = boardEl.children[idx];
-
-                if(cell.classList.contains("ship-dead-purple")){
-                    cell.className="cell ship-dead-purple";
-                    continue;
-                }
-
-                cell.className="cell covered";
-                cell.textContent="";
-
-                if(shots[player][r][c]==="hit"){
-                    cell.classList.add("hit");
-                } else if(shots[player][r][c]==="miss"){
-                    cell.classList.add("miss");
-                    cell.textContent="X";
-                }
-            }
-        }
-    });
-}
-
-/* ======================== RESET ======================= */
-function resetPlacement(){
-    boards[placingPlayer] = emptyBoard();
-    draggingShipSize = null;
-    buildPalette();
-    renderPlaceBoard();
-}
-
-function restartGame(){
-    placingPlayer = "red";
-    currentTurn = "red";
-    rotateDir = "h";
-    boards = { red: emptyBoard(), blue: emptyBoard() };
-    shots = { red: emptyBoard(), blue: emptyBoard() };
-    draggingShipSize = null;
-
-    elem("placeArea").classList.remove("hidden");
-    elem("playArea").classList.add("hidden");
-
-    elem("placeLabel").innerHTML = "Người <span style='color:red'>ĐỎ</span> đặt tàu";
-
-    buildPalette();
-    renderPlaceBoard();
-}
-
-/* ======================== WINNER ======================= */
-function showWinner(player){
-    elem("winnerText").textContent = player.toUpperCase() + " thắng!";
-    elem("winnerOverlay").style.display = "flex";
-
-    winSound.currentTime=0;
-    winSound.play();
-}
-
-function confirmWinner(){
-    elem("winnerOverlay").style.display = "none";
-    restartGame();
-}
-
-/* ====================== HELP BUTTON ====================== */
-function hideHelpBtnFunction(){
-    document.getElementById("helpBtn").style.display="none";
-    document.getElementById("hideHelpBtn").style.display="none";
-}
-function showHelp(){
-    document.getElementById("helpOverlay").style.display="flex";
-    const v=document.getElementById("helpVideo");
-    v.currentTime=0; v.play();
-}
-function closeHelp(){
-    document.getElementById("helpOverlay").style.display="none";
-    document.getElementById("helpVideo").pause();
-}
-
 </script>
+
 </body>
 </html>
