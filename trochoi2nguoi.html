@@ -239,6 +239,9 @@ h1 {
 </head>
 
 <body>
+    
+    <audio id="placeSound" src="an.mp3" preload="auto"></audio>
+
   <audio id="hitSound" src="bum.mp3" preload="auto"></audio>
 <audio id="missSound" src="xoet.mp3" preload="auto"></audio>
 <audio id="winSound" src="reoho.mp3" preload="auto"></audio>
@@ -362,7 +365,8 @@ function unlockAudio(){
     audioUnlocked = true;
     
     // Chỉ unlock mà không play
-    [hitSound, missSound, winSound].forEach(s=>{
+    [hitSound, missSound, winSound, placeSound].forEach(s=>{
+
         s.pause(); 
         s.currentTime = 0;
     });
@@ -463,6 +467,8 @@ function onPlaceCellClick(){
     }
 
     placeShip(placingPlayer, r, c, draggingShipSize);
+    placeSound.currentTime = 0;
+placeSound.play();
 
     const shipDiv = [...document.querySelectorAll(".palette .ship")]
         .find(s => parseInt(s.dataset.size) === draggingShipSize);
@@ -647,11 +653,33 @@ function shootBullet(toCell){
     const before = currentTurn;
 
     setTimeout(()=>{
-        oldOnShoot.call(toCell);
-        if(currentTurn !== before){
-            setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
-        }
-    }, duration+30);
+
+    const r = parseInt(toCell.dataset.r);
+    const c = parseInt(toCell.dataset.c);
+    const opp = currentTurn === "red" ? "blue" : "red";
+
+    const isHit = boards[opp][r][c] === "ship";
+
+    // ✔ Phát âm thanh đúng thời điểm chạm ô
+    if(isHit){
+    hitSound.load();
+    hitSound.currentTime = 0;
+    hitSound.play();
+} else {
+    missSound.load();
+    missSound.currentTime = 0;
+    missSound.play();
+}
+
+
+    // chạy xử lý cũ
+    oldOnShoot.call(toCell);
+
+    if(currentTurn !== before){
+        setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
+    }
+}, duration+30);
+
 }
 
 /* ======================== SHOOT ======================= */
@@ -669,23 +697,24 @@ const oldOnShoot = function(){
         renderPlayBoards();
         cellHit(r,c,opp);
 
-        hitSound.currentTime=0;
-        hitSound.play();
-
         markShipIfDestroyed(opp,r,c);
 
         if(checkWin(opp)){
             showWinner(currentTurn);
         }
+
     } else {
         shots[opp][r][c]="miss";
         renderPlayBoards();
-        missSound.currentTime=0;
-        missSound.play();
+
+        // ❌ XOÁ missSound ở đây
+        // missSound.play();
+
         currentTurn = opp;
         updateTurnText();
     }
 };
+
 
 function onShoot(){
     const opp = currentTurn==="red" ? "blue" : "red";
@@ -697,14 +726,7 @@ function onShoot(){
     const c = parseInt(this.dataset.c);
     const willHit = boards[opp][r][c] === "ship";
     
-    // play sound NOW → Safari cho phép
-    if(willHit){
-        hitSound.currentTime = 0;
-        
-    } else {
-        missSound.currentTime = 0;
-        
-    }
+    
 
     // tiếp tục bắn đạn như cũ
     shootBullet(this);
