@@ -319,7 +319,6 @@ textarea{
   </div>
 </div>
 
-<!-- Quick view overlay -->
 <div id="quickViewOverlay" >
   <div class="card quickViewCard" style="display: flex;justify-content: center;">
     <h2>Nhật ký nhanh </h2>
@@ -329,7 +328,6 @@ textarea{
   </div>
 </div>
 
-<!-- Filter modal -->
 <div id="filterModal" class="modal">
   <div class="card">
     <h3>Chọn khoảng thời gian</h3>
@@ -356,193 +354,7 @@ textarea{
 <button id="btnFilterTime">Chọn thời gian</button>
 
 <script>
-  function showHelp(){
-    document.getElementById("helpOverlay").style.display = "flex";
-    const v=document.getElementById("helpVideo");
-    v.currentTime = 0;
-    v.play();
-}
-
-function closeHelp(){
-    document.getElementById("helpOverlay").style.display = "none";
-    document.getElementById("helpVideo").pause();
-}
-
-// ẨN CẢ 2 NÚT
-function hideHelpBtnFunction(){
-    document.getElementById("helpBtn").style.display = "none";
-    document.getElementById("hideHelpBtn").style.display = "none";
-}
-// --- JS giữ nguyên như code gốc ---
-const cells = document.getElementById("cells");
-const selMonth = document.getElementById("selMonth");
-const selYear = document.getElementById("selYear");
-const userInfo = document.getElementById("userInfo");
-const btnLogin = document.getElementById("btnLogin");
-const btnLogout = document.getElementById("btnLogout");
-const modal = document.getElementById("modal");
-const entry = document.getElementById("entry");
-const modalTitle = document.getElementById("modalTitle");
-const btnQuickView = document.getElementById("btnQuickView");
-const quickViewOverlay = document.getElementById("quickViewOverlay");
-const quickEntries = document.getElementById("quickEntries");
-const closeQuickView = document.getElementById("closeQuickView");
-
-const btnFilterTime = document.getElementById("btnFilterTime");
-const filterModal = document.getElementById("filterModal");
-const startDateInput = document.getElementById("startDate");
-const endDateInput = document.getElementById("endDate");
-const applyFilter = document.getElementById("applyFilter");
-const closeFilter = document.getElementById("closeFilter");
-
-let view = new Date();
-let selectedDate = null;
-
-// --- KIỂM TRA ĐĂNG NHẬP ---
-function getCurrentUser() {
-  return localStorage.getItem("dangnhap_hien_tai") || null;
-}
-function checkLogin(){
-  const user = getCurrentUser();
-  if(!user){
-    alert("Vui lòng đăng nhập trước!");
-    window.location.href = "dangnhap.html";
-    return false;
-  }
-  return true;
-}
-function updateUserHeader(){
-  const user = getCurrentUser();
-  if(user){
-    userInfo.textContent = "Người dùng: " + user;
-    btnLogin.style.display = "none";
-    btnLogout.style.display = "inline-block";
-  } else {
-    userInfo.textContent = "Chưa đăng nhập";
-    btnLogin.style.display = "inline-block";
-    btnLogout.style.display = "none";
-  }
-}
-btnLogout.onclick = ()=>{ localStorage.removeItem("userId"); localStorage.removeItem("dangnhap_hien_tai"); window.location.href = "trangchu.html"; };
-btnLogin.onclick = ()=>{ window.location.href = "dangnhap.html"; };
-
-// Month & Year options
-for(let m=1;m<=12;m++){
-  const opt = document.createElement("option");
-  opt.value = m-1;
-  opt.textContent = "Tháng " + m;
-  selMonth.appendChild(opt);
-}
-for(let y=1970;y<=2070;y++){
-  const opt = document.createElement("option");
-  opt.value = y;
-  opt.textContent = y;
-  selYear.appendChild(opt);
-}
-
-// Date key theo user
-function dateKey(d){
-  const userId = getCurrentUser();
-  return `${userId}-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-}
-
-// Render Calendar
-function renderCalendar(){
-  if(!checkLogin()) return;
-  selMonth.value = view.getMonth();
-  selYear.value = view.getFullYear();
-  cells.innerHTML = "";
-  let start = new Date(view.getFullYear(), view.getMonth(), 1);
-  let offset = (start.getDay()+6)%7;
-  let first = new Date(start);
-  first.setDate(first.getDate() - offset);
-
-  for(let i=0;i<42;i++){
-    let d = new Date(first);
-    d.setDate(first.getDate()+i);
-    let div = document.createElement("div");
-    div.className = "cell" + (d.getMonth()!==view.getMonth()?" out":"");
-    div.innerHTML = `<div class='date'>${d.getDate()}</div>`;
-    if(localStorage.getItem(dateKey(d))) div.style.background = "#1e7e34";
-    else div.style.background = d.getMonth()!==view.getMonth() ? "#16204044" : "#162040";
-    div.onclick = ()=>openEntry(d);
-    cells.appendChild(div);
-  }
-}
-selMonth.onchange = ()=>{ view.setMonth(parseInt(selMonth.value)); renderCalendar(); };
-selYear.onchange = ()=>{ view.setFullYear(parseInt(selYear.value)); renderCalendar(); };
-document.getElementById("today").onclick = ()=>{ view = new Date(); renderCalendar(); };
-
-// Modal nhật ký
-function openEntry(d){
-  if(!checkLogin()) return;
-  selectedDate = d;
-  modal.style.display = "flex";
-  modalTitle.textContent = "Nhật ký - " + d.toLocaleDateString("vi-VN");
-  entry.value = localStorage.getItem(dateKey(d)) || "";
-}
-document.getElementById("closeModal").onclick = ()=>modal.style.display="none";
-document.getElementById("saveEntry").onclick = ()=>{
-  localStorage.setItem(dateKey(selectedDate), entry.value);
-  modal.style.display = "none";
-  renderCalendar();
-};
-
-// Quick view
-function renderQuickView(filterStart=null, filterEnd=null){
-  quickEntries.innerHTML = "";
-  const userId = getCurrentUser();
-  let items = [];
-
-  if(filterStart) filterStart.setHours(0,0,0,0);
-  if(filterEnd) filterEnd.setHours(23,59,59,999);
-
-  for(let i=0;i<localStorage.length;i++){
-    const key = localStorage.key(i);
-    if(!key.startsWith(userId+"-")) continue;
-    const value = localStorage.getItem(key);
-    const parts = key.split("-");
-    const y = parseInt(parts[1]);
-    const m = parseInt(parts[2]);
-    const d = parseInt(parts[3]);
-    const dateObj = new Date(y,m-1,d);
-    dateObj.setHours(12,0,0,0);
-    if(filterStart && dateObj < filterStart) continue;
-    if(filterEnd && dateObj > filterEnd) continue;
-    const dd = d.toString().padStart(2, "0");
-    const mm = m.toString().padStart(2, "0");
-    const yyyy = y.toString();
-    items.push({date:dateObj,textDate:`${dd}-${mm}-${yyyy}`,content:value});
-  }
-  items.sort((a,b)=>a.date-b.date);
-  items.forEach(item=>{
-    const div = document.createElement("div");
-    div.className="quick-entry";
-    div.innerHTML = `<div class="date-label">${item.textDate}</div><div class="content">${item.content}</div>`;
-    quickEntries.appendChild(div);
-  });
-}
-btnQuickView.onclick = ()=>{
-  if(!checkLogin()) return;
-  renderQuickView();
-  quickViewOverlay.style.display="flex";
-};
-closeQuickView.onclick = ()=>quickViewOverlay.style.display="none";
-
-// Filter modal
-btnFilterTime.onclick = ()=>filterModal.style.display="flex";
-closeFilter.onclick = ()=>filterModal.style.display="none";
-applyFilter.onclick = ()=>{
-  const startDate = startDateInput.value ? new Date(startDateInput.value) : null;
-  const endDate = endDateInput.value ? new Date(endDateInput.value) : null;
-  renderQuickView(startDate,endDate);
-  filterModal.style.display="none";
-  quickViewOverlay.style.display="flex";
-};
-
-// INIT
-updateUserHeader();
-renderCalendar();
+  const _0x4b0702=_0x45d7;function _0xc7cd(){const _0x23ac20=['hideHelpBtn','download','min','helpOverlay','1330709ybKXAf','332JAdJIO','toDataURL','1896384XUsFAw','6392LARWZY','343449rkSiCi','image/png','helpVideo','src','Vui\x20lòng\x20nhập\x20link!','10925tCXvtH','display','none','drawImage','getElementById','error','width','createElement','12310nYMYyC','helpBtn','getContext','play','clearRect','4145490Rgitdl','height','canvas','855JgYimQ','open','pause','inline-block','currentTime','nenqr.jpg','style','8351tMNeKV','generate','href','click','urlInput','onclick'];_0xc7cd=function(){return _0x23ac20;};return _0xc7cd();}(function(_0x131f66,_0x4059e8){const _0x33b39f=_0x45d7,_0x23c8df=_0x131f66();while(!![]){try{const _0x52d7d9=parseInt(_0x33b39f(0x201))/0x1+parseInt(_0x33b39f(0x204))/0x2+parseInt(_0x33b39f(0x206))/0x3+parseInt(_0x33b39f(0x202))/0x4*(parseInt(_0x33b39f(0x1e0))/0x5)+-parseInt(_0x33b39f(0x1ed))/0x6+-parseInt(_0x33b39f(0x1f7))/0x7*(parseInt(_0x33b39f(0x205))/0x8)+-parseInt(_0x33b39f(0x1f0))/0x9*(parseInt(_0x33b39f(0x1e8))/0xa);if(_0x52d7d9===_0x4059e8)break;else _0x23c8df['push'](_0x23c8df['shift']());}catch(_0x2c90f5){_0x23c8df['push'](_0x23c8df['shift']());}}}(_0xc7cd,0xc6a68));function _0x45d7(_0x365961,_0xb0e905){const _0xc7cde1=_0xc7cd();return _0x45d7=function(_0x45d7e3,_0x1ad958){_0x45d7e3=_0x45d7e3-0x1df;let _0xc7db27=_0xc7cde1[_0x45d7e3];return _0xc7db27;},_0x45d7(_0x365961,_0xb0e905);}function showHelp(){const _0x7a8b52=_0x45d7;document[_0x7a8b52(0x1e4)](_0x7a8b52(0x200))[_0x7a8b52(0x1f6)][_0x7a8b52(0x1e1)]='flex';const _0x263bff=document[_0x7a8b52(0x1e4)](_0x7a8b52(0x208));_0x263bff[_0x7a8b52(0x1f4)]=0x0,_0x263bff[_0x7a8b52(0x1eb)]();}function closeHelp(){const _0x288720=_0x45d7;document['getElementById'](_0x288720(0x200))['style']['display']=_0x288720(0x1e2),document[_0x288720(0x1e4)](_0x288720(0x208))[_0x288720(0x1f2)]();}function hideHelpBtnFunction(){const _0x386f65=_0x45d7;document['getElementById'](_0x386f65(0x1e9))[_0x386f65(0x1f6)][_0x386f65(0x1e1)]=_0x386f65(0x1e2),document['getElementById'](_0x386f65(0x1fd))[_0x386f65(0x1f6)][_0x386f65(0x1e1)]='none';}const canvas=document[_0x4b0702(0x1e4)]('qrCanvas'),ctx=canvas[_0x4b0702(0x1ea)]('2d'),downloadBtn=document[_0x4b0702(0x1e4)]('download'),openDriveBtn=document['getElementById']('openDrive'),background=new Image();background[_0x4b0702(0x209)]=_0x4b0702(0x1f5),document[_0x4b0702(0x1e4)](_0x4b0702(0x1f8))[_0x4b0702(0x1fc)]=async()=>{const _0x183900=_0x4b0702,_0x1a179f=document[_0x183900(0x1e4)](_0x183900(0x1fb))['value']['trim']();if(!_0x1a179f){alert(_0x183900(0x1df));return;}try{const _0x2d5cd1=await QRCode[_0x183900(0x203)](_0x1a179f,{'width':0xb4}),_0x3b36be=new Image();_0x3b36be['src']=_0x2d5cd1,_0x3b36be['onload']=()=>{const _0x3c8b38=_0x183900;ctx[_0x3c8b38(0x1ec)](0x0,0x0,canvas[_0x3c8b38(0x1e6)],canvas['height']);const _0x384b64=Math[_0x3c8b38(0x1ff)](canvas[_0x3c8b38(0x1e6)]/background['width'],canvas['height']/background[_0x3c8b38(0x1ee)]),_0x6fb05d=background[_0x3c8b38(0x1e6)]*_0x384b64,_0x1afefb=background[_0x3c8b38(0x1ee)]*_0x384b64,_0x5f355f=(canvas[_0x3c8b38(0x1e6)]-_0x6fb05d)/0x2,_0xc5c6a3=(canvas[_0x3c8b38(0x1ee)]-_0x1afefb)/0x2;ctx[_0x3c8b38(0x1e3)](background,_0x5f355f,_0xc5c6a3,_0x6fb05d,_0x1afefb);const _0x47273b=0xb4,_0x5f4d6f=(canvas['width']-_0x47273b)/0x2,_0x3cca2b=(canvas[_0x3c8b38(0x1ee)]-_0x47273b)/0x2;ctx[_0x3c8b38(0x1e3)](_0x3b36be,_0x5f4d6f,_0x3cca2b,_0x47273b,_0x47273b),downloadBtn[_0x3c8b38(0x1f6)][_0x3c8b38(0x1e1)]=_0x3c8b38(0x1f3),downloadBtn[_0x3c8b38(0x1fc)]=()=>{const _0x16fb9b=_0x3c8b38,_0x2615a6=document[_0x16fb9b(0x1e7)](_0x16fb9b(0x1ef)),_0x89673d=0x3e8;_0x2615a6[_0x16fb9b(0x1e6)]=_0x89673d,_0x2615a6['height']=_0x89673d;const _0x11b769=_0x2615a6[_0x16fb9b(0x1ea)]('2d'),_0x1217fb=Math[_0x16fb9b(0x1ff)](_0x89673d/background[_0x16fb9b(0x1e6)],_0x89673d/background[_0x16fb9b(0x1ee)]),_0x594884=background[_0x16fb9b(0x1e6)]*_0x1217fb,_0x42cffd=background[_0x16fb9b(0x1ee)]*_0x1217fb,_0x23ef19=(_0x89673d-_0x594884)/0x2,_0x13762e=(_0x89673d-_0x42cffd)/0x2;_0x11b769[_0x16fb9b(0x1e3)](background,_0x23ef19,_0x13762e,_0x594884,_0x42cffd);const _0x178686=0xb4/0xfa*_0x89673d,_0xc2259a=(_0x89673d-_0x178686)/0x2,_0x51635d=(_0x89673d-_0x178686)/0x2;_0x11b769['drawImage'](_0x3b36be,_0xc2259a,_0x51635d,_0x178686,_0x178686);const _0x563455=document['createElement']('a');_0x563455[_0x16fb9b(0x1fe)]='Annd.png',_0x563455['href']=_0x2615a6['toDataURL'](_0x16fb9b(0x207)),_0x563455[_0x16fb9b(0x1fa)]();};};}catch(_0x48c409){console[_0x183900(0x1e5)](_0x48c409),alert('Có\x20lỗi\x20khi\x20tạo\x20QR\x20Code.');}},downloadBtn[_0x4b0702(0x1fc)]=()=>{const _0x222f78=_0x4b0702,_0x50201e=document[_0x222f78(0x1e7)]('a');_0x50201e[_0x222f78(0x1fe)]='qr_with_bg.png',_0x50201e[_0x222f78(0x1f9)]=canvas['toDataURL'](_0x222f78(0x207)),_0x50201e[_0x222f78(0x1fa)]();},openDriveBtn[_0x4b0702(0x1fc)]=()=>{const _0xa12937=_0x4b0702;window[_0xa12937(0x1f1)]('https://drive.google.com','_blank');};
 </script>
 </body>
 </html>
