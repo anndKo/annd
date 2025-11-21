@@ -1,529 +1,854 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-<title>Tạo Thiệp</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto&family=Oswald&family=Lobster&family=Dancing+Script&family=Pacifico&family=Playfair+Display&family=Bebas+Neue&family=Montserrat&family=Yanone+Kaffeesatz&family=Indie+Flower&family=Merriweather&family=Poppins&family=Rowdies&family=Shadows+Into+Light&family=Alfa+Slab+One&family=Abril+Fatface&family=Amatic+SC&family=Caveat&family=Cinzel&family=Cormorant+Garamond&family=Fira+Sans&family=Barlow&family=IBM+Plex+Sans&family=Josefin+Sans&family=Kanit&family=Lora&family=Mochiy+Pop+One&family=Noto+Sans&family=Noto+Serif&family=Overpass&family=Quicksand&family=Raleway&family=Saira&family=Source+Sans+3&family=Vollkorn&family=Work+Sans&family=Acme&family=Anton&family=Baloo+2&display=swap" rel="stylesheet">
+<title>Game Bắn tàu</title>
 
 <style>
-    body { font-family: Arial; background:#0f172a; color:#fff; padding:20px; }
-    .container { max-width:900px; margin:auto; }
-    button { padding:10px 16px; background:#0af; border:none; border-radius:8px; cursor:pointer; }
-    textarea { width:100%; height:80px; padding:10px; background:#10233d; color:#fff; border:1px solid #345; }
-    select, input { padding:6px 10px; border-radius:6px; border:none; }
-    canvas { max-width:100%; cursor:grab; border:1px solid #345; }
+body { 
+    font-family: Arial; 
+    padding: 20px; 
+    background:#f2f2f2; 
+    
+}
+
+h1 {
+    text-align:center;
+    font-size:26px;
+    margin-bottom:10px;
+}
+
+#helpBtn {
+    position: fixed; 
+    top: 15px; 
+    right: 15px;
+    padding: 10px 18px; 
+    background: #ff9800; 
+    color: white;
+    border: none; 
+    border-radius: 8px; 
+    font-size: 16px; 
+    cursor: pointer;
+    z-index: 11000;
+}
+
+#helpOverlay {
+    position: fixed; 
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.8);
+    display: none; 
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column; 
+    z-index: 12000;
+}
+
+#helpOverlay video { 
+    max-width: 90%; 
+    max-height: 80%; 
+    border-radius: 12px; 
+}
+
+#closeHelp {
+    margin-top: 20px; 
+    padding: 12px 20px; 
+    background: #e53935;
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 18px; 
+    cursor: pointer;
+}
+
+/* ==== BẢNG 9×7 ==== */
+.board{
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);   /* 9 CỘT */
+    grid-template-rows: repeat(7, 1fr);      /* 7 HÀNG */
+    gap: 5px;
+    width: 90vw;
+    max-width: 500px;
+    aspect-ratio: 9 / 7; /* giữ đúng tỉ lệ */
+    background: #caa98a;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 0 auto;
+     width: calc(90vw - 20px); /* trừ padding */
+}
+
+.cell{
+    width: 100%; 
+    height: 100%;
+    border-radius: 6px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    font-weight: 700; 
+    color: white; 
+    cursor: pointer;
+}
+
+.covered{ cursor:pointer; }
+.hit{ background:black !important; }
+.miss{ color:white !important; font-weight:bold; }
+.preview-ok{ background:#4caf50 !important; }
+.preview-bad{ background:#e53935 !important; }
+.ship-cell{}
+
+/* Bảng đỏ */
+#redBoard .covered { background:#c62828 !important; }
+#redBoard .hit { background:black !important; }
+#redBoard .miss { background:#ffcdd2 !important; color:red !important; }
+#redBoard .ship-cell { background:#b71c1c !important; }
+
+/* Bảng xanh */
+#blueBoard .covered { background:#1565c0 !important; }
+#blueBoard .hit { background:black !important; }
+#blueBoard .miss { background:#bbdefb !important; color:blue !important; }
+#blueBoard .ship-cell { background:#0d47a1 !important; }
+
+/* palette */
+.palette { 
+    display:flex; 
+    flex-direction:row; 
+    justify-content:center; 
+    gap:14px; 
+    white-space:nowrap; 
+    overflow:hidden; 
+    width:100%; 
+}
+
+.ship { 
+    display:flex; 
+    gap:4px; 
+    flex-shrink:1; 
+    min-width:0; 
+}
+
+.ship-block {
+    aspect-ratio: 1;
+    width: 11vw;
+    max-width: 50px;
+    background:#1565c0;
+    border-radius:5px;
+}
+
+.hidden { display:none; }
+
+.rotate-btn {
+    padding:6px 10px; 
+    background:#1565c0; 
+    color:white;
+    border:none; 
+    border-radius:6px; 
+    cursor:pointer; 
+    margin-top:5px;
+}
+
+#status{ 
+    text-align:center; 
+    font-size:18px; 
+    margin:15px 0; 
+    font-weight:700; 
+}
+
+.blur-board {
+    opacity: 0.35;
+    filter: blur(1.5px);
+    transition: 0.4s;
+}
+
+.bullet{
+    position:absolute;
+    width: 14px;
+    height: 14px;
+    background: yellow;
+    border-radius: 50%;
+    pointer-events:none;
+    z-index:9999;
+    transition: transform 0.45s linear;
+}
+
+.fire-hit { 
+    box-shadow:0 0 12px 5px orange, 0 0 20px 10px red;
+    animation: firePulse 0.8s ease-out forwards; 
+}
+
+@keyframes firePulse {
+    0% { box-shadow:0 0 5px 2px orange; }
+    100%{ box-shadow:0 0 22px 12px red; }
+}
+
+.ship-dead-purple { 
+    background:#6a1b9a !important; 
+    border-radius:4px !important; 
+}
+
+.shake { 
+    animation: shakeAnim 0.4s; 
+}
+
+@keyframes shakeAnim {
+    0%{transform:translate(0);}
+    20%{transform:translate(-5px,0);}
+    40%{transform:translate(5px,0);}
+    60%{transform:translate(-5px,0);}
+    80%{transform:translate(5px,0);}
+    100%{transform:translate(0);}
+}
+
+#winnerOverlay {
+    position:fixed; 
+    top:0; 
+    left:0; 
+    width:100%; 
+    height:100%;
+    background:rgba(0,0,0,0.75); 
+    display:none;
+    justify-content:center; 
+    align-items:center; 
+    flex-direction:column;
+    color:white; 
+    font-size:28px; 
+    font-weight:bold; 
+    z-index:10000;
+}
+
+#winnerOverlay img { 
+    max-width:300px; 
+    margin-top:20px; 
+    border-radius:12px; 
+}
+
+#winnerOverlay button {
+    margin-top:30px; 
+    padding:12px 25px; 
+    font-size:18px;
+    border:none; 
+    border-radius:8px; 
+    background:#4caf50; 
+    color:white;
+    cursor:pointer;
+}
 </style>
 </head>
+
 <body>
+    
+    <audio id="placeSound" src="an.mp3" preload="auto"></audio>
 
+  <audio id="hitSound" src="bum.mp3" preload="auto"></audio>
+<audio id="missSound" src="xoet.mp3" preload="auto"></audio>
+<audio id="winSound" src="reoho.mp3" preload="auto"></audio>
 
-<div class="container">
-    <a href="taoqr.html"><p style="background-color: rgb(189, 157, 204); width: 20%; text-align: center;padding: 10px;color: black;font-weight: 600;">Tạo QR ảnh</p></a>
+<button id="hideHelpBtn" onclick="hideHelpBtnFunction()" 
+style="position: fixed; top: 15px; right: 130px;
+padding: 10px 18px; background:#c52525; color:white;
+border:none; border-radius:8px; font-size:16px; cursor:pointer; z-index:11000;font-weight: 600;">
+X
+</button>
 
-<h1>Tạo Ảnh — Chữ nâng cao</h1>
-<!-- Nút chọn ảnh -->
-<div style="margin: 10px 0;">
-    <!-- Popup chọn ảnh -->
-<div id="suggestBox" style="
-    display:none;
-    background:#1e293b;
-    padding:15px;
-    border-radius:10px;
-    margin:10px 0;
-">
-    <h3>Chọn ảnh gợi ý</h3>
-    <div id="suggestGrid" style="
-        display:grid;
-        grid-template-columns:repeat(auto-fill, minmax(120px,1fr));
-        gap:10px;
-        margin-top:10px;
-    ">
-        <!-- 🔥 Thêm ảnh gợi ý ở đây -->
-        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện.png" class="gImg">
-         <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang.png" class="gImg">
-          <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (2).png" class="gImg">
-           <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (1).png" class="gImg">
-            <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (4).png" class="gImg">
-             <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (6).png" class="gImg">
-              <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (5).png" class="gImg">
-               <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (8).png" class="gImg">
+<button id="helpBtn" onclick="showHelp()">Hướng dẫn</button>
 
-        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (1).png" class="gImg">
-        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (2).png" class="gImg">
-        <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (10).png" class="gImg">
-        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (4).png" class="gImg">
-        <img src="Thiệp mời sinh nhật 13 tuổi Hồng Tím Vàng Phong cách Minh họa Sách truyện (3).png" class="gImg">
-        <img src="Gemini_Generated_Image_mtftu6mtftu6mtft.png" class="gImg">
-        <img src="Gemini_Generated_Image_h90ltrh90ltrh90l.png" class="gImg">
-        <img src="Gemini_Generated_Image_4bt49d4bt49d4bt4.png" class="gImg">
-                <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (7).png" class="gImg">
-                <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (3).png" class="gImg">
-                 <img src="Màu Kem Vàng Đỏ Tinh tế Thanh lịch Cá nhân Thiệp Chúc mừng Năm mới Khổ ngang (9).png" class="gImg">
-                
+<!-- Overlay -->
+<div id="helpOverlay">
+<video id="helpVideo" controls>
+<source src="bắn tàu.mp4" type="video/mp4">
+</video>
+<button id="closeHelp" onclick="closeHelp()">Đóng</button>
+</div>
+
+<h1>Bắn tàu 2 Người</h1>
+
+<!-- ĐẶT TÀU -->
+<div id="placeArea">
+    <h3 id="placeLabel" style="text-align:center;color:red;font-size:36px;">Người ĐỎ đặt tàu</h3>
+
+    <div class="palette" id="palette"></div>
+
+    <div style="text-align:center">
+        <button class="rotate-btn" onclick="rotateShip()" style="margin-top:10px;font-size:20px;background-color:#4caf50;">Xoay tàu</button>
+    </div>
+
+    <h3 style="text-align:center">Lưới đặt</h3>
+    <div id="placeBoard" class="board"></div>
+
+    <div style="text-align:center;margin-top:15px">
+        <button onclick="confirmPlacement()" style="padding:10px 20px;border:none;background:#4caf50;color:white;border-radius:8px;font-size:16px;cursor:pointer">
+            Xác nhận đặt
+        </button>
+        <button onclick="resetPlacement()" style="padding:10px 20px;border:none;background:#e53935;color:white;border-radius:8px;font-size:16px;cursor:pointer;margin-left:10px">
+            Đặt lại
+        </button>
     </div>
 </div>
-    <button id="suggestBtn" style="width: 43%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(18, 221, 154);font-weight: 600;">Ảnh gợi ý</button>
-    <button id="uploadBtn" style="width: 40%;font-size: 25px;font-family: Arial, Helvetica, sans-serif;background-color: rgb(179, 21, 16);font-weight: 600;color: white;">Tải ảnh lên</button>
-    <input type="file" id="uploadInput" accept="image/*" style="display:none;">
+
+<!-- CHƠI GAME -->
+<div id="playArea" class="hidden">
+
+    <div style="text-align:center; margin-bottom:15px;">
+        <button onclick="restartGame()" 
+            style="padding:10px 20px;border:none;background:#9c27b0;color:white;border-radius:8px;font-size:16px;cursor:pointer;">
+            Chơi lại từ đầu
+        </button>
+    </div>
+
+    <div id="playBoardsWrapper">
+        <div class="boardWrapper"><div id="redBoard" class="board"></div></div>
+
+        <div id="status"></div>
+
+        <div class="boardWrapper"><div id="blueBoard" class="board"></div></div>
+    </div>
 </div>
 
-
-<label>Nội dung chữ:</label>
-<textarea id="text" style="margin-bottom: 10px;"></textarea>
-
-<label>Căn lề:</label>
-<select id="align">
-    <option value="center">Giữa</option>
-    <option value="left">Trái</option>
-    <option value="right">Phải</option>
-</select>
-
-<label>Font chữ:</label>
-<select id="font" style="width: 20%;">
-    <option>Arial</option>
-    <option style="font-family:Roboto">Roboto</option>
-    <option style="font-family:Oswald">Oswald</option>
-    <option style="font-family:Lobster">Lobster</option>
-    <option style="font-family:Pacifico">Pacifico</option>
-    <option style="font-family:'Playfair Display'">Playfair Display</option>
-    <option style="font-family:'Bebas Neue'">Bebas Neue</option>
-    <option style="font-family:Montserrat">Montserrat</option>
-    <option style="font-family:'Yanone Kaffeesatz'">Yanone Kaffeesatz</option>
-    <option style="font-family:'Indie Flower'">Indie Flower</option>
-    <option style="font-family:Merriweather">Merriweather</option>
-    <option style="font-family:Poppins">Poppins</option>
-    <option style="font-family:Rowdies">Rowdies</option>
-    <option style="font-family:'Shadows Into Light'">Shadows Into Light</option>
-    <option style="font-family:'Alfa Slab One'">Alfa Slab One</option>
-    <option style="font-family:'Abril Fatface'">Abril Fatface</option>
-    <option style="font-family:'Amatic SC'">Amatic SC</option>
-    <option style="font-family:Caveat">Caveat</option>
-    <option style="font-family:Cinzel">Cinzel</option>
-    <option style="font-family:'Cormorant Garamond'">Cormorant Garamond</option>
-    <option style="font-family:'Fira Sans'">Fira Sans</option>
-    <option style="font-family:Barlow">Barlow</option>
-    <option style="font-family:'IBM Plex Sans'">IBM Plex Sans</option>
-    <option style="font-family:'Josefin Sans'">Josefin Sans</option>
-    <option style="font-family:Kanit">Kanit</option>
-    <option style="font-family:Lora">Lora</option>
-    <option style="font-family:'Mochiy Pop One'">Mochiy Pop One</option>
-    <option style="font-family:'Noto Sans'">Noto Sans</option>
-    <option style="font-family:'Noto Serif'">Noto Serif</option>
-    <option style="font-family:Overpass">Overpass</option>
-    <option style="font-family:Quicksand">Quicksand</option>
-    <option style="font-family:Raleway">Raleway</option>
-    <option style="font-family:Saira">Saira</option>
-    <option style="font-family:'Source Sans 3'">Source Sans 3</option>
-    <option style="font-family:Vollkorn">Vollkorn</option>
-    <option style="font-family:'Work Sans'">Work Sans</option>
-    <option style="font-family:Acme">Acme</option>
-    <option style="font-family:Anton">Anton</option>
-    <option style="font-family:'Baloo 2'">Baloo 2</option>
-</select>
-<br><br>
-<label>Màu chữ:</label>
-<input type="color" id="color" value="#ffffff">
-
-<label>Màu nền:</label>
-<input type="color" id="bgcolor" value="#000000">
-<button id="noBg">Không nền</button>
-
-<br><br>
-<label>Bo góc nền:</label>
-<input type="range" id="radius" min="0" max="100" value="0">
-<span id="radiusValue">0</span>px
-
-<br><br>
-
-<label>Cỡ chữ:</label>
-<input type="range" id="size" min="10" max="200" value="60">
-<span id="sizeValue">60</span>px
-
-<br><br>
-<div>
-<!-- 🔥 GIỮ NGUYÊN CODE – CHỈ THAY input number → range slider -->
-
-<br>
-
-
-    <button id="generate" style="margin-bottom: 10px; width: 30%;font-size: 20px;font-weight: 600;background-color: rgb(233, 162, 70);">Tạo ảnh</button>
-    <!-- Nút tải ảnh xuống -->
-    <button id="download" style="margin-left: 10px; width: 200px; font-size: 20px; font-weight: 600; background-color: rgb(34, 197, 94); color: rgb(1, 2, 0);">Tải ảnh xuống</button>
+<div id="winnerOverlay">
+    <div id="winnerText">Người ĐỎ thắng!</div>
+    <img src="winner.png" alt="win">
+    <button onclick="confirmWinner()">Xác nhận</button>
 </div>
-<canvas id="canvas" style="width: 90vw; height: auto;"></canvas>
-
-</div>
-
 <script>
-    document.getElementById("download").onclick = () => {
-    const link = document.createElement("a");
-    link.download = "image.png"; // tên file khi tải xuống
-    link.href = canvas.toDataURL("image/png"); // chuyển canvas thành hình PNG
-    link.click();
-};
-
-    document.getElementById("radius").addEventListener("input", () => {
-    document.getElementById("radiusValue").textContent =
-        document.getElementById("radius").value;
-    render();
-});
-
-
-let posX = 100, posY = 100;
-let dragging = false;
-let resizing = false;
-let rotation = 0;
-let sizeFactor = 1;
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-
-
-/* Mở khung chọn ảnh */
-
-
-/* Render danh sách ảnh gợi ý */
-const suggestGrid = document.getElementById("suggestGrid");
-
-
-
-// Mở / đóng popup khi bấm nút
-document.getElementById("suggestBtn").onclick = () => {
-    let box = document.getElementById("suggestBox");
-    box.style.display = box.style.display === "none" ? "block" : "none";
-};
-
-// Lấy tất cả ảnh gợi ý trong HTML
-document.querySelectorAll("#suggestGrid .gImg").forEach(el => {
-    el.style.width = "100%";
-    el.style.borderRadius = "8px";
-    el.style.cursor = "pointer";
-    el.style.transition = "0.2s";
-
-    el.onmouseover = () => el.style.transform = "scale(1.05)";
-    el.onmouseout  = () => el.style.transform = "scale(1.0)";
-
-    el.onclick = () => {
-    img.src = el.src;  // đổi ảnh
-    img.onload = () => render(); // vẽ lại canvas khi ảnh load xong
-    document.getElementById("suggestBox").style.display = "none";
-};
-});
-
-
-/* Nút tải ảnh lên */
-document.getElementById("uploadBtn").onclick = () => {
-    document.getElementById("uploadInput").click();
-};
-
-/* Xử lý file upload */
-document.getElementById("uploadInput").onchange = e => {
-    let file = e.target.files[0];
-    if(!file) return;
-
-    let reader = new FileReader();
-    reader.onload = () => {
-        img.src = reader.result;   // đổi ảnh
-        img.onload = () => render(); // vẽ lại canvas khi ảnh load xong
-    };
-    reader.readAsDataURL(file);
-};
-
-const img = new Image();
-img.crossOrigin = "anonymous";
-img.src = "thongbao.png"; // ảnh mặc định
-img.onload = () => {
-    // Khi tạo ảnh, canvas sẽ bằng kích thước màn hình
-    canvas.width = img.width;
-canvas.height = img.height;
-
-    render();
-};
-
-
-
-document.getElementById("noBg").onclick = () => {
-    document.getElementById("bgcolor").value = "#00000000";
-    render();
-};
-
-/* Drag */
-canvas.addEventListener("mousedown", e => {
-    let rect = canvas.getBoundingClientRect();
-    let mouseX = e.clientX - rect.left;
-    let mouseY = e.clientY - rect.top;
-
-    const textSize = parseInt(document.getElementById('size').value) * sizeFactor;
-    const textWidth = ctx.measureText(document.getElementById('text').value).width * sizeFactor;
-    const textHeight = textSize;
-
-    if(mouseX > posX + textWidth/2 - 10 && mouseX < posX + textWidth/2 + 10 &&
-       mouseY > posY - textHeight/2 - 10 && mouseY < posY - textHeight/2 + 10){
-        resizing = true;
-    } else {
-        dragging = true;
-    }
-
-    canvas.style.cursor = dragging ? "grabbing" : "nwse-resize";
-});
-
-canvas.addEventListener("mousemove", e => {
-    if(!dragging && !resizing) return;
-
-    let rect = canvas.getBoundingClientRect();
-    let mouseX = e.clientX - rect.left;
-    let mouseY = e.clientY - rect.top;
-
-    if(dragging){
-        posX = mouseX;
-        posY = mouseY;
-    } else if(resizing){
-        let newSize = Math.max(8, Math.abs(mouseX - posX) * 2);
-        sizeFactor = newSize / parseInt(document.getElementById("size").value);
-    }
-
-    render();
-});
-
-canvas.addEventListener("mouseup", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
-canvas.addEventListener("mouseleave", ()=>{ dragging=false; resizing=false; canvas.style.cursor="grab"; });
-
-/* ---------------------- HỖ TRỢ ĐIỆN THOẠI (TOUCH) ---------------------- */
-
-let touchStart = false;
-let lastTouchX = 0, lastTouchY = 0;
-
-// —— DI CHUYỂN KHI 1 NGÓN ——
-canvas.addEventListener("touchstart", e => {
-    if (e.touches.length === 1) {
-        touchStart = true;
-        let rect = canvas.getBoundingClientRect();
-        lastTouchX = e.touches[0].clientX - rect.left;
-        lastTouchY = e.touches[0].clientY - rect.top;
-    }
-});
-
-// —— DI CHUYỂN —
-canvas.addEventListener("touchmove", e => {
+  // Chặn pinch zoom
+document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
-
-    let rect = canvas.getBoundingClientRect();
-
-    // ----- 1 NGÓN → DRAG -----
-    if (e.touches.length === 1 && touchStart) {
-        let t = e.touches[0];
-        let mouseX = t.clientX - rect.left;
-        let mouseY = t.clientY - rect.top;
-
-        posX += mouseX - lastTouchX;
-        posY += mouseY - lastTouchY;
-
-        lastTouchX = mouseX;
-        lastTouchY = mouseY;
-
-        render();
-    }
-
-    // ----- 2 NGÓN → PHÓNG TO + XOAY -----
-    if (e.touches.length === 2) {
-        let t1 = e.touches[0];
-        let t2 = e.touches[1];
-
-        // khoảng cách 2 ngón
-        let dx = t2.clientX - t1.clientX;
-        let dy = t2.clientY - t1.clientY;
-        let dist = Math.sqrt(dx*dx + dy*dy);
-
-        if (!canvas._lastDist) canvas._lastDist = dist;
-
-        // pinch zoom
-        let zoom = dist / canvas._lastDist;
-        sizeFactor *= zoom;
-        canvas._lastDist = dist;
-
-        // xoay
-        let angle = Math.atan2(dy, dx);
-        if (!canvas._lastAngle) canvas._lastAngle = angle;
-        rotation += angle - canvas._lastAngle;
-        canvas._lastAngle = angle;
-
-        render();
-    }
 });
 
-canvas.addEventListener("touchend", () => {
-    touchStart = false;
-    canvas._lastDist = null;
-    canvas._lastAngle = null;
-});
+// Chặn phóng to bằng Ctrl + wheel
+window.addEventListener("wheel", function(e){
+    if(e.ctrlKey) e.preventDefault();
+}, {passive:false});
 
-/* Zoom with wheel */
-canvas.addEventListener("wheel", e => {
-    e.preventDefault();
-    let sizeInput = document.getElementById("size");
-    let size = parseInt(sizeInput.value);
+// Chặn pinch-zoom bằng touchmove
+window.addEventListener("touchmove", function(e){
+    if(e.scale !== undefined && e.scale !== 1) e.preventDefault();
+}, {passive:false});
 
-    size += e.deltaY < 0 ? 2 : -2;
-    if(size < 8) size = 8;
-
-    sizeInput.value = size;
-    document.getElementById("sizeValue").textContent = size;
-
-    render();
-});
-
-/* Rotate */
-let rotating = false;
-canvas.addEventListener("contextmenu", e => e.preventDefault());
-canvas.addEventListener("mousedown", e => { if(e.button===2) rotating=true; });
-document.addEventListener("mousemove", e=>{
-    if(!rotating) return;
-    let rect = canvas.getBoundingClientRect();
-    rotation = Math.atan2(e.clientY - rect.top - posY, e.clientX - rect.left - posX);
-    render();
-});
-document.addEventListener("mouseup", ()=> rotating=false);
-
-/* 🔥 Thanh kéo thay đổi cỡ chữ trực tiếp */
-document.getElementById("size").addEventListener("input", () => {
-    document.getElementById("sizeValue").textContent = document.getElementById("size").value;
-    render();
-});
-
-/* Render */
-/* Render */
-function render(){
-    const text = document.getElementById("text").value;
-    const font = document.getElementById("font").value;
-    const baseSize = parseInt(document.getElementById("size").value);
-    const size = baseSize * sizeFactor;
-    const color = document.getElementById("color").value;
-    const bgcolor = document.getElementById("bgcolor").value;
-    const align = document.getElementById("align").value;
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-// Tắt smoothing để giữ nét gốc (pixel)
-ctx.imageSmoothingEnabled = false;
-
-// Tính tỉ lệ nếu muốn scale (hoặc dùng img gốc)
-let scale = Math.min(canvas.width / img.width, canvas.height / img.height);
-let imgW = img.width * scale;
-let imgH = img.height * scale;
-let imgX = (canvas.width - imgW) / 2;
-let imgY = 0;
-
-ctx.drawImage(img, imgX, imgY, imgW, imgH);
-
-    let lines = text.split("\n");
-    ctx.font = size + 'px "'+font+'"';
-// ――― TÍNH NỀN TỰ CO THEO CHỮ ―――
-let paddingX = 30;          // padding ngang
-let paddingY = 20;          // padding dọc
-
-// tính độ rộng max 1 dòng
-let maxWidth = 0;
-lines.forEach(l=>{
-    let w = ctx.measureText(l).width;
-    if(w > maxWidth) maxWidth = w;
-});
-
-let lineHeight = size * 1.2;
-let totalTextHeight = lines.length * lineHeight;
-
-// nền auto theo chữ
-let blockW = maxWidth + paddingX * 2;
-let blockH = totalTextHeight + paddingY * 2;
-  // chiếm 20% chiều cao ảnh (tùy chỉnh)
-
-    ctx.save();
-    ctx.translate(posX,posY);
-    ctx.rotate(rotation);
-
-    let radius = parseInt(document.getElementById("radius").value);
-
-if(bgcolor !== "#000000") {
-    ctx.fillStyle = bgcolor;
-    drawRoundRect(ctx, -blockW/2, -blockH/2, blockW, blockH, radius);
-    ctx.fill();
-}
-
-
-    ctx.fillStyle = color;
-
-// Tổng chiều cao text thực
-
-
-
-// bắt đầu từ giữa nền
-let startY = -totalTextHeight / 2 + size * 0.85;
-
-lines.forEach(line=>{
-    let w = ctx.measureText(line).width;
-    let x = 0;
-
-    if(align=="left") x = -blockW/2 + paddingX;
-    if(align=="right") x = blockW/2 - padding - w;
-
-    // ✔ CENTER CHUẨN TUYỆT ĐỐI
-    if(align=="center") x = -w/2;
-
-    ctx.fillText(line, x, startY);
-    startY += lineHeight;
-    });
-
-    ctx.restore();
-}
-function drawRoundRect(ctx, x, y, w, h, r){
-    r = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.lineTo(x+w-r, y);
-    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-    ctx.lineTo(x+w, y+h-r);
-    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-    ctx.lineTo(x+r, y+h);
-    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-    ctx.lineTo(x, y+r);
-    ctx.quadraticCurveTo(x, y, x+r, y);
-    ctx.closePath();
-}
-
-
-document.getElementById("generate").onclick = () => {
-    // Canvas khớp đúng độ phân giải ảnh gốc
-    canvas.width = img.width;
-    canvas.height = img.height;
-
-    // ⭐ Đặt chữ vào đúng tâm ảnh
-    posX = canvas.width / 2;
-    posY = canvas.height / 2;
-
-    render();
-};
-
-// Chặn pinch zoom
-document.addEventListener('touchmove', function (e) {
-    if (e.scale !== undefined && e.scale !== 1) {
-        e.preventDefault();
-    }
-}, { passive: false });
-
-// Chặn double-tap zoom
+// Chặn double-tap zoom trên iOS
 let lastTouchEnd = 0;
-document.addEventListener('touchend', function (e) {
-    let now = new Date().getTime();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
+document.addEventListener("touchend", function(event) {
+    let now = (new Date()).getTime();
+    if(now - lastTouchEnd <= 300) {
+        event.preventDefault();
     }
     lastTouchEnd = now;
 }, false);
 
-</script>
+  /* ====================== CẤU HÌNH BẢNG 7×9 ====================== */
+const ROWS = 7;   // số hàng
+const COLS = 9;   // số cột
 
+const SHIPS = [4,3,2,1];
+
+let placingPlayer = "red";      // đang đặt tàu của ai
+let rotateDir = "h";            // hướng đặt tàu
+let currentTurn = "red";        // lượt chơi
+
+let boards = { red: emptyBoard(), blue: emptyBoard() };
+let shots = { red: emptyBoard(), blue: emptyBoard() };
+
+let draggingShipSize = null;
+let playerShips = { red: [], blue: [] };
+
+let standbyBullet = null;
+
+
+let audioUnlocked = false;
+
+/* Unlock audio trên iPhone */
+function unlockAudio(){
+    if(audioUnlocked) return;
+    audioUnlocked = true;
+    
+    // Chỉ unlock mà không play
+    [hitSound, missSound, winSound, placeSound].forEach(s=>{
+
+        s.pause(); 
+        s.currentTime = 0;
+    });
+
+    document.removeEventListener("touchstart", unlockAudio);
+    document.removeEventListener("click", unlockAudio);
+}
+
+document.addEventListener("touchstart", unlockAudio, {passive:true});
+document.addEventListener("click", unlockAudio);
+
+
+/* ================= GRID BUILDING ================== */
+function emptyBoard(){
+    return Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
+}
+function elem(id){ return document.getElementById(id); }
+
+const placeBoardEl = elem("placeBoard");
+buildBoard(placeBoardEl, onPlaceCellEnter, onPlaceCellClick);
+
+function buildBoard(boardEl, enterFunc, clickFunc){
+    boardEl.innerHTML = "";
+    for(let r=0; r<ROWS; r++){
+        for(let c=0; c<COLS; c++){
+            let cell = document.createElement("div");
+            cell.className = "cell";
+            cell.dataset.r = r;
+            cell.dataset.c = c;
+            if(enterFunc) cell.addEventListener("mouseenter", enterFunc);
+            if(clickFunc) cell.addEventListener("click", clickFunc);
+            boardEl.appendChild(cell);
+        }
+    }
+}
+
+/* ================= SHIP PALETTE ================== */
+function buildPalette(){
+    let pal = elem("palette");
+    pal.innerHTML = "";
+    SHIPS.forEach(sz=>{
+        let ship = document.createElement("div");
+        ship.className = "ship";
+        ship.dataset.size = sz;
+        ship.dataset.placed = "false";
+
+        for(let i=0;i<sz;i++){
+            let b = document.createElement("div");
+            b.className = "ship-block";
+            ship.appendChild(b);
+        }
+
+        ship.addEventListener("click", ()=>{
+            if(ship.dataset.placed === "true") return;
+            draggingShipSize = sz;
+            document.querySelectorAll(".palette .ship").forEach(s=>{
+                if(s.dataset.placed==="false") s.style.opacity="1";
+            });
+            ship.style.opacity="0.3";
+        });
+
+        pal.appendChild(ship);
+    });
+}
+buildPalette();
+
+/* ==================== ROTATE SHIP ==================== */
+function rotateShip(){
+    rotateDir = (rotateDir === "h" ? "v" : "h");
+}
+
+/* ==================== PLACE SHIP ===================== */
+function onPlaceCellEnter(){
+    if(!draggingShipSize) return;
+    clearPreview();
+    const r = parseInt(this.dataset.r);
+    const c = parseInt(this.dataset.c);
+
+    const ok = canPlaceShip(placingPlayer, r, c, draggingShipSize);
+    const cells = getShipCells(r, c, draggingShipSize);
+
+    cells.forEach(p=>{
+        if(p.r<0 || p.c<0 || p.r>=ROWS || p.c>=COLS) return;
+        let idx = p.r * COLS + p.c;     
+        let cell = placeBoardEl.children[idx];
+        if(cell) cell.classList.add(ok ? "preview-ok":"preview-bad");
+    });
+}
+
+function onPlaceCellClick(){
+    if(!draggingShipSize) return;
+    const r = parseInt(this.dataset.r);
+    const c = parseInt(this.dataset.c);
+
+    if(!canPlaceShip(placingPlayer, r, c, draggingShipSize)){
+        alert("Không thể đặt tại đây!");
+        return;
+    }
+
+    placeShip(placingPlayer, r, c, draggingShipSize);
+    placeSound.currentTime = 0;
+placeSound.play();
+
+    const shipDiv = [...document.querySelectorAll(".palette .ship")]
+        .find(s => parseInt(s.dataset.size) === draggingShipSize);
+
+    if(shipDiv){
+        shipDiv.dataset.placed = "true";
+        shipDiv.style.opacity = "0.3";
+        shipDiv.style.pointerEvents = "none";
+    }
+
+    draggingShipSize = null;
+    clearPreview();
+    renderPlaceBoard();
+}
+
+function clearPreview(){
+    [...placeBoardEl.children].forEach(c => c.classList.remove("preview-ok","preview-bad"));
+}
+
+function getShipCells(r,c,sz){
+    let arr = [];
+    for(let i=0;i<sz;i++){
+        if(rotateDir==="h") arr.push({r, c:c+i});
+        else arr.push({r:r+i, c});
+    }
+    return arr;
+}
+
+function canPlaceShip(player,r,c,sz){
+    const cells = getShipCells(r,c,sz);
+    for(let p of cells){
+        if(p.r<0 || p.c<0 || p.r>=ROWS || p.c>=COLS) return false;
+        if(boards[player][p.r][p.c] != null) return false;
+    }
+    return true;
+}
+
+function placeShip(player, r, c, sz){
+    const cells = getShipCells(r,c,sz);
+    cells.forEach(p => boards[player][p.r][p.c] = "ship");
+    playerShips[player].push(cells);
+}
+
+function renderPlaceBoard(){
+    for(let r=0; r<ROWS; r++){
+        for(let c=0; c<COLS; c++){
+            let cell = placeBoardEl.children[r*COLS + c];
+            cell.style.background = boards[placingPlayer][r][c] ? "#003049" : "#8a5a44";
+        }
+    }
+}
+
+/* ======================== CONFIRM ======================= */
+function countShipsPlaced(player){
+    let count = 0;
+    document.querySelectorAll(".palette .ship").forEach(s=>{
+        if(s.dataset.placed==="true") count++;
+    });
+    return count;
+}
+
+function confirmPlacement(){
+    if(countShipsPlaced(placingPlayer) < SHIPS.length){
+        alert("Bạn phải đặt đủ 4 tàu!");
+        return;
+    }
+
+    if(placingPlayer==="red"){
+        placingPlayer="blue";
+        elem("placeLabel").innerHTML="Người <span style='color:blue'>XANH</span> đặt tàu";
+        draggingShipSize=null;
+        buildPalette();
+        renderPlaceBoard();
+    } else {
+        elem("helpBtn").style.display="none";
+        elem("hideHelpBtn").style.display="none";
+        startGame();
+    }
+}
+
+/* ======================== START GAME ======================= */
+function startGame(){
+    elem("placeArea").classList.add("hidden");
+    elem("playArea").classList.remove("hidden");
+
+    ["red","blue"].forEach(player=>{
+        let boardEl = elem(player+"Board");
+        boardEl.innerHTML="";
+
+        for(let r=0; r<ROWS; r++){
+            for(let c=0; c<COLS; c++){
+                let cell=document.createElement("div");
+                cell.className="cell covered";
+                cell.dataset.r=r;
+                cell.dataset.c=c;
+                cell.dataset.player=player;
+                cell.addEventListener("click", onShoot);
+                boardEl.appendChild(cell);
+            }
+        }
+    });
+
+    renderPlayBoards();
+    updateTurnText();
+}
+
+/* ===================== TURN TEXT + BLUR ===================== */
+function updateTurnText(){
+    elem("status").innerHTML =
+        currentTurn==="red"
+        ? "<span style='color:red'>Lượt của ĐỎ</span>"
+        : "<span style='color:blue'>Lượt của XANH</span>";
+
+    elem("redBoard").classList.remove("blur-board");
+    elem("blueBoard").classList.remove("blur-board");
+
+    setTimeout(()=>{
+        if(currentTurn==="red") elem("redBoard").classList.add("blur-board");
+        else elem("blueBoard").classList.add("blur-board");
+    }, 300);
+
+    setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
+}
+
+/* ======================== BULLET SPAWN ======================= */
+function spawnStandbyBullet(player){
+    if(standbyBullet) standbyBullet.remove();
+
+    standbyBullet = document.createElement("div");
+    standbyBullet.className = "bullet";
+    standbyBullet.style.width = "60px";
+    standbyBullet.style.height = "60px";
+
+    const centerIndex = (Math.floor(ROWS/2) * COLS) + Math.floor(COLS/2);
+    const cell = elem(player+"Board").children[centerIndex].getBoundingClientRect();
+    const cx = cell.left + cell.width/2;
+    const cy = cell.top + cell.height/2;
+
+    standbyBullet.style.left = (cx-30)+"px";
+    standbyBullet.style.top  = (cy-30)+"px";
+
+    standbyBullet.dataset.originX = cx;
+    standbyBullet.dataset.originY = cy;
+
+    document.body.appendChild(standbyBullet);
+}
+
+/* ======================== BULLET SHOOT ======================= */
+function shootBullet(toCell){
+    if(!standbyBullet) return;
+
+    const rect = toCell.getBoundingClientRect();
+    const targetX = rect.left + rect.width/2 + window.scrollX;
+    const targetY = rect.top  + rect.height/2 + window.scrollY;
+
+    const originX = parseFloat(standbyBullet.dataset.originX);
+    const originY = parseFloat(standbyBullet.dataset.originY);
+
+    let bullet = standbyBullet;
+    let controlX = (originX+targetX)/2 + (Math.random()*200-100);
+    let controlY = originY - 150;
+
+    let duration = 800;
+    let start = performance.now();
+
+    function animate(t){
+        let p = (t-start)/duration; if(p>1) p=1;
+
+        let x = (1-p)*(1-p)*originX + 2*(1-p)*p*controlX + p*p*targetX;
+        let y = (1-p)*(1-p)*originY + 2*(1-p)*p*controlY + p*p*targetY;
+
+        bullet.style.left = (x-bullet.offsetWidth/2)+"px";
+        bullet.style.top  = (y-bullet.offsetHeight/2)+"px";
+
+        bullet.style.width  = (60 - p*46) + "px";
+        bullet.style.height = (60 - p*46) + "px";
+
+        if(p<1) requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    const before = currentTurn;
+
+    setTimeout(()=>{
+
+    const r = parseInt(toCell.dataset.r);
+    const c = parseInt(toCell.dataset.c);
+    const opp = currentTurn === "red" ? "blue" : "red";
+
+    const isHit = boards[opp][r][c] === "ship";
+
+    // ✔ Phát âm thanh đúng thời điểm chạm ô
+    if(isHit){
+    hitSound.load();
+    hitSound.currentTime = 0;
+    hitSound.play();
+} else {
+    missSound.load();
+    missSound.currentTime = 0;
+    missSound.play();
+}
+
+
+    // chạy xử lý cũ
+    oldOnShoot.call(toCell);
+
+    if(currentTurn !== before){
+        setTimeout(()=>spawnStandbyBullet(currentTurn), 300);
+    }
+}, duration+30);
+
+}
+
+/* ======================== SHOOT ======================= */
+const oldOnShoot = function(){
+    const r = parseInt(this.dataset.r);
+    const c = parseInt(this.dataset.c);
+    const boardPlayer = this.dataset.player;
+    const opp = currentTurn==="red" ? "blue" : "red";
+
+    if(boardPlayer !== opp) return;
+    if(shots[opp][r][c]) return;
+
+    if(boards[opp][r][c]==="ship"){
+        shots[opp][r][c]="hit";
+        renderPlayBoards();
+        cellHit(r,c,opp);
+
+        markShipIfDestroyed(opp,r,c);
+
+        if(checkWin(opp)){
+            showWinner(currentTurn);
+        }
+
+    } else {
+        shots[opp][r][c]="miss";
+        renderPlayBoards();
+
+        // ❌ XOÁ missSound ở đây
+        // missSound.play();
+
+        currentTurn = opp;
+        updateTurnText();
+    }
+};
+
+
+function onShoot(){
+    const opp = currentTurn==="red" ? "blue" : "red";
+    if(this.dataset.player !== opp) return;
+    if(shots[opp][this.dataset.r][this.dataset.c]) return;
+
+    // --- NEW ---
+    const r = parseInt(this.dataset.r);
+    const c = parseInt(this.dataset.c);
+    const willHit = boards[opp][r][c] === "ship";
+    
+    
+
+    // tiếp tục bắn đạn như cũ
+    shootBullet(this);
+}
+
+/* ======================== EFFECTS ======================= */
+function cellHit(r,c,player){
+    const boardEl = elem(player+"Board");
+    const cell = boardEl.children[r*COLS + c];
+    cell.classList.add("fire-hit");
+    setTimeout(()=>cell.classList.remove("fire-hit"),900);
+}
+
+function checkWin(player){
+    for(let r=0; r<ROWS; r++)
+        for(let c=0; c<COLS; c++)
+            if(boards[player][r][c]==="ship" && !shots[player][r][c])
+                return false;
+    return true;
+}
+
+/* ================== SHIP DESTROY DETECTION ================== */
+function markShipIfDestroyed(player,r,c){
+    const ship = playerShips[player].find(s=>s.some(p=>p.r===r && p.c===c));
+    if(!ship) return;
+
+    const destroyed = ship.every(p=>shots[player][p.r][p.c]==="hit");
+    if(!destroyed) return;
+
+    const boardEl = elem(player+"Board");
+    ship.forEach(p=>{
+        const cell = boardEl.children[p.r*COLS + p.c];
+        cell.classList.add("ship-dead-purple");
+    });
+
+    const playArea = elem("playArea");
+    playArea.classList.add("shake");
+    setTimeout(()=>playArea.classList.remove("shake"),400);
+}
+
+/* ======================== RENDER ======================= */
+function renderPlayBoards(){
+    ["red","blue"].forEach(player=>{
+        const boardEl = elem(player+"Board");
+        for(let r=0; r<ROWS; r++){
+            for(let c=0; c<COLS; c++){
+                const idx = r*COLS + c;
+                const cell = boardEl.children[idx];
+
+                if(cell.classList.contains("ship-dead-purple")){
+                    cell.className="cell ship-dead-purple";
+                    continue;
+                }
+
+                cell.className="cell covered";
+                cell.textContent="";
+
+                if(shots[player][r][c]==="hit"){
+                    cell.classList.add("hit");
+                } else if(shots[player][r][c]==="miss"){
+                    cell.classList.add("miss");
+                    cell.textContent="X";
+                }
+            }
+        }
+    });
+}
+
+/* ======================== RESET ======================= */
+function resetPlacement(){
+    boards[placingPlayer] = emptyBoard();
+    draggingShipSize = null;
+    buildPalette();
+    renderPlaceBoard();
+}
+
+function restartGame(){
+    placingPlayer = "red";
+    currentTurn = "red";
+    rotateDir = "h";
+    boards = { red: emptyBoard(), blue: emptyBoard() };
+    shots = { red: emptyBoard(), blue: emptyBoard() };
+    draggingShipSize = null;
+
+    elem("placeArea").classList.remove("hidden");
+    elem("playArea").classList.add("hidden");
+
+    elem("placeLabel").innerHTML = "Người <span style='color:red'>ĐỎ</span> đặt tàu";
+
+    buildPalette();
+    renderPlaceBoard();
+}
+
+/* ======================== WINNER ======================= */
+function showWinner(player){
+    elem("winnerText").textContent = player.toUpperCase() + " thắng!";
+    elem("winnerOverlay").style.display = "flex";
+
+    winSound.currentTime=0;
+    winSound.play();
+}
+
+function confirmWinner(){
+    elem("winnerOverlay").style.display = "none";
+    restartGame();
+}
+
+/* ====================== HELP BUTTON ====================== */
+function hideHelpBtnFunction(){
+    document.getElementById("helpBtn").style.display="none";
+    document.getElementById("hideHelpBtn").style.display="none";
+}
+function showHelp(){
+    document.getElementById("helpOverlay").style.display="flex";
+    const v=document.getElementById("helpVideo");
+    v.currentTime=0; v.play();
+}
+function closeHelp(){
+    document.getElementById("helpOverlay").style.display="none";
+    document.getElementById("helpVideo").pause();
+}
+
+</script>
 </body>
 </html>

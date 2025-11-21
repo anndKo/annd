@@ -11,6 +11,7 @@ body {
     font-family: Arial; 
     padding: 20px; 
     background:#f2f2f2; 
+    
 }
 
 h1 {
@@ -71,17 +72,18 @@ h1 {
     grid-template-rows: repeat(7, 1fr);      /* 7 HÀNG */
     gap: 5px;
     width: 90vw;
-    max-width: 90vw;
+    max-width: 500px;
     aspect-ratio: 9 / 7; /* giữ đúng tỉ lệ */
     background: #caa98a;
     padding: 10px;
     border-radius: 10px;
     margin: 0 auto;
+     width: calc(90vw - 20px); /* trừ padding */
 }
 
 .cell{
-    width: 90%; 
-    height: 90%;
+    width: 100%; 
+    height: 100%;
     border-radius: 6px;
     display: flex; 
     justify-content: center; 
@@ -689,6 +691,22 @@ function onShoot(){
     const opp = currentTurn==="red" ? "blue" : "red";
     if(this.dataset.player !== opp) return;
     if(shots[opp][this.dataset.r][this.dataset.c]) return;
+
+    // --- NEW ---
+    const r = parseInt(this.dataset.r);
+    const c = parseInt(this.dataset.c);
+    const willHit = boards[opp][r][c] === "ship";
+    
+    // play sound NOW → Safari cho phép
+    if(willHit){
+        hitSound.currentTime = 0;
+        
+    } else {
+        missSound.currentTime = 0;
+        
+    }
+
+    // tiếp tục bắn đạn như cũ
     shootBullet(this);
 }
 
