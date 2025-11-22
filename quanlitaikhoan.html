@@ -297,7 +297,171 @@ th {
 </div>
 
 <script>
-  const _0x54b5d5=_0x5165;(function(_0x1892eb,_0x194b45){const _0x407ab5=_0x5165,_0x1886d8=_0x1892eb();while(!![]){try{const _0x2530f7=-parseInt(_0x407ab5(0x1d5))/0x1+-parseInt(_0x407ab5(0x1e3))/0x2+parseInt(_0x407ab5(0x1bf))/0x3+-parseInt(_0x407ab5(0x1cc))/0x4*(parseInt(_0x407ab5(0x1de))/0x5)+parseInt(_0x407ab5(0x1d6))/0x6*(-parseInt(_0x407ab5(0x1c3))/0x7)+parseInt(_0x407ab5(0x1ba))/0x8+parseInt(_0x407ab5(0x1c8))/0x9;if(_0x2530f7===_0x194b45)break;else _0x1886d8['push'](_0x1886d8['shift']());}catch(_0x47186d){_0x1886d8['push'](_0x1886d8['shift']());}}}(_0x245b,0xd80a1));function _0x5165(_0x576c8e,_0x1617ca){const _0x245b2a=_0x245b();return _0x5165=function(_0x516568,_0x4a593e){_0x516568=_0x516568-0x1b9;let _0x37942a=_0x245b2a[_0x516568];return _0x37942a;},_0x5165(_0x576c8e,_0x1617ca);}function showHelp(){const _0x58829c=_0x5165;document[_0x58829c(0x1dd)]('helpOverlay')[_0x58829c(0x1c9)][_0x58829c(0x1e1)]='flex';const _0x2763d8=document[_0x58829c(0x1dd)](_0x58829c(0x1bc));_0x2763d8[_0x58829c(0x1cf)]=0x0,_0x2763d8[_0x58829c(0x1db)]();}function closeHelp(){const _0x1b5dde=_0x5165;document[_0x1b5dde(0x1dd)](_0x1b5dde(0x1d1))[_0x1b5dde(0x1c9)]['display']=_0x1b5dde(0x1bb),document[_0x1b5dde(0x1dd)](_0x1b5dde(0x1bc))[_0x1b5dde(0x1d2)]();}function hideHelpBtnFunction(){const _0x251577=_0x5165;document[_0x251577(0x1dd)](_0x251577(0x1da))[_0x251577(0x1c9)]['display']=_0x251577(0x1bb),document[_0x251577(0x1dd)]('hideHelpBtn')[_0x251577(0x1c9)]['display']=_0x251577(0x1bb);}const canvas=document[_0x54b5d5(0x1dd)]('qrCanvas'),ctx=canvas[_0x54b5d5(0x1ca)]('2d'),downloadBtn=document[_0x54b5d5(0x1dd)](_0x54b5d5(0x1cb)),openDriveBtn=document[_0x54b5d5(0x1dd)](_0x54b5d5(0x1d8)),background=new Image();background[_0x54b5d5(0x1d4)]=_0x54b5d5(0x1c7),document[_0x54b5d5(0x1dd)]('generate')['onclick']=async()=>{const _0x33a452=_0x54b5d5,_0x5cc694=document[_0x33a452(0x1dd)]('urlInput')['value'][_0x33a452(0x1bd)]();if(!_0x5cc694){alert(_0x33a452(0x1e2));return;}try{const _0x233a2e=await QRCode[_0x33a452(0x1df)](_0x5cc694,{'width':0xb4}),_0x2750d0=new Image();_0x2750d0[_0x33a452(0x1d4)]=_0x233a2e,_0x2750d0[_0x33a452(0x1d0)]=()=>{const _0xcdb80d=_0x33a452;ctx['clearRect'](0x0,0x0,canvas['width'],canvas['height']);const _0x541683=Math['min'](canvas[_0xcdb80d(0x1ce)]/background[_0xcdb80d(0x1ce)],canvas[_0xcdb80d(0x1c0)]/background[_0xcdb80d(0x1c0)]),_0x581463=background[_0xcdb80d(0x1ce)]*_0x541683,_0x58c707=background[_0xcdb80d(0x1c0)]*_0x541683,_0xd21719=(canvas['width']-_0x581463)/0x2,_0x59d00b=(canvas[_0xcdb80d(0x1c0)]-_0x58c707)/0x2;ctx[_0xcdb80d(0x1d7)](background,_0xd21719,_0x59d00b,_0x581463,_0x58c707);const _0x29c2ab=0xb4,_0x5b712b=(canvas[_0xcdb80d(0x1ce)]-_0x29c2ab)/0x2,_0x44ffb4=(canvas['height']-_0x29c2ab)/0x2;ctx[_0xcdb80d(0x1d7)](_0x2750d0,_0x5b712b,_0x44ffb4,_0x29c2ab,_0x29c2ab),downloadBtn[_0xcdb80d(0x1c9)][_0xcdb80d(0x1e1)]='inline-block',downloadBtn[_0xcdb80d(0x1cd)]=()=>{const _0x2a2690=_0xcdb80d,_0x4c545a=document['createElement'](_0x2a2690(0x1c2)),_0x2c6d14=0x3e8;_0x4c545a[_0x2a2690(0x1ce)]=_0x2c6d14,_0x4c545a[_0x2a2690(0x1c0)]=_0x2c6d14;const _0x81847a=_0x4c545a['getContext']('2d'),_0xd98443=Math['min'](_0x2c6d14/background['width'],_0x2c6d14/background['height']),_0x3096f7=background[_0x2a2690(0x1ce)]*_0xd98443,_0x44e727=background['height']*_0xd98443,_0x5e240c=(_0x2c6d14-_0x3096f7)/0x2,_0x3aa8a1=(_0x2c6d14-_0x44e727)/0x2;_0x81847a[_0x2a2690(0x1d7)](background,_0x5e240c,_0x3aa8a1,_0x3096f7,_0x44e727);const _0x30d6bb=0xb4/0xfa*_0x2c6d14,_0x463d34=(_0x2c6d14-_0x30d6bb)/0x2,_0x518919=(_0x2c6d14-_0x30d6bb)/0x2;_0x81847a[_0x2a2690(0x1d7)](_0x2750d0,_0x463d34,_0x518919,_0x30d6bb,_0x30d6bb);const _0x3fec6a=document['createElement']('a');_0x3fec6a['download']=_0x2a2690(0x1d3),_0x3fec6a['href']=_0x4c545a[_0x2a2690(0x1df)](_0x2a2690(0x1c1)),_0x3fec6a[_0x2a2690(0x1c6)]();};};}catch(_0x553139){console[_0x33a452(0x1c5)](_0x553139),alert(_0x33a452(0x1b9));}},downloadBtn['onclick']=()=>{const _0x49c529=_0x54b5d5,_0x5b13b6=document[_0x49c529(0x1e0)]('a');_0x5b13b6['download']='qr_with_bg.png',_0x5b13b6[_0x49c529(0x1d9)]=canvas[_0x49c529(0x1df)]('image/png'),_0x5b13b6[_0x49c529(0x1c6)]();},openDriveBtn['onclick']=()=>{const _0x5cece0=_0x54b5d5;window[_0x5cece0(0x1dc)](_0x5cece0(0x1be),_0x5cece0(0x1c4));};function _0x245b(){const _0x223901=['getContext','download','4zITbjC','onclick','width','currentTime','onload','helpOverlay','pause','Annd.png','src','113490VltQGe','221838hWIFWl','drawImage','openDrive','href','helpBtn','play','open','getElementById','2307445ekJEfU','toDataURL','createElement','display','Vui\x20lòng\x20nhập\x20link!','1070376SgcHaR','Có\x20lỗi\x20khi\x20tạo\x20QR\x20Code.','13401264ElEZAq','none','helpVideo','trim','https://drive.google.com','4201248QdjAor','height','image/png','canvas','308ROiAIH','_blank','error','click','nenqr.jpg','4916718YPsjNJ','style'];_0x245b=function(){return _0x223901;};return _0x245b();}
+  function showHelp(){
+    document.getElementById("helpOverlay").style.display = "flex";
+    const v=document.getElementById("helpVideo");
+    v.currentTime = 0;
+    v.play();
+}
+
+function closeHelp(){
+    document.getElementById("helpOverlay").style.display = "none";
+    document.getElementById("helpVideo").pause();
+}
+
+// ẨN CẢ 2 NÚT
+function hideHelpBtnFunction(){
+    document.getElementById("helpBtn").style.display = "none";
+    document.getElementById("hideHelpBtn").style.display = "none";
+}
+  let deleteIndex = null;
+
+// Mở popup xác nhận
+function deleteAccount(index) {
+  const accounts = getAccounts();
+  const acc = accounts[index];
+
+  deleteIndex = index;
+
+  document.getElementById("deleteInfo").innerHTML = `
+  <table style="width:100%; border-collapse: collapse; text-align:center;">
+    <tr>
+      <th style="border:1px solid black; padding:5px;">Ứng dụng</th>
+      <th style="border:1px solid black; padding:5px;">Tài khoản</th>
+      <th style="border:1px solid black; padding:5px;">Mật khẩu</th>
+    </tr>
+    <tr>
+      <td style="border:1px solid black; padding:5px;">${acc.app}</td>
+      <td style="border:1px solid black; padding:5px;">${acc.username}</td>
+      <td style="border:1px solid black; padding:5px;">${acc.password}</td>
+    </tr>
+  </table>
+`;
+
+
+  document.getElementById("deletePopup").style.display = "flex";
+}
+
+// Nút xác nhận xoá
+document.getElementById("confirmDeleteBtn").addEventListener("click", () => {
+  const accounts = getAccounts();
+  accounts.splice(deleteIndex, 1);
+  saveAccounts(accounts);
+  renderAccounts();
+  document.getElementById("deletePopup").style.display = "none";
+});
+
+// Nút đóng popup
+document.getElementById("closePopupBtn").addEventListener("click", () => {
+  document.getElementById("deletePopup").style.display = "none";
+});
+  const searchInput = document.getElementById('searchApp');
+const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+// Tìm kiếm theo tên ứng dụng
+searchBtn.addEventListener('click', () => {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const accounts = getAccounts();
+
+  const filtered = accounts.filter(acc => acc.app.toLowerCase().includes(keyword));
+
+  accountList.innerHTML = '';
+  filtered.forEach((acc, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${acc.app}</td>
+      <td>${acc.username}</td>
+      <td>${acc.password}</td>
+      <td>
+  
+  <button class="deleteBtn" onclick="deleteAccount(${index})">Xóa</button>
+</td>
+
+    `;
+    accountList.appendChild(tr);
+  });
+});
+
+// Nút hiển thị tất cả
+resetBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  renderAccounts();
+});
+
+const currentUser = document.getElementById("currentUser");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const appInput = document.getElementById('app');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const addBtn = document.getElementById('addBtn');
+const accountList = document.getElementById('accountList');
+
+// Kiểm tra đăng nhập
+const user = localStorage.getItem("dangnhap_hien_tai");
+if(!user) {
+  // Chưa đăng nhập → quay về trang chủ
+  window.location.href = "trangchu.html";
+} else {
+  currentUser.textContent = user;
+}
+
+// Đăng xuất
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("dangnhap_hien_tai");
+  window.location.href = "trangchu.html";
+});
+
+// LocalStorage cho các tài khoản
+function getAccounts() {
+  return JSON.parse(localStorage.getItem('accounts_' + user) || '[]'); // riêng cho từng user
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem('accounts_' + user, JSON.stringify(accounts));
+}
+
+function renderAccounts() {
+  const accounts = getAccounts();
+  accountList.innerHTML = '';
+  accounts.forEach((acc, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${acc.app}</td>
+      <td>${acc.username}</td>
+      <td>${acc.password}</td>
+      <td><button class="deleteBtn" onclick="deleteAccount(${index})">Xóa</button></td>
+    `;
+    accountList.appendChild(tr);
+  });
+}
+
+// Thêm tài khoản
+addBtn.addEventListener('click', () => {
+  const app = appInput.value.trim();
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  if(!app || !username || !password) {
+    alert("Vui lòng nhập đầy đủ thông tin!");
+    return;
+  }
+
+  const accounts = getAccounts();
+  accounts.push({app, username, password});
+  saveAccounts(accounts);
+  renderAccounts();
+
+  appInput.value = '';
+  usernameInput.value = '';
+  passwordInput.value = '';
+});
+
+// Xóa tài khoản
+
+// Hiển thị lần đầu
+renderAccounts();
 </script>
 </body>
 </html>
