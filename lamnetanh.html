@@ -245,10 +245,13 @@ const aiSharpenVal = document.getElementById('asharpVal');
 
 // Update displayed values
 [sharpen, radius, brightness, contrast, saturation, smooth, denoise, aiSharpen].forEach(input=>{
-  input.addEventListener('input', ()=> {
+  const delayedApply = debounce(applyFilter, 120);
+
+input.addEventListener('input', ()=> {
     document.getElementById(input.id+'Val').innerText = input.value + (input===aiSharpen?'%':'');
-    applyFilter();
-  });
+    delayedApply();
+});
+
 });
 
 // Helper: Convolution filter
@@ -377,6 +380,14 @@ function openPreview(canvas){
 origCanvas.onclick = ()=>openPreview(origCanvas);
 editCanvas.onclick = ()=>openPreview(editCanvas);
 closePreview.onclick = ()=> previewOverlay.style.display="none";
+function debounce(func, delay) {
+  let timer;
+  return function () {
+    clearTimeout(timer);
+    timer = setTimeout(func, delay);
+  };
+}
+
 </script>
 
 </body>
