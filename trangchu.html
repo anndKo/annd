@@ -250,17 +250,24 @@
     <a href="#" id="dangXuat">Đăng xuất</a>
 </div>
 
-    <div class="anh-nen">
-        <img src="anhnendep.png" alt="lỗi ảnh" class="anhlon">
-        <h1 class="chu-tren-anh1">Chào mừng bạn đến với Annd</h1><br><br>
-        <h3 class="chu-tren-anh2">-Công cụ tiện ích-</h3>
-    </div>
+   <div class="anh-nen">
+    <video autoplay muted loop playsinline class="video-nen">
+        <source src="lv_0_20251124063004.mp4" type="video/mp4">
+    </video>
+
+    <h1 class="chu-tren-anh1">Chào mừng bạn đến với Annd</h1>
+    <h3 class="chu-tren-anh2">-Công cụ tiện ích-</h3>
+</div>
+
 
     <div class="khoicuoi">
         <h3>Thông Tin Liên Hệ</h3>
         <p style="color: white;"><strong>📞 Điện thoại:</strong> 0866887461</p>
         <p><strong>📧 Email:</strong> anndkocskh@gmail.com</p>
     </div>
+    <audio id="nhacNen">
+    <source src="lv_0_20251124063004 (mp3cut.net).mp3" type="audio/mp3">
+</audio>
 
     <script>
         function toggleMenu() {
@@ -294,6 +301,19 @@
                 menu.style.display = "none";
             }
         });
+        // Phát nhạc khi người dùng bấm vào trang (tương thích Chrome)
+document.addEventListener("click", function phatNhac() {
+    let audio = document.getElementById("nhacNen");
+    audio.volume = 1.0; // chỉnh âm lượng (0.0 – 1.0)
+    audio.play().catch(() => {});
+    document.removeEventListener("click", phatNhac);
+});
+window.addEventListener("load", () => {
+    let audio = document.getElementById("nhacNen");
+    audio.play().catch(() => {});
+});
+
+
     </script>
 
 </body>
