@@ -115,8 +115,12 @@ const denoiseVal = document.getElementById('denoiseVal');
 [sharpen,radius,brightness,denoise].forEach(input=>{
   input.addEventListener('input', ()=>{
     document.getElementById(input.id+'Val').innerText = input.value;
+});
+
+input.addEventListener('change', ()=> {
     applyFilter();
-  });
+});
+
 });
 
 // Convolution & Sharpen
@@ -149,12 +153,15 @@ function convolution(imgData, kernel){
   return imgData;
 }
 
-function getSharpenKernel(amount,radius){
-  const size = Math.max(3,Math.floor(radius)*2+1);
-  const kernel = new Array(size*size).fill(-amount/(size*size));
-  kernel[Math.floor(size*size/2)] = 1+amount;
-  return kernel;
+function getSharpenKernel(amount) {
+  const a = amount; 
+  return [
+    0,   -a,    0,
+    -a, 1 + 4*a, -a,
+    0,   -a,    0
+  ];
 }
+
 
 function applyFilter(){
   ctxE.drawImage(origCanvas,0,0);
@@ -183,7 +190,8 @@ function applyFilter(){
   let rad = parseFloat(radius.value);
   if(amount>0){
     let data = ctxE.getImageData(0,0,editCanvas.width,editCanvas.height);
-    let kernel = getSharpenKernel(amount, rad);
+    let kernel = getSharpenKernel(amount);
+
     ctxE.putImageData(convolution(data,kernel),0,0);
   }
 }

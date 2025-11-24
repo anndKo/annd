@@ -147,7 +147,7 @@
 <!-- OVERLAY VIDEO -->
 <div id="helpOverlay">
     <video id="helpVideo" controls>
-        <source src="tạo quiz (1).mp4" type="video/mp4">
+        <source src="lv_0_20251124175756.mp4" type="video/mp4">
     </video>
     <button id="closeHelp" onclick="closeHelp()">Đóng</button>
 </div>
@@ -320,6 +320,14 @@ function generateQuiz() {
     .split("\n")
     .map(l => l.trim())
     .filter(l => l !== "" && l !== "---"); // loại bỏ các dòng --- hoàn toàn
+    // 🔥 Tự động xóa mọi thứ trước câu hỏi đầu tiên
+let firstQuestionIndex = lines.findIndex(l =>
+    /^(\d+[\).]|Câu\s*\d+[:.\s]|Bài\s*\d+[:.\s])/i.test(l)
+);
+
+if (firstQuestionIndex > 0) {
+    lines.splice(0, firstQuestionIndex);
+}
 
 
     quizData = [];
