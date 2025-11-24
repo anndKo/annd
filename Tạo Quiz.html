@@ -314,6 +314,9 @@ function generateQuiz() {
 
 // XÓA ký tự "⸻"
 text = text.replace(/⸻+/g, "");
+// XÓA tất cả ký tự *, **, ***, ****
+text = text.replace(/\*+/g, "");
+
 
 // XÓA phần bị lặp (nhân đôi nội dung)
 let half = Math.floor(text.length / 2);
