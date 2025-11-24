@@ -310,7 +310,32 @@ function hideHelpBtnFunction(){
 let quizData = [];
 
 function generateQuiz() {
-    const text = document.getElementById("inputData").value.trim();
+    let text = document.getElementById("inputData").value.trim();
+
+// XÓA ký tự "⸻"
+text = text.replace(/⸻+/g, "");
+
+// XÓA phần bị lặp (nhân đôi nội dung)
+let half = Math.floor(text.length / 2);
+let firstPart = text.slice(0, half).trim();
+let secondPart = text.slice(half).trim();
+
+if (secondPart.includes(firstPart.slice(0, 50))) {
+    text = firstPart;
+}
+
+// XÓA toàn bộ nội dung sau "Đáp án:" của câu cuối cùng (nếu có)
+let lastAnswerIndex = text.lastIndexOf("Đáp án:");
+if (lastAnswerIndex !== -1) {
+    let before = text.slice(0, lastAnswerIndex);
+    let after = text.slice(lastAnswerIndex);
+    let answerLine = after.split("\n")[0];
+    text = before + answerLine;
+}
+
+
+
+
     if (!text) return alert("Vui lòng nhập câu hỏi!");
     document.getElementById("goodLuckBox").style.display = "none";
 

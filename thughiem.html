@@ -1,26 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<title>Tạo Quiz Ôn Tập </title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #257ec2;
+        margin: 0;
+        padding: 20px;
+        font-size: 3dvh;
+    }
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: rgb(8, 4, 4);
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+    }
+    textarea {
+        width: 100%;
+        height: 200px;
+        padding: 12px;
+        font-size: 20px;
+    }
+    button {
+        padding: 12px 18px;
+        margin: 10px 5px;
+        cursor: pointer;
+        border:none;
+        border-radius:6px;
+        font-size: 18px;
+        background: #2c7aed;
+        color: white;
+    }
+    h2, h3, h4 {
+        font-size: 24px;
+        color: white;
+        margin-top: 0;
+    }
 
-    <style>
-#helpBtn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    padding: 10px 18px;
-    background: #ff9800;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    z-index: 11000;
-}
+    /* tăng size chữ câu hỏi */
+    .question {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        background: #f6f8fb;
+        border-left: 5px solid #407bff;
+        font-size: 24px;
+        color: black;
+    }
 
-#hideHelpBtn {
+    .question b {
+        font-size: 26px;
+    }
+
+    label {
+        display: block;
+        margin: 5px 0;
+        font-size: 22px;
+    }
+
+    input[type=radio] {
+        transform: scale(2);
+        margin-right: 8px;
+    }
+
+    .wrong {
+        background: #ffecec;
+        padding: 10px;
+        margin: 8px 0;
+        border-left: 5px solid red;
+        border-radius: 6px;
+        font-size: 20px;
+        color: black;
+    }
+
+    #result {
+        margin-top: 20px;
+        font-size: 22px;
+        color: white;
+    }
+    #hideHelpBtn {
     position: fixed;
     top: 15px;
     right: 130px;
@@ -46,6 +108,19 @@
     flex-direction: column;
     z-index: 12000;
 }
+#helpBtn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 10px 18px;
+    background: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 11000;
+}
 #helpOverlay video {
     max-width: 90%;
     max-height: 80%;
@@ -61,11 +136,9 @@
     font-size: 18px;
     cursor: pointer;
 }
-    </style>
+</style>
 </head>
 <body>
-
-<!-- NÚT ẨN DUY NHẤT -->
 <button id="hideHelpBtn" onclick="hideHelpBtnFunction()">X</button>
 
 <!-- NÚT HƯỚNG DẪN -->
@@ -74,13 +147,148 @@
 <!-- OVERLAY VIDEO -->
 <div id="helpOverlay">
     <video id="helpVideo" controls>
-        <source src="huongdan.mp4" type="video/mp4">
+        <source src="lv_0_20251124175756.mp4" type="video/mp4">
     </video>
     <button id="closeHelp" onclick="closeHelp()">Đóng</button>
 </div>
+<div class="container">
+    <h2>📘 Tạo Quiz Ôn Tập</h2>
+
+    <div id="inputBox" style="width: 95%;">
+        <textarea id="inputData" placeholder="Dán câu hỏi + đáp án ở đây"></textarea>
+        <button onclick="generateQuiz()">Tạo Quiz</button>
+    </div>
+    <!-- ⭐ KHỐI CHÚC BẠN LÀM BÀI TỐT + NÚT SAO CHÉP -->
+<!-- ⭐ KHỐI CHÚC BẠN LÀM BÀI TỐT + FORM TẠO BIỂU MẪU -->
+<div id="goodLuckBox" style="
+    display: block;
+    margin-top: 10px;
+    background: #ffffff;
+    padding: 12px;
+    border-left: 5px solid #2c7aed;
+    border-radius: 6px;
+    color: black;
+    font-size: 20px;
+">
+    <b style="background-color: aquamarine;padding: 10px;border-radius: 8px;margin-bottom: 10px;">🎉 Tạo biểu mẫu:</b>
+    
+<br>
+    <!-- ⭐ THÊM MỚI TẠI ĐÂY -->
+    <div style="margin-top: 20px; font-size: 18px;">
+        <label style="font-weight: 600;font-family: Arial, Helvetica, sans-serif;">Số câu: 
+            <input id="soCau" type="number" style="padding:6px; width:90px; font-size:18px;border: 2px solid black;">
+        </label>
+
+        <label style="font-weight: 600;font-family: Arial, Helvetica, sans-serif;">Môn:
+            <input id="monHoc" type="text" style="padding:6px; width:250px; font-size:18px;border: 2px solid black;">
+        </label>
+
+        <button onclick="taoBieuMau()" style="
+            padding: 6px 12px;
+            background:#f11313;
+            color:rgb(245, 245, 245);
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight: 600;
+        ">Tạo biểu mẫu</button>
+    </div>
+
+    <!-- KẾT QUẢ BIỂU MẪU + NÚT COPY -->
+    <div id="mauOutput" style="margin-top:15px; white-space:pre-line; font-size:18px;"></div>
+</div>
 
 <script>
-function showHelp(){
+function taoBieuMau(){
+    const soCau = document.getElementById("soCau").value.trim();
+    const monHoc = document.getElementById("monHoc").value.trim();
+    let output = document.getElementById("mauOutput");
+
+    if(!soCau || !monHoc){
+        output.innerHTML = "<div style='color:red;'>⚠️ Vui lòng nhập đủ thông tin!</div>";
+        return;
+    }
+
+    let text =
+`Tạo cho tôi ${soCau} câu hỏi môn ${monHoc} dạng trắc nghiệm như sau:
+A.
+B.
+C.
+D.
+Đáp án:`;   
+
+    output.innerHTML = `
+        <div id="mauText" style="
+            background:#f6f8fb;
+            padding:12px;
+            border-left:5px solid #2c7aed;
+            border-radius:6px;
+            color:black;
+            white-space: pre-line;
+        ">${text}</div>
+
+        <button id="copyBtn" style="
+            margin-top:8px;
+            padding:6px 12px;
+            background:#2c7aed;
+            color:white;
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+            font-size:16px;
+        ">📋 Sao chép văn bản</button>
+    `;
+
+    document.getElementById("copyBtn").onclick = function(){
+        const textToCopy = document.getElementById("mauText").textContent;
+
+        // Thử dùng Clipboard API trước
+        if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Đã sao chép!");
+            }).catch(() => fallbackCopy(textToCopy));
+        } else {
+            fallbackCopy(textToCopy);
+        }
+    };
+
+    function fallbackCopy(text){
+        // Tạo textarea tạm để copy
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            alert("Đã sao chép!");
+        } catch(e){
+            alert("Sao chép thất bại!");
+        }
+        document.body.removeChild(textarea);
+    }
+}
+
+
+function copyMau(){
+    navigator.clipboard.writeText(window.generatedText);
+    alert("Đã sao chép!");
+}
+</script>
+
+
+
+    <form id="quizForm"></form>
+
+    <button id="endBtn" style="display:none;" onclick="submitQuiz()">Kết thúc bài</button>
+    <button id="retryBtn" style="display:none;" onclick="retryQuiz()">Làm lại bài</button>
+    <button id="newQuizBtn" style="display:none;" onclick="newQuiz()">Tạo lại câu hỏi</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    function showHelp(){
     document.getElementById("helpOverlay").style.display = "flex";
     const v=document.getElementById("helpVideo");
     v.currentTime = 0;
@@ -96,6 +304,245 @@ function closeHelp(){
 function hideHelpBtnFunction(){
     document.getElementById("helpBtn").style.display = "none";
     document.getElementById("hideHelpBtn").style.display = "none";
+}
+   
+
+let quizData = [];
+
+function generateQuiz() {
+    let text = document.getElementById("inputData").value.trim();
+
+// XÓA ký tự "⸻"
+text = text.replace(/⸻+/g, "");
+// XÓA tất cả ký tự *, **, ***, ****
+text = text.replace(/\*+/g, "");
+
+
+// XÓA phần bị lặp (nhân đôi nội dung)
+let half = Math.floor(text.length / 2);
+let firstPart = text.slice(0, half).trim();
+let secondPart = text.slice(half).trim();
+
+if (secondPart.includes(firstPart.slice(0, 50))) {
+    text = firstPart;
+}
+
+// XÓA toàn bộ nội dung sau "Đáp án:" của câu cuối cùng (nếu có)
+let lastAnswerIndex = text.lastIndexOf("Đáp án:");
+if (lastAnswerIndex !== -1) {
+    let before = text.slice(0, lastAnswerIndex);
+    let after = text.slice(lastAnswerIndex);
+    let answerLine = after.split("\n")[0];
+    text = before + answerLine;
+}
+
+
+
+
+    if (!text) return alert("Vui lòng nhập câu hỏi!");
+    document.getElementById("goodLuckBox").style.display = "none";
+
+
+    // 1. Tách tất cả các dòng và loại bỏ dòng trống
+    const lines = text
+    .split("\n")
+    .map(l => l.trim())
+    .filter(l => l !== "" && !/^-+$/g.test(l));
+ // loại bỏ các dòng --- hoàn toàn
+    // 🔥 Tự động xóa mọi thứ trước câu hỏi đầu tiên
+// 🔥 Tự động xóa TẤT CẢ nội dung TRƯỚC câu hỏi đầu tiên
+let firstQuestionIndex = lines.findIndex(l =>
+    /^(Câu\s*\d+|Bài\s*\d+|\d+\s*[\).])\s*/i.test(l)
+);
+
+// Nếu tìm thấy Câu 1 / Bài 1 / 1. thì xóa toàn bộ đoạn trước đó
+if (firstQuestionIndex > -1) {
+    lines.splice(0, firstQuestionIndex);
+}
+
+// ⭐ Ghép "Câu 1" + dòng kế tiếp thành 1 dòng duy nhất
+for (let i = 0; i < lines.length - 1; i++) {
+    if (/^(Câu\s*\d+|Bài\s*\d+|\d+\s*[\).])$/i.test(lines[i])) {
+        lines[i] = lines[i] + ": " + lines[i+1];
+        lines.splice(i+1, 1);
+        i--;
+    }
+}
+
+
+
+    quizData = [];
+    let errorList = [];
+    let currentBlock = [];
+
+    lines.forEach((line, idx) => {
+    currentBlock.push(line);
+
+    // Nếu dòng có "Đáp án:", coi như kết thúc 1 câu
+    if (/^Đáp án[:\s]/i.test(line)) {
+        let questionLine = currentBlock[0] || "";
+        let options = currentBlock.slice(1, -1); // tất cả dòng trừ câu hỏi và đáp án
+        let answerLine = currentBlock[currentBlock.length - 1];
+
+        // Xử lý loại bỏ ký tự lạ __, --, **
+        const cleanText = (text) => text.replace(/(__+|--+|\*\*+|~~+|@@+|!!+|,,+|;;+)/g, "").trim();
+
+
+        questionLine = cleanText(questionLine);
+        options = options.map(opt => cleanText(opt));
+        let correct = cleanText(answerLine.replace(/^Đáp án[:\s]*/i, ""));
+
+        if (!correct) {
+            errorList.push(quizData.length + 1);
+        }
+
+        // Xử lý A, B, C, D nếu có dấu : hoặc .
+        let A = options[0] ? options[0].replace(/^A[:.]\s*/, "").trim() : "";
+        let B = options[1] ? options[1].replace(/^B[:.]\s*/, "").trim() : "";
+        let C = options[2] ? options[2].replace(/^C[:.]\s*/, "").trim() : "";
+        let D = options[3] ? options[3].replace(/^D[:.]\s*/, "").trim() : "";
+
+        quizData.push({
+            question: questionLine,
+            A, B, C, D,
+            correct
+        });
+
+        currentBlock = []; // reset cho câu tiếp theo
+    }
+});
+
+
+    if (errorList.length > 0) {
+        document.getElementById("result").innerHTML = `
+            <div class="wrong" style="background:#fff3cd; border-left:5px solid orange; color:black;">
+                ⚠️ Lỗi nội dung ở câu số: ${errorList.join(', ')}. Vui lòng kiểm tra lại!
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById("inputBox").style.display = "none";
+    renderQuiz();
+}
+
+
+function renderQuiz(){
+    const quizForm = document.getElementById("quizForm");
+    quizForm.innerHTML="";
+
+    quizData.forEach((q, idx)=>{
+        let div = document.createElement("div");
+        div.className="question";
+        div.innerHTML = `
+            <b>${q.question}</b><br><br>
+            <label><input type="radio" name="q${idx}" value="A">A. ${q.A}</label>
+            <label><input type="radio" name="q${idx}" value="B">B. ${q.B}</label>
+            <label><input type="radio" name="q${idx}" value="C">C. ${q.C}</label>
+            <label><input type="radio" name="q${idx}" value="D">D. ${q.D}</label>
+        `;
+        quizForm.appendChild(div);
+    });
+
+    document.getElementById("endBtn").style.display = "inline-block";
+    document.getElementById("retryBtn").style.display = "none";
+    document.getElementById("newQuizBtn").style.display = "none";
+    document.getElementById("result").innerHTML = "";
+}
+
+function submitQuiz(){
+    const quizForm = document.getElementById("quizForm");
+    const divs = quizForm.querySelectorAll(".question");
+
+    let correctCount = 0;
+    let wrongList = [];
+    let missingAnswerList = []; // danh sách câu chưa có đáp án
+
+    divs.forEach((div, idx)=>{
+        let correctAns = quizData[idx].correct;
+        const checked = div.querySelector("input[type=radio]:checked");
+
+        // nếu không có đáp án, thêm vào danh sách missingAnswerList
+        if(!correctAns) {
+            missingAnswerList.push(idx+1); // lưu số thứ tự câu hỏi
+            correctAns = "(Không có đáp án)";
+        }
+
+        // tô màu đỏ cho đáp án đúng nếu có
+        if(correctAns !== "(Không có đáp án)"){
+            let labels = div.querySelectorAll("label");
+            labels.forEach(lb=>{
+                let inp = lb.querySelector("input");
+                if(inp.value === correctAns){
+                    lb.style.color = "red";
+                    lb.style.fontWeight = "bold";
+                }
+            });
+        }
+
+        if(checked && checked.value === correctAns){
+            correctCount++;
+        } else {
+            wrongList.push({
+                q: quizData[idx].question,
+                chosen: checked ? checked.value : "(Không chọn)",
+                correct: correctAns
+            });
+        }
+    });
+
+    let total = quizData.length;
+    let percent = Math.round((correctCount/total)*100);
+    let grade = Math.round(((correctCount/total)*10)*100)/100;
+
+    let html = `
+        <h3>🎯 Kết quả</h3>
+        <p>👉 Đúng: <b>${correctCount}/${total}</b></p>
+        <p>📊 Chính xác: <b>${percent}%</b></p>
+        <p>🏆 Điểm: <b>${grade}/10</b></p>
+    `;
+
+    if(wrongList.length>0){
+        html += `<h4>❗ Các câu sai</h4>`;
+        wrongList.forEach((w,i)=>{
+            html += `
+                <div class="wrong">
+                    <b>${w.q}</b><br>
+                    ➤ Bạn chọn: <b>${w.chosen}</b><br>
+                    ✔ Đáp án đúng: <b>${w.correct}</b>
+                </div>`;
+        });
+    }
+
+    // hiển thị cảnh báo câu chưa có đáp án
+    if(missingAnswerList.length > 0){
+        html += `<div class="wrong" style="background:#fff3cd; border-left:5px solid orange; color:black;">
+            ⚠️ Câu hỏi chưa có đáp án: ${missingAnswerList.join(', ')}. Vui lòng thêm đáp án để chấm chính xác.
+        </div>`;
+    }
+
+    document.getElementById("result").innerHTML = html;
+
+    document.getElementById("retryBtn").style.display = "inline-block";
+    document.getElementById("newQuizBtn").style.display = "inline-block";
+    document.getElementById("endBtn").style.display = "none";
+}
+
+
+function retryQuiz(){
+    renderQuiz();
+}
+
+function newQuiz(){
+    quizData = [];
+    document.getElementById("inputBox").style.display = "block";
+     document.getElementById("goodLuckBox").style.display = "block"; // ✅ hiển thị lại khối tạo biểu mẫu
+    document.getElementById("quizForm").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("endBtn").style.display = "none";
+    document.getElementById("retryBtn").style.display = "none";
+    document.getElementById("newQuizBtn").style.display = "none";
+    document.getElementById("inputData").value = "";
 }
 </script>
 
