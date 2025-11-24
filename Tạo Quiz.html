@@ -319,15 +319,28 @@ function generateQuiz() {
     const lines = text
     .split("\n")
     .map(l => l.trim())
-    .filter(l => l !== "" && l !== "---"); // loại bỏ các dòng --- hoàn toàn
+    .filter(l => l !== "" && !/^-+$/g.test(l));
+ // loại bỏ các dòng --- hoàn toàn
     // 🔥 Tự động xóa mọi thứ trước câu hỏi đầu tiên
+// 🔥 Tự động xóa TẤT CẢ nội dung TRƯỚC câu hỏi đầu tiên
 let firstQuestionIndex = lines.findIndex(l =>
-    /^(\d+[\).]|Câu\s*\d+[:.\s]|Bài\s*\d+[:.\s])/i.test(l)
+    /^(Câu\s*\d+|Bài\s*\d+|\d+\s*[\).])\s*/i.test(l)
 );
 
-if (firstQuestionIndex > 0) {
+// Nếu tìm thấy Câu 1 / Bài 1 / 1. thì xóa toàn bộ đoạn trước đó
+if (firstQuestionIndex > -1) {
     lines.splice(0, firstQuestionIndex);
 }
+
+// ⭐ Ghép "Câu 1" + dòng kế tiếp thành 1 dòng duy nhất
+for (let i = 0; i < lines.length - 1; i++) {
+    if (/^(Câu\s*\d+|Bài\s*\d+|\d+\s*[\).])$/i.test(lines[i])) {
+        lines[i] = lines[i] + ": " + lines[i+1];
+        lines.splice(i+1, 1);
+        i--;
+    }
+}
+
 
 
     quizData = [];
