@@ -6,7 +6,7 @@
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #257ec2;
+        background: hsl(109, 20%, 54%);
         margin: 0;
         padding: 20px;
         font-size: 3dvh;
@@ -43,7 +43,7 @@
 
     /* tăng size chữ câu hỏi */
     .question {
-        margin-top: 20px;
+        margin-top: 30px;
         padding: 20px;
         border-radius: 8px;
         background: #f6f8fb;
@@ -136,6 +136,20 @@
     font-size: 18px;
     cursor: pointer;
 }
+.question-counter {
+  
+    padding: 10px; /* top = 40px để chừa chỗ counter */
+    border-radius: 8px;
+    background: #f6f8fb;
+    
+    font-size: 24px;
+    color: black;
+    margin-left: 80%;
+}
+.question-wrapper {
+    position: relative;
+}
+
 </style>
 </head>
 <body>
@@ -152,7 +166,7 @@
     <button id="closeHelp" onclick="closeHelp()">Đóng</button>
 </div>
 <div class="container">
-    <h2>📘 Chế độ kiểm tra (Làm nguyên 1 đề rồi trả kết quả) </h2>
+    <h2 style="font-family: Arial, Helvetica, sans-serif;">📘 Chế độ luyện tập (Làm câu nào sửa câu đó)</h2>
 
     <div id="inputBox" style="width: 95%;">
         <textarea id="inputData" placeholder="Dán câu hỏi + đáp án ở đây"></textarea>
@@ -361,13 +375,33 @@ if (firstQuestionIndex > -1) {
 }
 
 // ⭐ Ghép "Câu 1" + dòng kế tiếp thành 1 dòng duy nhất
+// ⭐ Gộp các dòng dạng "Câu 1:" + dòng câu hỏi phía sau
 for (let i = 0; i < lines.length - 1; i++) {
-    if (/^(Câu\s*\d+|Bài\s*\d+|\d+\s*[\).])$/i.test(lines[i])) {
+
+    // Nếu dòng chỉ có "Câu 1", "Câu 2", "Câu 3"...
+    if (/^Câu\s*\d+\s*:?$/i.test(lines[i])) {
+        lines[i] = lines[i].replace(/:$/, "") + ": " + lines[i+1];
+        lines.splice(i+1, 1);
+        i--;
+        continue;
+    }
+
+    // Nếu dạng "Câu 1" không có dấu ":" → thêm vào
+    if (/^Câu\s*\d+$/i.test(lines[i])) {
         lines[i] = lines[i] + ": " + lines[i+1];
+        lines.splice(i+1, 1);
+        i--;
+        continue;
+    }
+
+    // Nếu dạng "1." hoặc "1)"
+    if (/^\d+\s*[\).]\s*$/i.test(lines[i])) {
+        lines[i] = lines[i].replace(/[\).]\s*$/, "") + ": " + lines[i+1];
         lines.splice(i+1, 1);
         i--;
     }
 }
+
 
 
 
@@ -544,6 +578,234 @@ function newQuiz(){
     document.getElementById("newQuizBtn").style.display = "none";
     document.getElementById("inputData").value = "";
 }
+// ======================= CHẾ ĐỘ HIỂN THỊ 1 CÂU =========================
+let currentIndex = 0;
+let answersUser = {}; // lưu kết quả chọn
+
+function renderSingleQuestion() {
+    const quizForm = document.getElementById("quizForm");
+    quizForm.innerHTML = "";
+
+    let q = quizData[currentIndex];
+
+    let div = document.createElement("div");
+div.className = "question-wrapper";
+
+div.innerHTML = `
+    <div class="question">
+        <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
+
+        <b>${q.question}</b><br><br>
+
+        <label><input type="radio" name="qSingle" value="A">A. ${q.A}</label>
+        <label><input type="radio" name="qSingle" value="B">B. ${q.B}</label>
+        <label><input type="radio" name="qSingle" value="C">C. ${q.C}</label>
+        <label><input type="radio" name="qSingle" value="D">D. ${q.D}</label>
+
+        <div id="resultLine" style="
+            margin-top:15px;
+            font-size:22px;
+            font-weight:bold;
+        "></div>
+
+        <div id="controlConfirm" style="margin-top:15px;">
+            <button type="button" onclick="confirmAnswer()" style="
+                padding:10px 14px;
+                font-size:18px;
+                background:#2c7aed;
+                color:white;
+                border:none;
+                border-radius:6px;
+            ">Xác nhận</button>
+        </div>
+
+        <div id="controlNextPrev" style="display:none; margin-top:15px;">
+            <button type="button" onclick="prevQuestion()" style="
+    padding:10px 14px;
+    font-size:18px;
+    margin-right:10px;
+">⬅ Trước</button>
+
+<button id="nextBtn" type="button" onclick="nextQuestion()" style="
+    padding:10px 14px;
+    font-size:18px;
+">
+    Tiếp ➡
+</button>
+
+        </div>
+    
+
+    </div>
+        <div style="margin-top:20px; text-align:center;">
+    <button type="button" onclick="restartToInput()" style="
+        padding:10px 14px;
+        font-size:18px;
+        background:#e53935;
+        color:white;
+        border:none;
+        border-radius:6px;
+    ">🆕 Tạo lại câu hỏi</button>
+</div>
+`;
+
+
+    quizForm.appendChild(div);
+
+    // Nếu đã chọn đáp án rồi (quay lại câu trước), thì khôi phục
+    if (answersUser[currentIndex]) {
+        let old = answersUser[currentIndex];
+        let inp = div.querySelector(`input[value="${old}"]`);
+        if (inp) inp.checked = true;
+
+        showCorrectAnswer(true);
+    }
+    // đổi nút nếu là câu cuối
+let nextBtn = document.getElementById("nextBtn");
+if (currentIndex === quizData.length - 1) {
+    nextBtn.textContent = "Kết thúc";
+} else {
+    nextBtn.textContent = "Tiếp ➡";
+}
+
+}
+function restartToInput() {
+    quizData = [];
+    answersUser = {};
+    currentIndex = 0;
+
+    // Hiện lại ô nhập câu hỏi
+    document.getElementById("inputBox").style.display = "block";
+    document.getElementById("goodLuckBox").style.display = "block";
+
+    // Ẩn quiz + kết quả
+    document.getElementById("quizForm").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+
+    document.getElementById("endBtn").style.display = "none";
+    document.getElementById("retryBtn").style.display = "none";
+    document.getElementById("newQuizBtn").style.display = "none";
+}
+
+
+function confirmAnswer() {
+    let div = document.querySelector(".question");
+    let checked = div.querySelector("input[type=radio]:checked");
+
+    if (!checked) {
+        alert("⚠️ Bạn chưa chọn đáp án!");
+        return;
+    }
+
+    answersUser[currentIndex] = checked.value;
+
+    showCorrectAnswer(false);
+}
+
+
+function showCorrectAnswer(isRestore = false) {
+    let div = document.querySelector(".question");
+    let labels = div.querySelectorAll("label");
+    let correct = quizData[currentIndex].correct;
+
+    labels.forEach(lb => {
+        let inp = lb.querySelector("input");
+        lb.style.fontWeight = "normal";
+        lb.style.color = "black";
+
+        if (inp.value === correct) {
+            lb.style.color = "green";
+            lb.style.fontWeight = "bold";
+        }
+
+        if (answersUser[currentIndex] === inp.value && inp.value !== correct) {
+            lb.style.color = "red";
+            lb.style.fontWeight = "bold";
+        }
+    });
+
+    // hiện dòng chữ đúng/sai
+    let resultLine = document.getElementById("resultLine");
+    if (answersUser[currentIndex] === correct)
+        resultLine.textContent = "✔ Đúng";
+    else
+        resultLine.textContent = "✘ Sai";
+
+    // nếu không ở chế độ restore (xác nhận trực tiếp)
+    if (!isRestore) {
+        document.getElementById("controlConfirm").style.display = "none";
+        document.getElementById("controlNextPrev").style.display = "block";
+    }
+}
+
+
+function nextQuestion() {
+    if (currentIndex < quizData.length - 1) {
+        currentIndex++;
+        renderSingleQuestion();
+    } else {
+        endQuizSingle(); // Khi đến câu cuối thì kết thúc
+    }
+}
+
+
+function prevQuestion() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        renderSingleQuestion();
+    }
+}
+
+// >>> KHI XONG TẤT CẢ CÂU <<<
+function endQuizSingle() {
+    let resultBox = document.getElementById("result");
+
+    let correctCount = 0;
+    if (Object.keys(answersUser).length === 0) return;
+
+    quizData.forEach((q, i) => {
+        if (answersUser[i] === q.correct) correctCount++;
+    });
+
+    let total = quizData.length;
+    let percent = Math.round((correctCount/total)*100);
+
+    resultBox.innerHTML = `
+        <div style="background:#fff;padding:10px;border-radius:6px;color:black;">
+            🎯 Hoàn thành bài!<br>
+            ➤ Đúng: <b>${correctCount}/${total}</b><br>
+            📊 Chính xác: <b>${percent}%</b>
+        </div>
+
+        <button onclick="retrySingle()">🔄 Làm lại</button>
+        <button onclick="newQuiz()">🆕 Tạo quiz khác</button>
+    `;
+}
+
+function retrySingle() {
+    currentIndex = 0;
+    answersUser = {};
+
+    // ẨN KHỐI KẾT QUẢ HOÀN THÀNH
+    document.getElementById("result").innerHTML = "";
+
+    renderSingleQuestion();
+}
+
+
+
+// ================= OVERRIDE ================
+function renderQuiz() {
+    currentIndex = 0;
+    answersUser = {};
+    
+    document.getElementById("endBtn").style.display = "none";
+    document.getElementById("retryBtn").style.display = "none";
+    document.getElementById("newQuizBtn").style.display = "none";
+
+    renderSingleQuestion();
+}
+
 </script>
 
 </body>
