@@ -424,7 +424,8 @@ for (let i = 0; i < lines.length - 1; i++) {
 
         questionLine = cleanText(questionLine);
         options = options.map(opt => cleanText(opt));
-        let correct = cleanText(answerLine.replace(/^Đáp án[:\s]*/i, ""));
+        let correctRaw = cleanText(answerLine.replace(/^Đáp án[:\s]*/i, ""));
+        let correct = correctRaw.split(",").map(x => x.trim()); // ["A","B"]
 
         if (!correct) {
             errorList.push(quizData.length + 1);
@@ -591,17 +592,19 @@ function renderSingleQuestion() {
     let div = document.createElement("div");
 div.className = "question-wrapper";
 
-div.innerHTML = `
+    div.innerHTML = `
     <div class="question">
         <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
-
+    
         <b>${q.question}</b><br><br>
-
-        <label><input type="radio" name="qSingle" value="A">A. ${q.A}</label>
-        <label><input type="radio" name="qSingle" value="B">B. ${q.B}</label>
-        <label><input type="radio" name="qSingle" value="C">C. ${q.C}</label>
-        <label><input type="radio" name="qSingle" value="D">D. ${q.D}</label>
-
+    
+        ${isMulti ? '<div style="color:orange">⚠️ Chọn nhiều đáp án</div><br>' : ''}
+    
+        <label><input type="${inputType}" name="qSingle" value="A">A. ${q.A}</label>
+        <label><input type="${inputType}" name="qSingle" value="B">B. ${q.B}</label>
+        <label><input type="${inputType}" name="qSingle" value="C">C. ${q.C}</label>
+        <label><input type="${inputType}" name="qSingle" value="D">D. ${q.D}</label>
+    `;
         <div id="resultLine" style="
             margin-top:15px;
             font-size:22px;
@@ -654,12 +657,15 @@ div.innerHTML = `
 
     // Nếu đã chọn đáp án rồi (quay lại câu trước), thì khôi phục
     if (answersUser[currentIndex]) {
-        let old = answersUser[currentIndex];
-        let inp = div.querySelector(`input[value="${old}"]`);
-        if (inp) inp.checked = true;
+    let old = answersUser[currentIndex]; // array
 
-        showCorrectAnswer(true);
-    }
+    old.forEach(val => {
+        let inp = div.querySelector(`input[value="${val}"]`);
+        if (inp) inp.checked = true;
+    });
+
+    showCorrectAnswer(true);
+}
     // đổi nút nếu là câu cuối
 let nextBtn = document.getElementById("nextBtn");
 if (currentIndex === quizData.length - 1) {
@@ -690,14 +696,15 @@ function restartToInput() {
 
 function confirmAnswer() {
     let div = document.querySelector(".question");
-    let checked = div.querySelector("input[type=radio]:checked");
+    let checkedInputs = div.querySelectorAll("input[name='qSingle']:checked");
 
-    if (!checked) {
+    if (checkedInputs.length === 0) {
         alert("⚠️ Bạn chưa chọn đáp án!");
         return;
     }
 
-    answersUser[currentIndex] = checked.value;
+    let selected = Array.from(checkedInputs).map(i => i.value);
+    answersUser[currentIndex] = selected;
 
     showCorrectAnswer(false);
 }
@@ -706,32 +713,33 @@ function confirmAnswer() {
 function showCorrectAnswer(isRestore = false) {
     let div = document.querySelector(".question");
     let labels = div.querySelectorAll("label");
-    let correct = quizData[currentIndex].correct;
+
+    let userAns = answersUser[currentIndex] || [];
+    let correctAns = quizData[currentIndex].correct;
 
     labels.forEach(lb => {
         let inp = lb.querySelector("input");
         lb.style.fontWeight = "normal";
         lb.style.color = "black";
 
-        if (inp.value === correct) {
+        if (correctAns.includes(inp.value)) {
             lb.style.color = "green";
             lb.style.fontWeight = "bold";
         }
 
-        if (answersUser[currentIndex] === inp.value && inp.value !== correct) {
+        if (userAns.includes(inp.value) && !correctAns.includes(inp.value)) {
             lb.style.color = "red";
             lb.style.fontWeight = "bold";
         }
     });
 
-    // hiện dòng chữ đúng/sai
     let resultLine = document.getElementById("resultLine");
-    if (answersUser[currentIndex] === correct)
-        resultLine.textContent = "✔ Đúng";
-    else
-        resultLine.textContent = "✘ Sai";
 
-    // nếu không ở chế độ restore (xác nhận trực tiếp)
+    let isCorrect = userAns.length === correctAns.length &&
+        userAns.every(a => correctAns.includes(a));
+
+    resultLine.textContent = isCorrect ? "✔ Đúng" : "✘ Sai";
+
     if (!isRestore) {
         document.getElementById("controlConfirm").style.display = "none";
         document.getElementById("controlNextPrev").style.display = "block";
@@ -764,7 +772,13 @@ function endQuizSingle() {
     if (Object.keys(answersUser).length === 0) return;
 
     quizData.forEach((q, i) => {
-        if (answersUser[i] === q.correct) correctCount++;
+        let userAns = answersUser[i] || [];
+let correctAns = q.correct;
+
+let isCorrect = userAns.length === correctAns.length &&
+    userAns.every(a => correctAns.includes(a));
+
+if (isCorrect) correctCount++;
     });
 
     let total = quizData.length;
