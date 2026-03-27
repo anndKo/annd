@@ -591,52 +591,33 @@ function renderSingleQuestion() {
 
     let div = document.createElement("div");
 div.className = "question-wrapper";
-
+let isMulti = q.correct.length > 1;
+let inputType = isMulti ? "checkbox" : "radio";
     div.innerHTML = `
-    <div class="question">
-        <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
-    
-        <b>${q.question}</b><br><br>
-    
-        ${isMulti ? '<div style="color:orange">⚠️ Chọn nhiều đáp án</div><br>' : ''}
-    
-        <label><input type="${inputType}" name="qSingle" value="A">A. ${q.A}</label>
-        <label><input type="${inputType}" name="qSingle" value="B">B. ${q.B}</label>
-        <label><input type="${inputType}" name="qSingle" value="C">C. ${q.C}</label>
-        <label><input type="${inputType}" name="qSingle" value="D">D. ${q.D}</label>
-    `;
-        <div id="resultLine" style="
-            margin-top:15px;
-            font-size:22px;
-            font-weight:bold;
-        "></div>
+<div class="question">
+    <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
 
-        <div id="controlConfirm" style="margin-top:15px;">
-            <button type="button" onclick="confirmAnswer()" style="
-                padding:10px 14px;
-                font-size:18px;
-                background:#2c7aed;
-                color:white;
-                border:none;
-                border-radius:6px;
-            ">Xác nhận</button>
-        </div>
+    <b>${q.question}</b><br><br>
 
-        <div id="controlNextPrev" style="display:none; margin-top:15px;">
-            <button type="button" onclick="prevQuestion()" style="
-    padding:10px 14px;
-    font-size:18px;
-    margin-right:10px;
-">⬅ Trước</button>
+    ${isMulti ? '<div style="color:orange">⚠️ Chọn nhiều đáp án</div><br>' : ''}
 
-<button id="nextBtn" type="button" onclick="nextQuestion()" style="
-    padding:10px 14px;
-    font-size:18px;
-">
-    Tiếp ➡
-</button>
+    <label><input type="${inputType}" name="qSingle" value="A">A. ${q.A}</label>
+    <label><input type="${inputType}" name="qSingle" value="B">B. ${q.B}</label>
+    <label><input type="${inputType}" name="qSingle" value="C">C. ${q.C}</label>
+    <label><input type="${inputType}" name="qSingle" value="D">D. ${q.D}</label>
 
-        </div>
+    <div id="resultLine" style="margin-top:15px;font-size:22px;font-weight:bold;"></div>
+
+    <div id="controlConfirm" style="margin-top:15px;">
+        <button type="button" onclick="confirmAnswer()">Xác nhận</button>
+    </div>
+
+    <div id="controlNextPrev" style="display:none; margin-top:15px;">
+        <button type="button" onclick="prevQuestion()">⬅ Trước</button>
+        <button id="nextBtn" type="button" onclick="nextQuestion()">Tiếp ➡</button>
+    </div>
+</div>
+`;
     
 
     </div>
