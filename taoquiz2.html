@@ -296,7 +296,7 @@ button:hover { transform: translateY(-1px); }
 #quizForm { display: grid; gap: 18px; }
 .quiz-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 70%) minmax(280px, 30%);
     gap: 22px;
     align-items: start;
 }
@@ -350,22 +350,28 @@ body.quiz-mode .question {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 110px;
-    padding: 9px 14px;
+    gap: 8px;
+    min-width: 148px;
+    padding: 10px 16px;
     border-radius: 999px;
-    background: rgba(15, 118, 110, 0.12);
-    color: #0f766e;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
     font-size: 14px;
     font-weight: 800;
     letter-spacing: 0.04em;
+    box-shadow: 0 14px 28px rgba(220, 38, 38, 0.22);
+}
+.question-timer-icon {
+    font-size: 16px;
+    line-height: 1;
 }
 .question-timer.warning {
-    background: rgba(234, 88, 12, 0.14);
-    color: #c2410c;
+    background: linear-gradient(135deg, #ea580c, #dc2626);
+    color: #ffffff;
 }
 .question-timer.danger {
-    background: rgba(220, 38, 38, 0.14);
-    color: #b91c1c;
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    color: #ffffff;
 }
 .question-sidebar {
     position: sticky;
@@ -389,6 +395,22 @@ body.quiz-mode .question-grid {
     max-height: 100%;
     overflow-y: auto;
     padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(37, 99, 235, 0.9) rgba(191, 219, 254, 0.35);
+}
+body.quiz-mode .question-grid::-webkit-scrollbar {
+    width: 6px;
+}
+body.quiz-mode .question-grid::-webkit-scrollbar-track {
+    background: rgba(191, 219, 254, 0.35);
+    border-radius: 999px;
+}
+body.quiz-mode .question-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95));
+    border-radius: 999px;
+}
+body.quiz-mode .question-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(29, 78, 216, 1), rgba(30, 64, 175, 1));
 }
 .question-dot {
     min-height: 48px;
@@ -650,7 +672,7 @@ function startTimer() {
 function updateTimerDisplay() {
     const timer = document.getElementById("questionTimer");
     if (!timer) return;
-    timer.textContent = formatTime(timeRemainingSeconds);
+    timer.innerHTML = `<span class="question-timer-icon">⏰</span><span>${formatTime(timeRemainingSeconds)}</span>`;
     timer.className = "question-timer";
     if (timeRemainingSeconds <= 60) timer.classList.add("danger");
     else if (timeRemainingSeconds <= 300) timer.classList.add("warning");
@@ -772,7 +794,6 @@ function generateQuiz() {
     const rawText = document.getElementById("inputData").value.trim();
     const timeLimitValue = document.getElementById("timeLimit").value.trim();
     if (!rawText) { alert("Vui lòng nhập câu hỏi!"); return; }
-    if (!timeLimitValue || Number(timeLimitValue) <= 0) { alert("Vui lòng nhập thời gian làm bài theo phút!"); return; }
     const parsed = parseQuestionBlocks(rawText);
     if (parsed.length === 0) {
         document.getElementById("result").innerHTML = "<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Không đọc được bộ câu hỏi. Hãy kiểm tra lại cấu trúc: mỗi câu gồm nội dung, 4 đáp án A B C D và dòng Đáp án ở cuối.</div>";
@@ -782,7 +803,7 @@ function generateQuiz() {
     currentIndex = 0;
     answersUser = {};
     confirmedAnswers = {};
-    timeLimitMinutes = Number(timeLimitValue);
+    timeLimitMinutes = timeLimitValue && Number(timeLimitValue) > 0 ? Number(timeLimitValue) : 0;
     timeRemainingSeconds = timeLimitMinutes * 60;
     document.body.classList.add("quiz-mode");
     document.getElementById("inputBox").style.display = "none";
@@ -792,7 +813,7 @@ function generateQuiz() {
     document.getElementById("retryBtn").style.display = "none";
     document.getElementById("newQuizBtn").style.display = "none";
     renderSingleQuestion();
-    startTimer();
+    if (timeLimitMinutes > 0) startTimer();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function renderSingleQuestion() {
@@ -815,7 +836,7 @@ function renderSingleQuestion() {
             <div class="question">
                 <div class="question-meta">
                     <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
-                    <div class="question-timer" id="questionTimer">${formatTime(timeRemainingSeconds)}</div>
+                    ${timeLimitMinutes > 0 ? `<div class="question-timer" id="questionTimer"><span class="question-timer-icon">⏰</span><span>${formatTime(timeRemainingSeconds)}</span></div>` : ""}
                 </div>
                 <b>${q.question}</b>
                 ${isMulti ? '<div class="multi-note">Câu này có nhiều đáp án đúng.</div>' : ''}
@@ -852,7 +873,7 @@ function renderSingleQuestion() {
         input.addEventListener("change", handleAnswerChange);
     });
     updateQuestionControls();
-    updateTimerDisplay();
+    if (timeLimitMinutes > 0) updateTimerDisplay();
     document.getElementById("nextBtn").textContent = currentIndex === quizData.length - 1 ? "Kết thúc" : "Tiếp";
 }
 function saveCurrentSelection() {
@@ -971,7 +992,7 @@ function retryQuiz() {
     document.getElementById("result").innerHTML = "";
     document.getElementById("endBtn").style.display = "inline-flex";
     renderSingleQuestion();
-    startTimer();
+    if (timeLimitMinutes > 0) startTimer();
 }
 function submitQuiz() { endQuizSingle(); }
 function restartToInput() {
