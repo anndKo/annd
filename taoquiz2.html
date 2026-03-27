@@ -593,7 +593,8 @@ function renderSingleQuestion() {
 div.className = "question-wrapper";
 let isMulti = q.correct.length > 1;
 let inputType = isMulti ? "checkbox" : "radio";
-    div.innerHTML = `
+
+div.innerHTML = `
 <div class="question">
     <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
 
@@ -620,7 +621,6 @@ let inputType = isMulti ? "checkbox" : "radio";
 `;
     
 
-    </div>
         <div style="margin-top:20px; text-align:center;">
     <button type="button" onclick="restartToInput()" style="
         padding:10px 14px;
