@@ -55,6 +55,8 @@ body::after {
 }
 body.quiz-mode {
     padding: 0;
+    height: 100vh;
+    overflow: hidden;
     background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
 }
 body.quiz-mode::before, body.quiz-mode::after { display: none; }
@@ -81,6 +83,7 @@ body.quiz-mode::before, body.quiz-mode::after { display: none; }
 body.quiz-mode .container {
     max-width: none;
     min-height: 100vh;
+    height: 100vh;
     border: none;
     border-radius: 0;
     background: transparent;
@@ -164,6 +167,7 @@ body.quiz-mode .content-grid {
 body.quiz-mode .main-column { gap: 0; }
 body.quiz-mode #quizPanel {
     min-height: 100vh;
+    height: 100vh;
     padding: 24px;
     border: none;
     border-radius: 0;
@@ -237,7 +241,7 @@ textarea:focus, input[type="number"]:focus, input[type="text"]:focus {
     font-size: 15px;
 }
 .hint-box strong, .helper-list strong { display: block; margin-bottom: 4px; color: var(--text); }
-.action-row, .result-actions, .question-nav, .question-confirm {
+.action-row, .result-actions, .question-nav, .question-confirm, .question-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
@@ -261,6 +265,10 @@ button:hover { transform: translateY(-1px); }
 #hideHelpBtn, #closeHelp, .danger-outline { background: linear-gradient(135deg, #ef4444, #dc2626); }
 #endBtn { background: linear-gradient(135deg, #ea580c, #f97316); }
 #retryBtn, #newQuizBtn { background: linear-gradient(135deg, #0f766e, #0d9488); }
+.confirm-btn {
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    box-shadow: 0 14px 28px rgba(13, 148, 136, 0.24);
+}
 .field-label {
     display: block;
     margin-bottom: 8px;
@@ -288,9 +296,13 @@ button:hover { transform: translateY(-1px); }
 #quizForm { display: grid; gap: 18px; }
 .quiz-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-columns: minmax(0, 1fr) 320px;
     gap: 22px;
     align-items: start;
+}
+body.quiz-mode .quiz-layout {
+    height: calc(100vh - 48px);
+    align-items: stretch;
 }
 .question-wrapper { position: relative; }
 .question {
@@ -303,6 +315,11 @@ button:hover { transform: translateY(-1px); }
     color: var(--text);
     font-size: 20px;
 }
+body.quiz-mode .question {
+    height: 100%;
+    overflow-y: auto;
+    margin-top: 0;
+}
 .question b {
     display: block;
     margin-bottom: 12px;
@@ -313,8 +330,6 @@ button:hover { transform: translateY(-1px); }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
-    margin-bottom: 18px;
     min-width: 88px;
     padding: 9px 14px;
     border-radius: 999px;
@@ -324,27 +339,64 @@ button:hover { transform: translateY(-1px); }
     font-weight: 800;
     letter-spacing: 0.04em;
 }
+.question-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.question-timer {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: rgba(15, 118, 110, 0.12);
+    color: #0f766e;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+.question-timer.warning {
+    background: rgba(234, 88, 12, 0.14);
+    color: #c2410c;
+}
+.question-timer.danger {
+    background: rgba(220, 38, 38, 0.14);
+    color: #b91c1c;
+}
 .question-sidebar {
     position: sticky;
-    top: 18px;
-    padding: 20px;
+    top: 0;
+    padding: 24px;
     border-radius: 24px;
     background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,248,255,0.96));
     border: 1px solid rgba(148, 163, 184, 0.18);
     box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
 }
+body.quiz-mode .question-sidebar {
+    height: 100%;
+    overflow: hidden;
+}
 .question-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
+}
+body.quiz-mode .question-grid {
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 6px;
 }
 .question-dot {
-    min-height: 40px;
+    min-height: 48px;
     border: 1px solid rgba(148, 163, 184, 0.22);
     border-radius: 14px;
     background: #ffffff;
     color: var(--text);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     box-shadow: none;
 }
@@ -366,10 +418,27 @@ button:hover { transform: translateY(-1px); }
     color: #166534;
     border-color: rgba(34, 197, 94, 0.35);
 }
+.question-dot.wrong-answer {
+    background: rgba(254, 226, 226, 0.98);
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.38);
+}
+.question-dot.active.wrong-answer,
 .question-dot.active.answered,
 .question-dot.active.checked {
     color: #ffffff;
     border-color: transparent;
+}
+.question-actions {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+.question-action-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
 }
 .multi-note {
     margin-bottom: 16px;
@@ -444,9 +513,17 @@ input[type="radio"], input[type="checkbox"] {
     .panel, .question { padding: 20px; }
     .quiz-layout { grid-template-columns: 1fr; }
     .question-sidebar { position: static; order: -1; }
+    body.quiz-mode .quiz-layout { height: auto; }
+    body.quiz-mode .question,
+    body.quiz-mode .question-sidebar,
+    body.quiz-mode .question-grid {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
     .field-grid, .hint-row { grid-template-columns: 1fr; }
-    .action-row, .result-actions, .question-nav, .question-confirm { flex-direction: column; }
-    .top-actions button, .action-row button, .result-actions button, .question-nav button, .question-confirm button { width: 100%; }
+    .action-row, .result-actions, .question-nav, .question-confirm, .question-actions, .question-action-stack { flex-direction: column; }
+    .top-actions button, .action-row button, .result-actions button, .question-nav button, .question-confirm button, .question-actions button { width: 100%; }
     textarea { min-height: 280px; }
     body.quiz-mode { padding: 0; }
     body.quiz-mode #quizPanel { padding: 14px; }
@@ -489,6 +566,9 @@ B. Đáp án B
 C. Đáp án C
 D. Đáp án D
 Đáp án: A"></textarea>
+                <div class="field-grid" style="margin-top:18px;">
+                    <div><label class="field-label" for="timeLimit">Thời gian làm bài (phút)</label><input id="timeLimit" type="number" min="1" placeholder="Ví dụ: 15"></div>
+                </div>
                 <div class="action-row"><button type="button" onclick="generateQuiz()">Tạo Quiz</button></div>
                 <div class="hint-row">
                     <div class="hint-box"><strong>1. Đúng thứ tự</strong>Mỗi câu nên giữ theo A, B, C, D.</div>
@@ -533,6 +613,48 @@ let quizData = [];
 let currentIndex = 0;
 let answersUser = {};
 let confirmedAnswers = {};
+let timeLimitMinutes = 0;
+let timeRemainingSeconds = 0;
+let timerInterval = null;
+function isQuestionCorrect(index) {
+    if (!confirmedAnswers[index]) return false;
+    const userAns = answersUser[index] || [];
+    const correctAns = quizData[index]?.correct || [];
+    return userAns.length === correctAns.length && userAns.every(answer => correctAns.includes(answer));
+}
+function formatTime(seconds) {
+    const safeSeconds = Math.max(0, seconds);
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainSeconds = safeSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainSeconds).padStart(2, "0")}`;
+}
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+function startTimer() {
+    stopTimer();
+    if (timeRemainingSeconds <= 0) return;
+    timerInterval = setInterval(() => {
+        timeRemainingSeconds--;
+        updateTimerDisplay();
+        if (timeRemainingSeconds <= 0) {
+            stopTimer();
+            alert("Đã hết thời gian làm bài!");
+            endQuizSingle();
+        }
+    }, 1000);
+}
+function updateTimerDisplay() {
+    const timer = document.getElementById("questionTimer");
+    if (!timer) return;
+    timer.textContent = formatTime(timeRemainingSeconds);
+    timer.className = "question-timer";
+    if (timeRemainingSeconds <= 60) timer.classList.add("danger");
+    else if (timeRemainingSeconds <= 300) timer.classList.add("warning");
+}
 function showHelp() {
     document.getElementById("helpOverlay").style.display = "flex";
     const video = document.getElementById("helpVideo");
@@ -648,7 +770,9 @@ function parseQuestionBlocks(text) {
 }
 function generateQuiz() {
     const rawText = document.getElementById("inputData").value.trim();
+    const timeLimitValue = document.getElementById("timeLimit").value.trim();
     if (!rawText) { alert("Vui lòng nhập câu hỏi!"); return; }
+    if (!timeLimitValue || Number(timeLimitValue) <= 0) { alert("Vui lòng nhập thời gian làm bài theo phút!"); return; }
     const parsed = parseQuestionBlocks(rawText);
     if (parsed.length === 0) {
         document.getElementById("result").innerHTML = "<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Không đọc được bộ câu hỏi. Hãy kiểm tra lại cấu trúc: mỗi câu gồm nội dung, 4 đáp án A B C D và dòng Đáp án ở cuối.</div>";
@@ -658,6 +782,8 @@ function generateQuiz() {
     currentIndex = 0;
     answersUser = {};
     confirmedAnswers = {};
+    timeLimitMinutes = Number(timeLimitValue);
+    timeRemainingSeconds = timeLimitMinutes * 60;
     document.body.classList.add("quiz-mode");
     document.getElementById("inputBox").style.display = "none";
     document.getElementById("goodLuckBox").style.display = "none";
@@ -666,6 +792,8 @@ function generateQuiz() {
     document.getElementById("retryBtn").style.display = "none";
     document.getElementById("newQuizBtn").style.display = "none";
     renderSingleQuestion();
+    startTimer();
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 function renderSingleQuestion() {
     const quizForm = document.getElementById("quizForm");
@@ -679,13 +807,16 @@ function renderSingleQuestion() {
         const classes = ["question-dot"];
         if (index === currentIndex) classes.push("active");
         if ((answersUser[index] || []).length > 0) classes.push("answered");
-        if (confirmedAnswers[index]) classes.push("checked");
+        if (confirmedAnswers[index]) classes.push(isQuestionCorrect(index) ? "checked" : "wrong-answer");
         return `<button type="button" class="${classes.join(" ")}" onclick="goToQuestion(${index})">${index + 1}</button>`;
     }).join("");
     div.innerHTML = `
         <div class="quiz-layout">
             <div class="question">
-                <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
+                <div class="question-meta">
+                    <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
+                    <div class="question-timer" id="questionTimer">${formatTime(timeRemainingSeconds)}</div>
+                </div>
                 <b>${q.question}</b>
                 ${isMulti ? '<div class="multi-note">Câu này có nhiều đáp án đúng.</div>' : ''}
                 <label><input type="${inputType}" name="qSingle" value="A">A. ${q.A}</label>
@@ -693,8 +824,13 @@ function renderSingleQuestion() {
                 <label><input type="${inputType}" name="qSingle" value="C">C. ${q.C}</label>
                 <label><input type="${inputType}" name="qSingle" value="D">D. ${q.D}</label>
                 <div id="resultLine" style="margin-top:16px;font-size:20px;font-weight:800;"></div>
-                <div class="question-confirm" id="controlConfirm"><button type="button" onclick="confirmAnswer()">Xác nhận</button></div>
-                <div class="question-nav" id="controlNextPrev"><button type="button" onclick="prevQuestion()">Trước</button><button id="nextBtn" type="button" onclick="nextQuestion()">Tiếp</button></div>
+                <div class="question-actions">
+                    <div class="question-nav"><button type="button" onclick="prevQuestion()">Trước</button></div>
+                    <div class="question-action-stack">
+                        <div class="question-confirm" id="controlConfirm"><button type="button" class="confirm-btn" onclick="confirmAnswer()">Xác nhận</button></div>
+                        <div class="question-nav" id="controlNextPrev"><button id="nextBtn" type="button" onclick="nextQuestion()">Tiếp</button></div>
+                    </div>
+                </div>
                 <div class="question-nav"><button type="button" class="danger-outline" onclick="restartToInput()">Tạo lại câu hỏi</button></div>
             </div>
             <aside class="question-sidebar">
@@ -716,6 +852,7 @@ function renderSingleQuestion() {
         input.addEventListener("change", handleAnswerChange);
     });
     updateQuestionControls();
+    updateTimerDisplay();
     document.getElementById("nextBtn").textContent = currentIndex === quizData.length - 1 ? "Kết thúc" : "Tiếp";
 }
 function saveCurrentSelection() {
@@ -800,6 +937,7 @@ function prevQuestion() {
 }
 function endQuizSingle() {
     saveCurrentSelection();
+    stopTimer();
     if (Object.keys(answersUser).length === 0) return;
     let correctCount = 0;
     let wrongList = [];
@@ -829,9 +967,11 @@ function retryQuiz() {
     currentIndex = 0;
     answersUser = {};
     confirmedAnswers = {};
+    timeRemainingSeconds = timeLimitMinutes * 60;
     document.getElementById("result").innerHTML = "";
     document.getElementById("endBtn").style.display = "inline-flex";
     renderSingleQuestion();
+    startTimer();
 }
 function submitQuiz() { endQuizSingle(); }
 function restartToInput() {
@@ -839,6 +979,9 @@ function restartToInput() {
     answersUser = {};
     confirmedAnswers = {};
     currentIndex = 0;
+    timeLimitMinutes = 0;
+    timeRemainingSeconds = 0;
+    stopTimer();
     document.body.classList.remove("quiz-mode");
     document.getElementById("inputBox").style.display = "block";
     document.getElementById("goodLuckBox").style.display = "block";
@@ -851,6 +994,7 @@ function restartToInput() {
 function newQuiz() {
     restartToInput();
     document.getElementById("inputData").value = "";
+    document.getElementById("timeLimit").value = "";
 }
 </script>
 </body>
