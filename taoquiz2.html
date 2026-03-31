@@ -1724,14 +1724,14 @@ function renderQuestionImages(images) {
     if (!Array.isArray(images) || images.length === 0) return "";
     return `<div class="question-image-stack">${images.map((item, index) => `
         <div class="question-image-frame">
-            <img src="${item.src}" alt="${escapeHtml(item.name || `Hinh anh ${index + 1}`)}">
+            <img src="${item.src}" alt="${escapeHtml(item.name || `Hình ảnh ${index + 1}`)}">
         </div>`).join("")}</div>`;
 }
 async function fileToDataUrl(file) {
     return await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error || new Error("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c áº£nh"));
+        reader.onerror = () => reject(reader.error || new Error("Không đọc được ảnh"));
         reader.readAsDataURL(file);
     });
 }
@@ -1739,7 +1739,7 @@ async function loadImageElement(src) {
     return await new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error("KhÃ´ng táº£i Ä‘Æ°á»£c áº£nh"));
+        image.onerror = () => reject(new Error("Không tải được ảnh"));
         image.src = src;
     });
 }
@@ -1799,7 +1799,7 @@ async function handleQuestionImageFiles(fileList) {
     const files = Array.from(fileList || []).filter(file => file.type && file.type.startsWith("image/"));
     if (files.length === 0) return;
     if (draftQuestions.length === 0) {
-        alert("HÃ£y xÃ¡c nháº­n cÃ¢u há»i trÆ°á»›c khi thÃªm áº£nh.");
+        alert("Hãy xác nhận câu hỏi trước khi thêm ảnh.");
         return;
     }
     const questionNumber = clampImageQuestionNumber();
@@ -1945,8 +1945,8 @@ function renderSingleQuestion() {
                     <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
                     ${timeLimitMinutes > 0 ? `<div class="question-timer" id="questionTimer"><span class="question-timer-icon">⏰</span><span>${formatTime(timeRemainingSeconds)}</span></div>` : ""}
                 </div>
-                <div class="question-body"><b>${renderTextWithLineBreaks(q.question)}</b></div>
                 ${renderQuestionImages(q.images)}
+                <div class="question-body"><b>${renderTextWithLineBreaks(q.question)}</b></div>
                 ${isMulti ? '<div class="multi-note">Câu này có nhiều đáp án đúng.</div>' : ''}
                 <label><input type="${inputType}" name="qSingle" value="A">A. ${escapeHtml(q.A)}</label>
                 <label><input type="${inputType}" name="qSingle" value="B">B. ${escapeHtml(q.B)}</label>
