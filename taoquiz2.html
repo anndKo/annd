@@ -1857,10 +1857,18 @@ function resetConfirmedQuestionInput() {
 function confirmQuestionInput() {
     const rawText = document.getElementById("inputData").value.trim();
     if (!rawText) { alert("Vui lòng nhập câu hỏi!"); return; }
-    const parsed = parseQuestionOnlyBlocks(rawText);
+    let parsed = parseQuestionOnlyBlocks(rawText);
     if (parsed.length === 0) {
         document.getElementById("result").innerHTML = "<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Không đọc được bộ câu hỏi. Hãy kiểm tra lại cấu trúc: mỗi câu gồm nội dung và 4 đáp án A B C D.</div>";
         return;
+    }
+    const soCauValue = document.getElementById("soCau").value.trim();
+    if (soCauValue && Number(soCauValue) > 0) {
+        if (Number(soCauValue) < parsed.length) {
+            parsed = parsed.slice(0, Number(soCauValue));
+        } else if (Number(soCauValue) > parsed.length) {
+            alert(`Số câu parse được là ${parsed.length}, nhưng bạn nhập ${soCauValue}. Sẽ sử dụng ${parsed.length} câu.`);
+        }
     }
     draftQuestions = parsed;
     pruneQuestionImages();
