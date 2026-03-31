@@ -451,6 +451,111 @@ body.quiz-mode #quizPanel::before {
     font-size: 13px;
     line-height: 1.65;
 }
+.answer-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+.question-image-tools {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 16px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(47, 109, 246, 0.06), rgba(123, 231, 207, 0.05));
+    border: 1px solid rgba(47, 109, 246, 0.12);
+}
+.question-image-tools[hidden] {
+    display: none;
+}
+.question-image-tools-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.question-image-tools-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-dark);
+}
+.question-image-tools-note {
+    margin: 0;
+    color: var(--muted-dark);
+    font-size: 13px;
+    line-height: 1.65;
+}
+.question-image-tools-row {
+    display: grid;
+    grid-template-columns: minmax(0, 120px) minmax(0, 1fr);
+    gap: 12px;
+    align-items: end;
+}
+.question-image-preview {
+    display: grid;
+    gap: 10px;
+}
+.question-image-empty {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px dashed rgba(133, 147, 170, 0.36);
+    color: var(--muted-dark);
+    font-size: 13px;
+    line-height: 1.65;
+}
+.question-image-item {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(133, 147, 170, 0.18);
+}
+.question-image-thumb {
+    width: 84px;
+    height: 64px;
+    border-radius: 14px;
+    object-fit: cover;
+    background: #eef4ff;
+    border: 1px solid rgba(133, 147, 170, 0.16);
+    image-rendering: -webkit-optimize-contrast;
+    filter: contrast(1.08) saturate(1.08);
+}
+.question-image-meta strong,
+.question-image-meta span {
+    display: block;
+}
+.question-image-meta strong {
+    color: var(--text-dark);
+    font-size: 14px;
+}
+.question-image-meta span {
+    margin-top: 4px;
+    color: var(--muted-dark);
+    font-size: 12px;
+    line-height: 1.55;
+}
+.question-image-remove {
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ec6a5f, #cb3f43);
+    box-shadow: 0 10px 22px rgba(203, 63, 67, 0.18);
+}
+@media (max-width: 720px) {
+    .question-image-tools-row,
+    .question-image-item {
+        grid-template-columns: 1fr;
+    }
+    .question-image-thumb {
+        width: 100%;
+        height: 180px;
+    }
+}
 #answerInputSection {
     display: block;
     margin-top: 0 !important;
@@ -708,6 +813,35 @@ body.quiz-mode .question {
     font-size: clamp(24px, 3vw, 34px);
     line-height: 1.35;
     letter-spacing: -0.03em;
+    white-space: pre-line;
+}
+.question-body {
+    padding: 20px 22px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(47, 109, 246, 0.07), rgba(123, 231, 207, 0.04));
+    border: 1px solid rgba(47, 109, 246, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+.question-image-stack {
+    display: grid;
+    gap: 14px;
+    margin: 18px 0 8px;
+}
+.question-image-frame {
+    overflow: hidden;
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 247, 255, 0.98));
+    border: 1px solid rgba(47, 109, 246, 0.14);
+    box-shadow: 0 16px 34px rgba(18, 40, 84, 0.08);
+}
+.question-image-frame img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    background: #f3f7ff;
+    image-rendering: -webkit-optimize-contrast;
+    filter: contrast(1.1) saturate(1.08) drop-shadow(0 10px 18px rgba(7, 17, 31, 0.08));
 }
 .question-meta {
     display: flex;
@@ -1260,6 +1394,8 @@ let timeLimitMinutes = 0;
 let timeRemainingSeconds = 0;
 let timerInterval = null;
 let draftQuestions = [];
+let questionImages = {};
+let imageAssetSequence = 0;
 function isQuestionCorrect(index) {
     if (!confirmedAnswers[index]) return false;
     const userAns = answersUser[index] || [];
@@ -1327,9 +1463,24 @@ function cleanLine(text) {
 function normalizeVietnamese(text) {
     return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D");
 }
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+function renderTextWithLineBreaks(text) {
+    return escapeHtml(text).replace(/\n/g, "<br>");
+}
 function isQuestionStart(line) {
     const normalized = normalizeVietnamese(line);
     return /^(Cau\s*\d+|Bai\s*\d+|\d+\s*[\).:])\s*/i.test(normalized);
+}
+function isOptionLine(line) {
+    const normalized = normalizeVietnamese(line);
+    return /^[A-D]\s*[\).:-]\s*\S+/i.test(normalized);
 }
 function isAnswerLine(line) {
     const normalized = normalizeVietnamese(line);
@@ -1402,28 +1553,35 @@ function parseQuestionOnlyBlocks(text) {
     }
     const parsed = [];
     let currentBlock = [];
+    function pushBlock(blockLines) {
+        if (!blockLines.length) return;
+        const optionStart = blockLines.findIndex(line => isOptionLine(line));
+        if (optionStart < 0) return;
+        const questionText = blockLines.slice(0, optionStart).join("\n").trim();
+        const optionLines = blockLines.slice(optionStart).filter(line => isOptionLine(line));
+        const optionMap = {};
+        optionLines.forEach(line => {
+            const match = line.match(/^([A-D])\s*[\).:-]\s*(.+)$/i);
+            if (match) optionMap[match[1].toUpperCase()] = match[2].trim();
+        });
+        if (questionText && optionMap.A && optionMap.B && optionMap.C && optionMap.D) {
+            parsed.push({
+                question: questionText,
+                A: optionMap.A,
+                B: optionMap.B,
+                C: optionMap.C,
+                D: optionMap.D
+            });
+        }
+    }
     lines.forEach(line => {
         if (isQuestionStart(line) && currentBlock.length > 0) {
-            const questionLine = currentBlock[0] || "";
-            const options = currentBlock.slice(1);
-            const A = options[0] ? options[0].replace(/^A[:.]\s*/i, "").trim() : "";
-            const B = options[1] ? options[1].replace(/^B[:.]\s*/i, "").trim() : "";
-            const C = options[2] ? options[2].replace(/^C[:.]\s*/i, "").trim() : "";
-            const D = options[3] ? options[3].replace(/^D[:.]\s*/i, "").trim() : "";
-            if (questionLine && A && B && C && D) parsed.push({ question: questionLine, A, B, C, D });
+            pushBlock(currentBlock);
             currentBlock = [];
         }
         currentBlock.push(line);
     });
-    if (currentBlock.length > 0) {
-        const questionLine = currentBlock[0] || "";
-        const options = currentBlock.slice(1);
-        const A = options[0] ? options[0].replace(/^A[:.]\s*/i, "").trim() : "";
-        const B = options[1] ? options[1].replace(/^B[:.]\s*/i, "").trim() : "";
-        const C = options[2] ? options[2].replace(/^C[:.]\s*/i, "").trim() : "";
-        const D = options[3] ? options[3].replace(/^D[:.]\s*/i, "").trim() : "";
-        if (questionLine && A && B && C && D) parsed.push({ question: questionLine, A, B, C, D });
-    }
+    pushBlock(currentBlock);
     return parsed;
 }
 function parseAnswerInput(text, totalQuestions) {
@@ -1452,10 +1610,219 @@ function parseAnswerInput(text, totalQuestions) {
 function buildAnswerTemplate(totalQuestions) {
     return Array.from({ length: totalQuestions }, (_, index) => `Câu ${index + 1}: `).join("\n");
 }
+function clampImageQuestionNumber() {
+    const input = document.getElementById("imageQuestionNumber");
+    if (!input) return 1;
+    const max = Math.max(draftQuestions.length, 1);
+    input.max = String(max);
+    let value = Number(input.value) || 1;
+    value = Math.min(Math.max(value, 1), max);
+    input.value = String(value);
+    return value;
+}
+function getQuestionImageCount() {
+    return Object.values(questionImages).reduce((total, items) => total + items.length, 0);
+}
+function updateAnswerStatus() {
+    const answerStatus = document.getElementById("answerStatus");
+    if (!answerStatus) return;
+    const imageCount = getQuestionImageCount();
+    answerStatus.textContent = imageCount > 0 ? `Sáºµn sÃ ng · ${imageCount} áº£nh` : "Sáºµn sÃ ng";
+}
+function ensureGenerateButtonPlacement() {
+    const answerSection = document.getElementById("answerInputSection");
+    const generateBtn = document.getElementById("generateQuizBtn");
+    if (!answerSection || !generateBtn) return;
+    let actionRow = answerSection.querySelector(".answer-action-row");
+    if (!actionRow) {
+        actionRow = document.createElement("div");
+        actionRow.className = "answer-action-row";
+        answerSection.appendChild(actionRow);
+    }
+    if (generateBtn.parentElement !== actionRow) actionRow.appendChild(generateBtn);
+}
+function ensureAnswerImageTools() {
+    const answerSection = document.getElementById("answerInputSection");
+    if (!answerSection) return;
+    let tools = document.getElementById("questionImageTools");
+    if (!tools) {
+        tools = document.createElement("div");
+        tools.id = "questionImageTools";
+        tools.className = "question-image-tools";
+        tools.hidden = true;
+        tools.innerHTML = `
+            <div class="question-image-tools-header">
+                <div>
+                    <p class="question-image-tools-title">HÃ¬nh áº£nh cÃ¢u há»i</p>
+                    <p class="question-image-tools-note">Chá»n vá»‹ trÃ­ cÃ¢u, táº£i áº£nh lÃªn hoáº·c nháº¥n Ctrl+V Ä‘á»ƒ dÃ¡n. Má»—i cÃ¢u cÃ³ thá»ƒ cÃ³ nhiá»u áº£nh.</p>
+                </div>
+            </div>
+            <div class="question-image-tools-row">
+                <div>
+                    <label class="field-label" for="imageQuestionNumber">Vá»‹ trÃ­ cÃ¢u</label>
+                    <input id="imageQuestionNumber" type="number" min="1" value="1">
+                </div>
+                <div>
+                    <button type="button" id="uploadQuestionImageBtn">HÃ¬nh áº£nh cÃ¢u há»i</button>
+                    <input id="questionImageInput" type="file" accept="image/*" multiple hidden>
+                </div>
+            </div>
+            <div class="question-image-preview" id="questionImagePreview"></div>`;
+        const tip = answerSection.querySelector(".answer-tip");
+        if (tip) tip.insertAdjacentElement("beforebegin", tools);
+        else answerSection.appendChild(tools);
+        document.getElementById("uploadQuestionImageBtn").addEventListener("click", () => {
+            clampImageQuestionNumber();
+            document.getElementById("questionImageInput").click();
+        });
+        document.getElementById("questionImageInput").addEventListener("change", async event => {
+            await handleQuestionImageFiles(event.target.files);
+            event.target.value = "";
+        });
+    }
+    tools.hidden = draftQuestions.length === 0;
+    clampImageQuestionNumber();
+    updateQuestionImagePreview();
+}
+function updateQuestionImagePreview() {
+    const preview = document.getElementById("questionImagePreview");
+    if (!preview) return;
+    const entries = Object.keys(questionImages)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .flatMap(index => (questionImages[index] || []).map(item => ({ ...item, questionIndex: index })));
+    if (entries.length === 0) {
+        preview.innerHTML = `<div class="question-image-empty">ChÆ°a cÃ³ áº£nh nÃ o. Báº¡n cÃ³ thá»ƒ chá»n cÃ¢u rá»“i báº¥m nÃºt táº£i áº£nh hoáº·c dÃ¡n áº£nh báº±ng Ctrl+V.</div>`;
+        updateAnswerStatus();
+        return;
+    }
+    preview.innerHTML = entries.map(item => `
+        <div class="question-image-item">
+            <img class="question-image-thumb" src="${item.src}" alt="CÃ¢u ${item.questionIndex + 1}">
+            <div class="question-image-meta">
+                <strong>CÃ¢u ${item.questionIndex + 1}</strong>
+                <span>${escapeHtml(item.name || "áº¢nh dÃ¡n")}</span>
+            </div>
+            <button type="button" class="question-image-remove" onclick="removeQuestionImage(${item.questionIndex}, ${item.id})">XÃ³a</button>
+        </div>`).join("");
+    updateAnswerStatus();
+}
+function removeQuestionImage(questionIndex, imageId) {
+    const items = questionImages[questionIndex] || [];
+    questionImages[questionIndex] = items.filter(item => item.id !== imageId);
+    if (questionImages[questionIndex].length === 0) delete questionImages[questionIndex];
+    updateQuestionImagePreview();
+}
+function pruneQuestionImages() {
+    const total = draftQuestions.length;
+    Object.keys(questionImages).forEach(key => {
+        const index = Number(key);
+        if (index >= total) delete questionImages[index];
+    });
+}
+function renderQuestionImages(images) {
+    if (!Array.isArray(images) || images.length === 0) return "";
+    return `<div class="question-image-stack">${images.map((item, index) => `
+        <div class="question-image-frame">
+            <img src="${item.src}" alt="${escapeHtml(item.name || `Hinh anh ${index + 1}`)}">
+        </div>`).join("")}</div>`;
+}
+async function fileToDataUrl(file) {
+    return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error || new Error("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c áº£nh"));
+        reader.readAsDataURL(file);
+    });
+}
+async function loadImageElement(src) {
+    return await new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("KhÃ´ng táº£i Ä‘Æ°á»£c áº£nh"));
+        image.src = src;
+    });
+}
+function sharpenImageData(imageData, width, height) {
+    const source = imageData.data;
+    const contrasted = new Uint8ClampedArray(source.length);
+    for (let i = 0; i < source.length; i += 4) {
+        contrasted[i] = Math.max(0, Math.min(255, (source[i] - 128) * 1.08 + 132));
+        contrasted[i + 1] = Math.max(0, Math.min(255, (source[i + 1] - 128) * 1.08 + 132));
+        contrasted[i + 2] = Math.max(0, Math.min(255, (source[i + 2] - 128) * 1.08 + 132));
+        contrasted[i + 3] = source[i + 3];
+    }
+    const output = new Uint8ClampedArray(contrasted);
+    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            const pixelIndex = (y * width + x) * 4;
+            for (let channel = 0; channel < 3; channel++) {
+                let value = 0;
+                let kernelIndex = 0;
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const sourceIndex = ((y + ky) * width + (x + kx)) * 4 + channel;
+                        value += contrasted[sourceIndex] * kernel[kernelIndex++];
+                    }
+                }
+                output[pixelIndex + channel] = Math.max(0, Math.min(255, contrasted[pixelIndex + channel] * 0.4 + value * 0.6));
+            }
+        }
+    }
+    imageData.data.set(output);
+    return imageData;
+}
+async function enhanceImageFile(file) {
+    const sourceUrl = await fileToDataUrl(file);
+    const image = await loadImageElement(sourceUrl);
+    const maxWidth = 1600;
+    const scale = Math.min(1, maxWidth / Math.max(image.width, 1));
+    const width = Math.max(1, Math.round(image.width * scale));
+    const height = Math.max(1, Math.round(image.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    context.drawImage(image, 0, 0, width, height);
+    if (width * height <= 2200000) {
+        const enhanced = sharpenImageData(context.getImageData(0, 0, width, height), width, height);
+        context.putImageData(enhanced, 0, 0);
+    }
+    return {
+        id: ++imageAssetSequence,
+        name: file.name || `image-${imageAssetSequence}.png`,
+        src: canvas.toDataURL("image/webp", 0.92)
+    };
+}
+async function handleQuestionImageFiles(fileList) {
+    const files = Array.from(fileList || []).filter(file => file.type && file.type.startsWith("image/"));
+    if (files.length === 0) return;
+    if (draftQuestions.length === 0) {
+        alert("HÃ£y xÃ¡c nháº­n cÃ¢u há»i trÆ°á»›c khi thÃªm áº£nh.");
+        return;
+    }
+    const questionNumber = clampImageQuestionNumber();
+    const questionIndex = questionNumber - 1;
+    const status = document.getElementById("answerStatus");
+    if (status) status.textContent = "Äang xá»­ lÃ½ áº£nh";
+    for (const file of files) {
+        try {
+            const imageAsset = await enhanceImageFile(file);
+            if (!questionImages[questionIndex]) questionImages[questionIndex] = [];
+            questionImages[questionIndex].push(imageAsset);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    updateQuestionImagePreview();
+}
 function highlightAnswerPanel() {
     const section = document.getElementById("answerInputSection");
     const answerStatus = document.getElementById("answerStatus");
     if (!section) return;
+    ensureGenerateButtonPlacement();
+    ensureAnswerImageTools();
     document.body.classList.add("answer-focus-active");
     section.classList.remove("is-hidden");
     section.classList.add("is-highlighted");
@@ -1468,11 +1835,14 @@ function clearAnswerHighlight() {
 }
 function resetConfirmedQuestionInput() {
     draftQuestions = [];
+    questionImages = {};
+    imageAssetSequence = 0;
     clearAnswerHighlight();
     document.getElementById("answerInputSection").style.display = "none";
     document.getElementById("answerInputSection").classList.add("is-hidden");
     document.getElementById("generateQuizBtn").style.display = "none";
     document.getElementById("answerData").value = "";
+    ensureAnswerImageTools();
     document.getElementById("answerStatus").textContent = "Chờ xác nhận";
 }
 function confirmQuestionInput() {
@@ -1484,8 +1854,10 @@ function confirmQuestionInput() {
         return;
     }
     draftQuestions = parsed;
+    pruneQuestionImages();
     document.getElementById("answerInputSection").style.display = "block";
     document.getElementById("answerInputSection").classList.remove("is-hidden");
+    ensureAnswerImageTools();
     const answerData = document.getElementById("answerData");
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
@@ -1515,7 +1887,11 @@ function generateQuiz() {
         document.getElementById("result").innerHTML = `<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Thiếu đáp án ở các câu: ${missingAnswers.join(", ")}. Hãy nhập theo mẫu "Câu 1: A".</div>`;
         return;
     }
-    quizData = draftQuestions.map((question, index) => ({ ...question, correct: parsedAnswers[index] }));
+    quizData = draftQuestions.map((question, index) => ({
+        ...question,
+        correct: parsedAnswers[index],
+        images: (questionImages[index] || []).map(item => ({ ...item }))
+    }));
     currentIndex = 0;
     answersUser = {};
     confirmedAnswers = {};
@@ -1529,6 +1905,7 @@ function generateQuiz() {
     document.getElementById("endBtn").style.display = "inline-flex";
     document.getElementById("retryBtn").style.display = "none";
     document.getElementById("newQuizBtn").style.display = "none";
+    ensureAnswerImageTools();
     renderSingleQuestion();
     if (timeLimitMinutes > 0) startTimer();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1559,12 +1936,13 @@ function renderSingleQuestion() {
                     <div class="question-counter">${currentIndex + 1} / ${quizData.length}</div>
                     ${timeLimitMinutes > 0 ? `<div class="question-timer" id="questionTimer"><span class="question-timer-icon">⏰</span><span>${formatTime(timeRemainingSeconds)}</span></div>` : ""}
                 </div>
-                <b>${q.question}</b>
+                <div class="question-body"><b>${renderTextWithLineBreaks(q.question)}</b></div>
+                ${renderQuestionImages(q.images)}
                 ${isMulti ? '<div class="multi-note">Câu này có nhiều đáp án đúng.</div>' : ''}
-                <label><input type="${inputType}" name="qSingle" value="A">A. ${q.A}</label>
-                <label><input type="${inputType}" name="qSingle" value="B">B. ${q.B}</label>
-                <label><input type="${inputType}" name="qSingle" value="C">C. ${q.C}</label>
-                <label><input type="${inputType}" name="qSingle" value="D">D. ${q.D}</label>
+                <label><input type="${inputType}" name="qSingle" value="A">A. ${escapeHtml(q.A)}</label>
+                <label><input type="${inputType}" name="qSingle" value="B">B. ${escapeHtml(q.B)}</label>
+                <label><input type="${inputType}" name="qSingle" value="C">C. ${escapeHtml(q.C)}</label>
+                <label><input type="${inputType}" name="qSingle" value="D">D. ${escapeHtml(q.D)}</label>
                 <div id="resultLine" style="margin-top:16px;font-size:20px;font-weight:800;"></div>
                 <div class="question-actions">
                     <div class="question-nav"><button type="button" onclick="prevQuestion()">Trước</button></div>
@@ -1724,6 +2102,8 @@ function submitQuiz() { endQuizSingle(); }
 function restartToInput() {
     quizData = [];
     draftQuestions = [];
+    questionImages = {};
+    imageAssetSequence = 0;
     answersUser = {};
     confirmedAnswers = {};
     currentIndex = 0;
@@ -1750,7 +2130,21 @@ function newQuiz() {
     document.getElementById("answerData").value = "";
     document.getElementById("timeLimit").value = "";
 }
+ensureGenerateButtonPlacement();
+ensureAnswerImageTools();
 document.getElementById("inputData").addEventListener("input", resetConfirmedQuestionInput);
+document.addEventListener("paste", async event => {
+    const answerSection = document.getElementById("answerInputSection");
+    if (!answerSection || answerSection.style.display === "none" || draftQuestions.length === 0) return;
+    const items = Array.from(event.clipboardData?.items || []);
+    const imageFiles = items
+        .filter(item => item.type && item.type.startsWith("image/"))
+        .map(item => item.getAsFile())
+        .filter(Boolean);
+    if (imageFiles.length === 0) return;
+    event.preventDefault();
+    await handleQuestionImageFiles(imageFiles);
+});
 document.addEventListener("keydown", event => {
     if (event.key === "Escape") clearAnswerHighlight();
 });
