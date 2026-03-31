@@ -1627,7 +1627,7 @@ function updateAnswerStatus() {
     const answerStatus = document.getElementById("answerStatus");
     if (!answerStatus) return;
     const imageCount = getQuestionImageCount();
-    answerStatus.textContent = imageCount > 0 ? `Sẵn sàng · ${imageCount} ảnh` : "Sẵn sàng";
+    answerStatus.textContent = imageCount > 0 ? `Sáºµn sÃ ng · ${imageCount} áº£nh` : "Sáºµn sÃ ng";
 }
 function ensureGenerateButtonPlacement() {
     const answerSection = document.getElementById("answerInputSection");
@@ -1653,8 +1653,8 @@ function ensureAnswerImageTools() {
         tools.innerHTML = `
             <div class="question-image-tools-header">
                 <div>
-                    <p class="question-image-tools-title">Hình ảnh câu hỏi</p>
-                    <p class="question-image-tools-note">Chọn vị trí câu, tải ảnh lên hoặc nhấn Ctrl+V để dán. Mỗi câu có thể có nhiều ảnh.</p>
+                    <p class="question-image-tools-title">HÃ¬nh áº£nh cÃ¢u há»i</p>
+                    <p class="question-image-tools-note">Chá»n vá»‹ trÃ­ cÃ¢u, táº£i áº£nh lÃªn hoáº·c nháº¥n Ctrl+V Ä‘á»ƒ dÃ¡n. Má»—i cÃ¢u cÃ³ thá»ƒ cÃ³ nhiá»u áº£nh.</p>
                 </div>
             </div>
             <div class="question-image-tools-row">
@@ -1692,9 +1692,7 @@ function updateQuestionImagePreview() {
         .sort((a, b) => a - b)
         .flatMap(index => (questionImages[index] || []).map(item => ({ ...item, questionIndex: index })));
     if (entries.length === 0) {
-        preview.innerHTML = `<div class="question-image-empty">
-Chưa có ảnh nào. Bạn có thể chọn câu rồi bấm nút tải ảnh hoặc dán ảnh bằng Ctrl+V.
-</div>`;
+        preview.innerHTML = `<div class="question-image-empty">ChÆ°a cÃ³ áº£nh nÃ o. Báº¡n cÃ³ thá»ƒ chá»n cÃ¢u rá»“i báº¥m nÃºt táº£i áº£nh hoáº·c dÃ¡n áº£nh báº±ng Ctrl+V.</div>`;
         updateAnswerStatus();
         return;
     }
@@ -1801,13 +1799,13 @@ async function handleQuestionImageFiles(fileList) {
     const files = Array.from(fileList || []).filter(file => file.type && file.type.startsWith("image/"));
     if (files.length === 0) return;
     if (draftQuestions.length === 0) {
-        alert("Hãy xác nhận câu hỏi trước khi thêm ảnh.");
+        alert("HÃ£y xÃ¡c nháº­n cÃ¢u há»i trÆ°á»›c khi thÃªm áº£nh.");
         return;
     }
     const questionNumber = clampImageQuestionNumber();
     const questionIndex = questionNumber - 1;
     const status = document.getElementById("answerStatus");
-    if (status) status.textContent = "Đang xử lý ảnh";
+    if (status) status.textContent = "Äang xá»­ lÃ½ áº£nh";
     for (const file of files) {
         try {
             const imageAsset = await enhanceImageFile(file);
@@ -1818,6 +1816,15 @@ async function handleQuestionImageFiles(fileList) {
         }
     }
     updateQuestionImagePreview();
+    // Tự động chuyển sang câu tiếp theo để thêm ảnh
+    const input = document.getElementById("imageQuestionNumber");
+    const nextNumber = questionNumber + 1;
+    if (nextNumber <= draftQuestions.length) {
+        input.value = String(nextNumber);
+        if (status) status.textContent = `Chuyển sang câu ${nextNumber} để thêm ảnh`;
+    } else {
+        if (status) status.textContent = "Hoàn thành tải ảnh cho tất cả câu hỏi";
+    }
 }
 function highlightAnswerPanel() {
     const section = document.getElementById("answerInputSection");
