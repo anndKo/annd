@@ -6,79 +6,111 @@
 <title>Tạo Quiz Ôn Tập</title>
 <style>
 :root {
-    --bg: #f3f8ff;
-    --bg-2: #eef4fb;
-    --surface: rgba(255, 255, 255, 0.84);
-    --surface-soft: #f7fbff;
-    --text: #15263b;
-    --muted: #60738d;
-    --primary: #2563eb;
-    --primary-2: #1d4ed8;
-    --danger: #dc2626;
-    --border: rgba(148, 163, 184, 0.22);
-    --shadow: 0 28px 80px rgba(15, 23, 42, 0.12);
+    color-scheme: light;
+    --bg: #07111f;
+    --bg-soft: #0d1b2f;
+    --surface: rgba(10, 19, 34, 0.72);
+    --surface-strong: rgba(8, 15, 28, 0.88);
+    --surface-light: rgba(255, 255, 255, 0.08);
+    --card: rgba(255, 255, 255, 0.93);
+    --card-soft: rgba(244, 247, 251, 0.92);
+    --text: #e8eef9;
+    --text-dark: #132238;
+    --muted: #8da2bf;
+    --muted-dark: #62748c;
+    --line: rgba(255, 255, 255, 0.12);
+    --line-strong: rgba(148, 163, 184, 0.22);
+    --primary: #6ea8ff;
+    --primary-strong: #2f6df6;
+    --accent: #7be7cf;
+    --accent-strong: #1d9e87;
+    --gold: #ffd78a;
+    --danger: #e75a5a;
+    --shadow-xl: 0 30px 80px rgba(0, 0, 0, 0.26);
+    --shadow-lg: 0 18px 48px rgba(7, 17, 31, 0.22);
+    --radius-xl: 32px;
+    --radius-lg: 24px;
+    --radius-md: 18px;
+    --transition: 180ms ease;
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* {
+    box-sizing: border-box;
+}
+html {
+    scroll-behavior: smooth;
+}
 body {
     margin: 0;
     min-height: 100vh;
-    padding: 28px 16px 44px;
-    font-family: "Be Vietnam Pro", "Segoe UI", sans-serif;
+    padding: 26px 18px 38px;
+    font-family: "Segoe UI Variable Display", "Bahnschrift", "Trebuchet MS", sans-serif;
     color: var(--text);
     background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 28%),
-        radial-gradient(circle at right center, rgba(15, 118, 110, 0.12), transparent 22%),
-        linear-gradient(180deg, var(--bg) 0%, #f8fbff 48%, var(--bg-2) 100%);
+        radial-gradient(circle at top left, rgba(71, 123, 255, 0.22), transparent 26%),
+        radial-gradient(circle at 85% 15%, rgba(123, 231, 207, 0.18), transparent 18%),
+        radial-gradient(circle at bottom right, rgba(255, 215, 138, 0.12), transparent 20%),
+        linear-gradient(135deg, #040a13 0%, #07111f 42%, #0c182a 100%);
 }
-body::before, body::after {
+body::before,
+body::after {
     content: "";
     position: fixed;
+    inset: auto;
     border-radius: 999px;
-    filter: blur(14px);
     pointer-events: none;
+    filter: blur(24px);
+    opacity: 0.8;
     z-index: 0;
 }
 body::before {
-    width: 260px;
-    height: 260px;
-    top: 80px;
-    left: -90px;
-    background: rgba(37, 99, 235, 0.12);
+    width: 320px;
+    height: 320px;
+    top: -90px;
+    right: -90px;
+    background: rgba(110, 168, 255, 0.22);
 }
 body::after {
-    width: 220px;
-    height: 220px;
-    right: -50px;
-    bottom: 80px;
-    background: rgba(20, 184, 166, 0.1);
+    width: 260px;
+    height: 260px;
+    left: -100px;
+    bottom: 40px;
+    background: rgba(123, 231, 207, 0.16);
 }
 body.quiz-mode {
     padding: 0;
-    height: 100vh;
     overflow: hidden;
-    background: linear-gradient(180deg, #eef5ff 0%, #f7fbff 100%);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(71, 123, 255, 0.18), transparent 24%),
+        linear-gradient(180deg, #06101d 0%, #0a1322 100%);
 }
-body.quiz-mode::before, body.quiz-mode::after { display: none; }
+body.quiz-mode::before,
+body.quiz-mode::after {
+    display: none;
+}
 .top-actions {
     position: fixed;
     top: 18px;
     right: 18px;
+    z-index: 30;
     display: flex;
-    gap: 12px;
-    z-index: 20;
+    gap: 10px;
+}
+.shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1380px;
+    margin: 0 auto;
 }
 .container {
     position: relative;
-    z-index: 1;
-    max-width: 1180px;
-    margin: 0 auto;
-    border-radius: 40px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.62);
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(18px);
+    border: 1px solid var(--line);
+    border-radius: 36px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+        rgba(7, 17, 31, 0.72);
+    box-shadow: var(--shadow-xl);
+    backdrop-filter: blur(22px);
 }
 body.quiz-mode .container {
     max-width: none;
@@ -91,64 +123,151 @@ body.quiz-mode .container {
     backdrop-filter: none;
 }
 .hero {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.82fr);
-    gap: 24px;
-    padding: 36px;
-    color: #f8fbff;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.96), rgba(8, 145, 178, 0.9));
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+    gap: 28px;
+    padding: 42px;
+    background:
+        linear-gradient(140deg, rgba(8, 18, 34, 0.96), rgba(13, 27, 47, 0.88)),
+        linear-gradient(120deg, rgba(47, 109, 246, 0.22), transparent);
+    border-bottom: 1px solid var(--line);
+}
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -120px -120px auto;
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 215, 138, 0.16), transparent 62%);
+    pointer-events: none;
+}
+.hero-copy {
+    position: relative;
+    z-index: 1;
 }
 .hero-tag {
     display: inline-flex;
     align-items: center;
-    padding: 10px 14px;
+    gap: 10px;
+    padding: 11px 16px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--gold);
     font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    margin-bottom: 14px;
+}
+.hero-tag::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 18px currentColor;
 }
 .hero h1 {
-    margin: 0 0 14px;
-    font-size: clamp(34px, 5vw, 54px);
-    line-height: 1.02;
+    max-width: 780px;
+    margin: 18px 0 16px;
+    font-size: clamp(38px, 5vw, 68px);
+    line-height: 0.98;
     letter-spacing: -0.05em;
 }
 .hero p {
+    max-width: 690px;
     margin: 0;
-    max-width: 700px;
+    color: rgba(232, 238, 249, 0.8);
     font-size: 17px;
-    line-height: 1.75;
-    color: rgba(248, 251, 255, 0.9);
+    line-height: 1.78;
 }
-.hero-side { display: grid; gap: 14px; }
-.hero-chip {
-    padding: 18px 20px;
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 26px;
 }
-.hero-chip strong { display: block; margin-bottom: 6px; font-size: 16px; }
-.hero-chip span { font-size: 14px; line-height: 1.65; color: rgba(248, 251, 255, 0.84); }
+.hero-stat,
+.hero-panel,
+.metric-card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.hero-stat {
+    padding: 18px 18px 16px;
+    border-radius: 22px;
+}
+.hero-stat strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-size: 28px;
+    line-height: 1;
+}
+.hero-stat span {
+    color: rgba(232, 238, 249, 0.72);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.hero-side {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+.hero-panel {
+    padding: 22px;
+    border-radius: 26px;
+}
+.hero-panel strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 17px;
+}
+.hero-panel span {
+    color: rgba(232, 238, 249, 0.75);
+    font-size: 14px;
+    line-height: 1.7;
+}
+.hero-panel.primary {
+    background:
+        linear-gradient(160deg, rgba(110, 168, 255, 0.2), rgba(255, 255, 255, 0.08)),
+        rgba(255, 255, 255, 0.06);
+}
 .content-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.78fr);
     gap: 24px;
-    padding: 26px;
-    align-items: start;
+    padding: 24px;
 }
-.main-column, .side-column { display: grid; gap: 22px; }
+.main-column,
+.side-column {
+    display: grid;
+    gap: 24px;
+    align-content: start;
+}
 .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 32px;
-    padding: 26px;
-    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
-    backdrop-filter: blur(12px);
-    color: var(--text);
+    position: relative;
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line-strong);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 248, 252, 0.92));
+    color: var(--text-dark);
+    box-shadow: var(--shadow-lg);
+}
+.panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), transparent 26%);
+    pointer-events: none;
 }
 body.quiz-mode .top-actions,
 body.quiz-mode .hero,
@@ -164,117 +283,369 @@ body.quiz-mode .content-grid {
     gap: 0;
     padding: 0;
 }
-body.quiz-mode .main-column { gap: 0; }
+body.quiz-mode .main-column {
+    gap: 0;
+}
 body.quiz-mode #quizPanel {
     min-height: 100vh;
     height: 100vh;
-    padding: 24px;
+    padding: 22px;
     border: none;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    backdrop-filter: none;
+}
+body.quiz-mode #quizPanel::before {
+    display: none;
 }
 .panel-header {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
 }
 .eyebrow {
     display: inline-flex;
     align-items: center;
-    padding: 7px 12px;
+    gap: 8px;
+    padding: 8px 12px;
     border-radius: 999px;
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--primary-2);
+    background: rgba(47, 109, 246, 0.1);
+    color: var(--primary-strong);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.eyebrow::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.panel-title {
+    margin: 12px 0 0;
+    font-size: clamp(24px, 2.8vw, 34px);
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+}
+.panel-subtitle {
+    max-width: 760px;
+    margin: 10px 0 0;
+    color: var(--muted-dark);
+    font-size: 15px;
+    line-height: 1.74;
+}
+.intro-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.72fr);
+    gap: 18px;
+    margin-bottom: 20px;
+}
+.intro-card,
+.assistant-card {
+    padding: 20px;
+    border-radius: 22px;
+    background: var(--card-soft);
+    border: 1px solid rgba(47, 109, 246, 0.08);
+}
+.intro-card strong,
+.assistant-card strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+.intro-card p,
+.assistant-card p {
+    margin: 0;
+    color: var(--muted-dark);
+    line-height: 1.7;
+    font-size: 14px;
+}
+.assistant-card {
+    background:
+        linear-gradient(180deg, rgba(47, 109, 246, 0.08), rgba(123, 231, 207, 0.06)),
+        var(--card-soft);
+}
+.composer-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.18fr) minmax(300px, 0.82fr);
+    gap: 18px;
+    align-items: start;
+}
+.question-compose,
+.answer-compose {
+    position: relative;
+}
+.answer-compose {
+    padding: 22px;
+    border-radius: 30px;
+    background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.99), rgba(241, 247, 255, 0.97)),
+        radial-gradient(circle at top right, rgba(110, 168, 255, 0.12), transparent 40%);
+    border: 1px solid rgba(47, 109, 246, 0.14);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        0 18px 42px rgba(18, 40, 84, 0.08);
+    transition: transform var(--transition), box-shadow 240ms ease, border-color 240ms ease, opacity 240ms ease, filter 240ms ease;
+}
+.answer-compose-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.answer-compose-title {
+    margin: 0 0 6px;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+.answer-compose-note {
+    margin: 0;
+    color: var(--muted-dark);
+    font-size: 13px;
+    line-height: 1.65;
+}
+.answer-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(47, 109, 246, 0.08);
+    color: var(--primary-strong);
     font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
-.panel-title {
-    margin: 10px 0 0;
-    font-size: 26px;
-    line-height: 1.15;
-    color: var(--text);
+.answer-compose.is-hidden {
+    opacity: 0.78;
 }
-.panel-subtitle {
-    margin: 10px 0 0;
-    color: var(--muted);
-    font-size: 15px;
-    line-height: 1.7;
+.answer-compose.is-highlighted {
+    z-index: 80;
+    border-color: rgba(47, 109, 246, 0.42);
+    box-shadow:
+        0 0 0 1px rgba(47, 109, 246, 0.18),
+        0 30px 90px rgba(17, 40, 84, 0.22),
+        0 0 0 8px rgba(110, 168, 255, 0.14);
+    transform: translateY(-4px) scale(1.01);
+    filter: saturate(1.02);
 }
-textarea, input[type="number"], input[type="text"] {
+.answer-tip {
+    margin-top: 12px;
+    padding: 13px 15px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(47, 109, 246, 0.08), rgba(123, 231, 207, 0.08));
+    border: 1px solid rgba(47, 109, 246, 0.08);
+    color: var(--muted-dark);
+    font-size: 13px;
+    line-height: 1.65;
+}
+#answerInputSection {
+    display: block;
+    margin-top: 0 !important;
+}
+@media (min-width: 1081px) {
+    #answerInputSection {
+        position: sticky;
+        top: 24px;
+    }
+}
+#answerInputSection textarea {
+    min-height: 280px;
+}
+#focusDismissLayer {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 70;
+    background: rgba(4, 10, 19, 0.4);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    transition: opacity 220ms ease;
+}
+body.answer-focus-active #focusDismissLayer {
+    display: block;
+    opacity: 1;
+}
+body.answer-focus-active .container > :not(#focusDismissLayer),
+body.answer-focus-active #inputBox .panel-header,
+body.answer-focus-active #inputBox .intro-grid,
+body.answer-focus-active #inputBox .field-grid,
+body.answer-focus-active #inputBox .action-row,
+body.answer-focus-active #inputBox .hint-row,
+body.answer-focus-active #inputBox #result,
+body.answer-focus-active #inputBox .question-compose {
+    pointer-events: none;
+}
+body.answer-focus-active #inputBox .question-compose,
+body.answer-focus-active #inputBox .panel-header,
+body.answer-focus-active #inputBox .intro-grid,
+body.answer-focus-active #inputBox .field-grid,
+body.answer-focus-active #inputBox .action-row,
+body.answer-focus-active #inputBox .hint-row,
+body.answer-focus-active #inputBox #result {
+    filter: blur(1px);
+    opacity: 0.45;
+}
+textarea,
+input[type="number"],
+input[type="text"] {
     width: 100%;
-    border: 1px solid rgba(148, 163, 184, 0.34);
-    border-radius: 20px;
-    background: rgba(248, 250, 252, 0.92);
-    color: var(--text);
-    font-family: inherit;
+    border: 1px solid rgba(133, 147, 170, 0.26);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--text-dark);
+    font: inherit;
+    transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
 }
 textarea {
-    min-height: 340px;
+    min-height: 360px;
+    padding: 22px 24px;
     resize: vertical;
-    padding: 22px;
-    font-size: 17px;
-    line-height: 1.72;
+    font-size: 16px;
+    line-height: 1.78;
 }
-input[type="number"], input[type="text"] { padding: 14px 16px; font-size: 16px; }
-textarea:focus, input[type="number"]:focus, input[type="text"]:focus {
-    outline: none;
-    border-color: rgba(37, 99, 235, 0.46);
-    box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.12);
-    transform: translateY(-1px);
-}
-.hint-row, .field-grid { display: grid; gap: 14px; }
-.hint-row { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 18px; }
-.field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.hint-box, .helper-list li {
-    padding: 16px;
-    border-radius: 18px;
-    background: var(--surface-soft);
-    border: 1px solid rgba(37, 99, 235, 0.08);
-    color: var(--muted);
-    line-height: 1.7;
+input[type="number"],
+input[type="text"] {
+    padding: 15px 16px;
     font-size: 15px;
 }
-.hint-box strong, .helper-list strong { display: block; margin-bottom: 4px; color: var(--text); }
-.action-row, .result-actions, .question-nav, .question-confirm, .question-actions {
+textarea:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+    outline: none;
+    border-color: rgba(47, 109, 246, 0.38);
+    box-shadow: 0 0 0 6px rgba(47, 109, 246, 0.12);
+    transform: translateY(-1px);
+}
+.field-grid,
+.hint-row,
+.metric-grid {
+    display: grid;
+    gap: 14px;
+}
+.field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.hint-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 20px;
+}
+.metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.hint-box,
+.helper-list li,
+.metric-card {
+    border-radius: 20px;
+}
+.hint-box,
+.helper-list li {
+    padding: 17px 18px;
+    background: var(--card-soft);
+    border: 1px solid rgba(47, 109, 246, 0.08);
+    color: var(--muted-dark);
+    line-height: 1.7;
+    font-size: 14px;
+}
+.hint-box strong,
+.helper-list strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text-dark);
+}
+.metric-card {
+    padding: 18px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(243, 247, 251, 0.94));
+    border: 1px solid rgba(133, 147, 170, 0.18);
+}
+.metric-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 28px;
+    color: var(--text-dark);
+}
+.metric-card span {
+    color: var(--muted-dark);
+    font-size: 13px;
+    line-height: 1.55;
+}
+.action-row,
+.result-actions,
+.question-nav,
+.question-confirm,
+.question-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-top: 18px;
+}
+.action-row,
+.result-actions {
+    margin-top: 20px;
 }
 button {
     appearance: none;
-    border: none;
-    border-radius: 16px;
-    padding: 13px 18px;
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 15px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #3578ff, #2454d7);
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
     font-weight: 800;
+    letter-spacing: 0.01em;
     cursor: pointer;
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+    box-shadow: 0 14px 30px rgba(36, 84, 215, 0.26);
+    transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
 }
-button:hover { transform: translateY(-1px); }
-#helpBtn { background: linear-gradient(135deg, #0f766e, #0d9488); }
-#hideHelpBtn, #closeHelp, .danger-outline { background: linear-gradient(135deg, #ef4444, #dc2626); }
-#endBtn { background: linear-gradient(135deg, #ea580c, #f97316); }
-#retryBtn, #newQuizBtn { background: linear-gradient(135deg, #0f766e, #0d9488); }
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 18px 34px rgba(36, 84, 215, 0.28);
+    filter: saturate(1.05);
+}
+button:active {
+    transform: translateY(0);
+}
+#helpBtn,
+#retryBtn,
+#newQuizBtn {
+    background: linear-gradient(135deg, #1da48d, #147463);
+    box-shadow: 0 14px 30px rgba(20, 116, 99, 0.22);
+}
+#hideHelpBtn,
+#closeHelp,
+.danger-outline {
+    background: linear-gradient(135deg, #ec6a5f, #cb3f43);
+    box-shadow: 0 14px 30px rgba(203, 63, 67, 0.2);
+}
+#endBtn {
+    background: linear-gradient(135deg, #fd9b55, #eb6a26);
+    box-shadow: 0 14px 30px rgba(235, 106, 38, 0.24);
+}
 .confirm-btn {
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
-    box-shadow: 0 14px 28px rgba(13, 148, 136, 0.24);
+    background: linear-gradient(135deg, #169d84, #0f7964);
+    box-shadow: 0 14px 30px rgba(15, 121, 100, 0.24);
 }
 .field-label {
     display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
+    margin-bottom: 9px;
+    font-size: 13px;
     font-weight: 800;
-    color: var(--text);
+    letter-spacing: 0.02em;
+    color: var(--text-dark);
 }
 .helper-list {
     margin: 0;
@@ -283,61 +654,60 @@ button:hover { transform: translateY(-1px); }
     display: grid;
     gap: 12px;
 }
-#mauOutput, #result { margin-top: 18px; font-size: 16px; color: var(--text); }
-#mauText {
-    background: linear-gradient(180deg, #f8fbff, #f2f7ff);
-    border: 1px solid rgba(37, 99, 235, 0.14);
-    border-left: 5px solid var(--primary);
-    border-radius: 18px;
-    padding: 16px;
-    line-height: 1.7;
-    white-space: pre-line;
+#mauOutput,
+#result {
+    position: relative;
+    z-index: 1;
+    margin-top: 18px;
 }
-#quizForm { display: grid; gap: 18px; }
+#mauText {
+    padding: 18px;
+    border-radius: 20px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 251, 0.95));
+    border: 1px solid rgba(47, 109, 246, 0.16);
+    border-left: 5px solid var(--primary-strong);
+    white-space: pre-line;
+    line-height: 1.72;
+}
+#quizForm {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 20px;
+}
 .quiz-layout {
     display: grid;
-    grid-template-columns: minmax(0, 70%) minmax(280px, 30%);
+    grid-template-columns: minmax(0, 1.65fr) minmax(290px, 0.78fr);
     gap: 22px;
     align-items: start;
 }
 body.quiz-mode .quiz-layout {
-    height: calc(100vh - 48px);
+    height: calc(100vh - 44px);
     align-items: stretch;
 }
-.question-wrapper { position: relative; }
+.question-wrapper {
+    position: relative;
+}
 .question {
-    margin-top: 8px;
+    height: 100%;
     padding: 28px;
     border-radius: 30px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
-    color: var(--text);
-    font-size: 20px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 251, 0.96));
+    border: 1px solid rgba(145, 159, 181, 0.18);
+    box-shadow: 0 26px 48px rgba(7, 17, 31, 0.16);
+    color: var(--text-dark);
 }
 body.quiz-mode .question {
-    height: 100%;
     overflow-y: auto;
-    margin-top: 0;
 }
 .question b {
     display: block;
-    margin-bottom: 12px;
-    font-size: clamp(22px, 3vw, 30px);
-    line-height: 1.38;
-}
-.question-counter {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 88px;
-    padding: 9px 14px;
-    border-radius: 999px;
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--primary-2);
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
+    margin-bottom: 18px;
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.35;
+    letter-spacing: -0.03em;
 }
 .question-meta {
     display: flex;
@@ -346,121 +716,137 @@ body.quiz-mode .question {
     gap: 12px;
     margin-bottom: 18px;
 }
+.question-counter,
 .question-timer {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    min-width: 148px;
+    min-height: 48px;
     padding: 10px 16px;
     border-radius: 999px;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #ffffff;
     font-size: 14px;
     font-weight: 800;
-    letter-spacing: 0.04em;
-    box-shadow: 0 14px 28px rgba(220, 38, 38, 0.22);
 }
-.question-timer-icon {
-    font-size: 16px;
-    line-height: 1;
+.question-counter {
+    background: rgba(47, 109, 246, 0.1);
+    color: var(--primary-strong);
+}
+.question-timer {
+    gap: 8px;
+    min-width: 150px;
+    background: linear-gradient(135deg, #fd8d70, #da474b);
+    color: #fff;
+    box-shadow: 0 14px 28px rgba(218, 71, 75, 0.22);
 }
 .question-timer.warning {
-    background: linear-gradient(135deg, #ea580c, #dc2626);
-    color: #ffffff;
+    background: linear-gradient(135deg, #f0a348, #e36a2f);
 }
 .question-timer.danger {
-    background: linear-gradient(135deg, #b91c1c, #991b1b);
-    color: #ffffff;
+    background: linear-gradient(135deg, #d34249, #a7242d);
 }
 .question-sidebar {
     position: sticky;
     top: 0;
-    padding: 24px;
-    border-radius: 24px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(244,248,255,0.96));
-    border: 1px solid rgba(148, 163, 184, 0.18);
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+    display: grid;
+    gap: 16px;
+    padding: 22px;
+    border-radius: 28px;
+    background:
+        linear-gradient(180deg, rgba(14, 25, 42, 0.96), rgba(10, 18, 31, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 40px rgba(0, 0, 0, 0.22);
+    color: var(--text);
 }
 body.quiz-mode .question-sidebar {
     height: 100%;
     overflow: hidden;
 }
+.sidebar-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.sidebar-heading strong {
+    font-size: 16px;
+    color: #fff;
+}
+.sidebar-heading span {
+    color: rgba(232, 238, 249, 0.66);
+    font-size: 13px;
+}
+.sidebar-note {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(232, 238, 249, 0.72);
+    font-size: 13px;
+    line-height: 1.7;
+}
 .question-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
 }
 body.quiz-mode .question-grid {
-    max-height: 100%;
     overflow-y: auto;
-    padding-right: 6px;
+    padding-right: 4px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(37, 99, 235, 0.9) rgba(191, 219, 254, 0.35);
+    scrollbar-color: rgba(110, 168, 255, 0.9) rgba(255, 255, 255, 0.08);
 }
 body.quiz-mode .question-grid::-webkit-scrollbar {
     width: 6px;
 }
 body.quiz-mode .question-grid::-webkit-scrollbar-track {
-    background: rgba(191, 219, 254, 0.35);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 999px;
 }
 body.quiz-mode .question-grid::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95));
+    background: linear-gradient(180deg, #6ea8ff, #2f6df6);
     border-radius: 999px;
-}
-body.quiz-mode .question-grid::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(29, 78, 216, 1), rgba(30, 64, 175, 1));
 }
 .question-dot {
     min-height: 48px;
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    border-radius: 14px;
-    background: #ffffff;
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 800;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
     box-shadow: none;
+    font-size: 14px;
 }
 .question-dot:hover {
-    transform: translateY(-1px);
-    border-color: rgba(37, 99, 235, 0.38);
+    border-color: rgba(110, 168, 255, 0.32);
 }
 .question-dot.active {
-    background: linear-gradient(135deg, var(--primary), var(--primary-2));
-    color: #ffffff;
+    background: linear-gradient(135deg, #6ea8ff, #2f6df6);
 }
 .question-dot.answered {
-    background: rgba(219, 234, 254, 0.86);
-    color: var(--primary-2);
-    border-color: rgba(37, 99, 235, 0.28);
+    background: rgba(110, 168, 255, 0.14);
+    color: #dbe8ff;
 }
 .question-dot.checked {
-    background: rgba(220, 252, 231, 0.96);
-    color: #166534;
-    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(32, 181, 132, 0.22);
+    color: #cefff1;
 }
 .question-dot.partial-answer {
-    background: rgba(254, 249, 195, 0.98);
-    color: #a16207;
-    border-color: rgba(234, 179, 8, 0.42);
+    background: rgba(255, 193, 79, 0.2);
+    color: #ffe9b7;
 }
 .question-dot.wrong-answer {
-    background: rgba(254, 226, 226, 0.98);
-    color: #b91c1c;
-    border-color: rgba(239, 68, 68, 0.38);
+    background: rgba(231, 90, 90, 0.24);
+    color: #ffd4d4;
 }
-.question-dot.active.partial-answer,
-.question-dot.active.wrong-answer,
 .question-dot.active.answered,
-.question-dot.active.checked {
-    color: #ffffff;
-    border-color: transparent;
+.question-dot.active.checked,
+.question-dot.active.partial-answer,
+.question-dot.active.wrong-answer {
+    color: #fff;
 }
 .question-actions {
-    display: flex;
     align-items: flex-end;
     justify-content: space-between;
+    margin-top: 18px;
 }
 .question-action-stack {
     display: flex;
@@ -470,78 +856,181 @@ body.quiz-mode .question-grid::-webkit-scrollbar-thumb:hover {
 }
 .multi-note {
     margin-bottom: 16px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: rgba(234, 88, 12, 0.08);
-    color: #9a3412;
-    font-weight: 700;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(240, 163, 72, 0.12);
+    border: 1px solid rgba(240, 163, 72, 0.2);
+    color: #b16119;
     font-size: 14px;
+    font-weight: 700;
 }
 label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
-    margin: 14px 0;
-    padding: 15px 16px;
-    border-radius: 18px;
-    background: rgba(248, 250, 252, 0.98);
-    border: 1px solid rgba(148, 163, 184, 0.2);
-    font-size: 18px;
-    line-height: 1.58;
-    color: var(--text);
+    margin: 12px 0;
+    padding: 17px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(145, 159, 181, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-dark);
+    font-size: 17px;
+    line-height: 1.62;
+    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
-input[type="radio"], input[type="checkbox"] {
+label:hover {
+    transform: translateY(-1px);
+    border-color: rgba(47, 109, 246, 0.24);
+    box-shadow: 0 12px 24px rgba(47, 109, 246, 0.08);
+}
+input[type="radio"],
+input[type="checkbox"] {
     width: 22px;
     height: 22px;
-    margin: 0;
+    margin: 2px 0 0;
     flex: 0 0 auto;
-    accent-color: var(--primary);
+    accent-color: var(--primary-strong);
 }
 .wrong {
-    margin: 12px 0;
-    padding: 16px 18px;
-    border-radius: 16px;
+    margin: 14px 0;
+    padding: 18px;
+    border-radius: 18px;
     border-left: 5px solid var(--danger);
-    background: #fff4f4;
-    color: var(--text);
+    background: rgba(255, 244, 244, 0.96);
+    color: var(--text-dark);
     line-height: 1.7;
-    font-size: 16px;
 }
 .result-summary {
-    padding: 20px;
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
-    border: 1px solid rgba(148, 163, 184, 0.18);
+    padding: 24px;
+    border-radius: 24px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(242, 247, 251, 0.96));
+    border: 1px solid rgba(145, 159, 181, 0.18);
+    box-shadow: 0 18px 38px rgba(7, 17, 31, 0.08);
+}
+.result-summary h3 {
+    margin: 0 0 10px;
+    font-size: 26px;
 }
 #helpOverlay {
     position: fixed;
     inset: 0;
+    z-index: 50;
     display: none;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    gap: 14px;
     padding: 24px;
-    background: rgba(15, 23, 42, 0.76);
-    backdrop-filter: blur(8px);
-    z-index: 30;
+    background: rgba(4, 10, 19, 0.8);
+    backdrop-filter: blur(10px);
 }
 #helpOverlay video {
-    width: min(100%, 920px);
+    width: min(100%, 980px);
     max-height: 80vh;
-    border-radius: 26px;
-    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.4);
+    border-radius: 28px;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
 }
-@media (max-width: 980px) { .hero, .content-grid { grid-template-columns: 1fr; } }
+.fade-up {
+    animation: fadeUp 600ms cubic-bezier(.2, .8, .2, 1) both;
+}
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+@media (max-width: 1080px) {
+    .hero,
+    .content-grid,
+    .intro-grid,
+    .composer-grid,
+    .quiz-layout {
+        grid-template-columns: 1fr;
+    }
+    #answerInputSection {
+        position: static;
+        top: auto;
+    }
+    .hero-stats,
+    .hint-row,
+    .metric-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
 @media (max-width: 760px) {
-    body { padding-top: 88px; }
-    .top-actions { left: 12px; right: 12px; justify-content: flex-end; }
-    .container { border-radius: 28px; }
-    .hero { padding: 26px 22px; }
-    .content-grid { padding: 18px; }
-    .panel, .question { padding: 20px; }
-    .quiz-layout { grid-template-columns: 1fr; }
-    .question-sidebar { position: static; order: -1; }
-    body.quiz-mode .quiz-layout { height: auto; }
+    body {
+        padding: 78px 12px 20px;
+    }
+    .top-actions {
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        justify-content: flex-end;
+    }
+    .container {
+        border-radius: 28px;
+    }
+    .hero {
+        padding: 28px 20px;
+    }
+    .content-grid {
+        padding: 16px;
+    }
+    .panel,
+    .question,
+    .question-sidebar {
+        padding: 20px;
+        border-radius: 24px;
+    }
+    .hero-stats,
+    .composer-grid,
+    .field-grid,
+    .hint-row,
+    .metric-grid,
+    .question-grid {
+        grid-template-columns: 1fr;
+    }
+    .action-row,
+    .result-actions,
+    .question-nav,
+    .question-confirm,
+    .question-actions,
+    .question-action-stack {
+        flex-direction: column;
+    }
+    .top-actions button,
+    .action-row button,
+    .result-actions button,
+    .question-nav button,
+    .question-confirm button,
+    .question-actions button {
+        width: 100%;
+    }
+    textarea {
+        min-height: 280px;
+    }
+    body.quiz-mode #quizPanel {
+        padding: 12px;
+    }
+    body.quiz-mode .quiz-layout {
+        height: auto;
+    }
     body.quiz-mode .question,
     body.quiz-mode .question-sidebar,
     body.quiz-mode .question-grid {
@@ -549,12 +1038,6 @@ input[type="radio"], input[type="checkbox"] {
         max-height: none;
         overflow: visible;
     }
-    .field-grid, .hint-row { grid-template-columns: 1fr; }
-    .action-row, .result-actions, .question-nav, .question-confirm, .question-actions, .question-action-stack { flex-direction: column; }
-    .top-actions button, .action-row button, .result-actions button, .question-nav button, .question-confirm button, .question-actions button { width: 100%; }
-    textarea { min-height: 280px; }
-    body.quiz-mode { padding: 0; }
-    body.quiz-mode #quizPanel { padding: 14px; }
 }
 </style>
 </head>
@@ -563,85 +1046,211 @@ input[type="radio"], input[type="checkbox"] {
     <button type="button" id="hideHelpBtn" onclick="hideHelpBtnFunction()">Ẩn nút</button>
     <button type="button" id="helpBtn" onclick="showHelp()">Hướng dẫn</button>
 </div>
+
 <div id="helpOverlay">
     <video id="helpVideo" controls>
         <source src="lv_0_20251124175756.mp4" type="video/mp4">
     </video>
     <button type="button" id="closeHelp" onclick="closeHelp()">Đóng</button>
 </div>
-<div class="container">
-    <section class="hero">
-        <div>
-            <div class="hero-tag">Student Quiz Studio</div>
-            <h1>Tạo quiz hiện đại, đẹp và dễ học cho sinh viên</h1>
-            <p>Dán câu hỏi vào, tạo quiz trong vài giây và làm bài trong một không gian sáng, rõ và chuyên nghiệp. Giao diện được sắp xếp để sinh viên tập trung vào nội dung, nhìn tiến độ dễ dàng và sửa sai nhanh hơn.</p>
-        </div>
-        <div class="hero-side">
-            <div class="hero-chip"><strong>Nhập đề nhanh</strong><span>Một khung dán nội dung lớn, dễ dàng đưa bộ đề vào mà không cần chỉnh sửa quá nhiều.</span></div>
-            <div class="hero-chip"><strong>Làm bài từng câu rõ ràng</strong><span>Câu hỏi hiển thị lớn, lựa chọn thoáng, nút bấm rõ và dễ thao tác trên laptop hoặc điện thoại.</span></div>
-            <div class="hero-chip"><strong>Phù hợp ôn tập</strong><span>Hợp để luyện thi, giao bài tự học, kiểm tra nhanh trong lớp hoặc tạo bộ quiz từ tài liệu môn học.</span></div>
-        </div>
-    </section>
-    <section class="content-grid">
-        <div class="main-column">
-            <div class="panel" id="inputBox">
-                <div class="panel-header"><div><span class="eyebrow">Input</span><h2 class="panel-title">Dán bộ câu hỏi vào đây</h2><p class="panel-subtitle">Bước 1 dán phần câu hỏi gồm nội dung và 4 đáp án A, B, C, D. Sau khi xác nhận, hệ thống sẽ hiện thêm khối nhập đáp án theo dạng Câu 1: A.</p></div></div>
-                <textarea id="inputData" placeholder="Dán câu hỏi vào đây...
+<div id="focusDismissLayer" onclick="clearAnswerHighlight()"></div>
+
+<div class="shell">
+    <div class="container fade-up">
+        <section class="hero">
+            <div class="hero-copy">
+                <div class="hero-tag">Quiz Studio Premium</div>
+                <h1>Tạo bộ quiz sang trọng, nhanh và tập trung tuyệt đối vào việc học</h1>
+                <p>Thiết kế mới ưu tiên cảm giác cao cấp, chuyển động nhẹ, hiển thị rõ trên màn hình lớn lẫn điện thoại. Phần nhập đề, tạo đáp án và khu vực làm bài được chia tách mạch lạc để thao tác nhanh nhưng vẫn mượt và tải gọn.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <strong>4 bước</strong>
+                        <span>Dán đề, xác nhận, nhập đáp án, bắt đầu làm bài.</span>
+                    </div>
+                    <div class="hero-stat">
+                        <strong>1 màn hình</strong>
+                        <span>Quản lý tiến độ, thời gian và điều hướng câu hỏi trực quan.</span>
+                    </div>
+                    <div class="hero-stat">
+                        <strong>Mượt nhẹ</strong>
+                        <span>Hiệu ứng ngắn, bóng đổ tinh gọn, ưu tiên tốc độ hiển thị.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-side">
+                <div class="hero-panel primary">
+                    <strong>Không gian làm bài chuyên nghiệp</strong>
+                    <span>Câu hỏi nổi bật, đáp án thoáng mắt, sidebar điều hướng rõ trạng thái để sinh viên tập trung hơn và hạn chế thao tác thừa.</span>
+                </div>
+                <div class="hero-panel">
+                    <strong>Tối ưu cho ôn tập thực tế</strong>
+                    <span>Hợp để luyện đề, kiểm tra nhanh, giao bài tự học hoặc dựng câu hỏi từ nội dung AI tạo ra theo mẫu chuẩn.</span>
+                </div>
+                <div class="hero-panel">
+                    <strong>Giữ logic cũ, nâng tầm giao diện</strong>
+                    <span>Script xử lý quiz vẫn được giữ lại để tránh lỗi phát sinh, chỉ nâng cấp cách trình bày và trải nghiệm sử dụng.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <div class="main-column">
+                <div class="panel" id="inputBox">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Input</span>
+                            <h2 class="panel-title">Nhập bộ câu hỏi theo cách gọn và chắc chắn</h2>
+                            <p class="panel-subtitle">Dán toàn bộ nội dung đề vào ô dưới, sau đó xác nhận để hệ thống tách câu hỏi. Khi đã đúng cấu trúc, bạn nhập đáp án chuẩn theo mẫu và tạo quiz chỉ trong vài giây.</p>
+                        </div>
+                    </div>
+
+                    <div class="intro-grid">
+                        <div class="intro-card">
+                            <strong>Định dạng đề xuất</strong>
+                            <p>Mỗi câu gồm một dòng nội dung và bốn lựa chọn A, B, C, D. Nếu là câu nhiều đáp án đúng, bạn vẫn có thể nhập đáp án theo dạng `A, C` ở phần bên dưới.</p>
+                        </div>
+                        <div class="assistant-card">
+                            <strong>Mẹo để đọc đề chính xác hơn</strong>
+                            <p>Giữ mỗi đáp án trên một dòng riêng, tránh dán thêm ký tự trang trí dư thừa và nên kiểm tra lại vài câu đầu trước khi tạo quiz.</p>
+                        </div>
+                    </div>
+
+                    <div class="composer-grid">
+                        <div class="question-compose">
+                            <textarea id="inputData" placeholder="Dán câu hỏi vào đây...
 
 Câu 1: Nội dung câu hỏi
 A. Đáp án A
 B. Đáp án B
 C. Đáp án C
 D. Đáp án D"></textarea>
-                <div id="answerInputSection" style="display:none;margin-top:18px;">
-                    <label class="field-label" for="answerData">Nhập đáp án sau khi xác nhận câu hỏi</label>
-                    <textarea id="answerData" placeholder="Câu 1: A&#10;Câu 2: B"></textarea>
+                        </div>
+
+                        <div id="answerInputSection" class="answer-compose is-hidden" style="display:none;">
+                            <div class="answer-compose-header">
+                                <div>
+                                    <h3 class="answer-compose-title">Nhập đáp án sau khi xác nhận câu hỏi</h3>
+                                    <p class="answer-compose-note">Panel này sẽ được làm nổi bật ngay sau khi bạn xác nhận để nhập đáp án nhanh, rõ và chuyên nghiệp hơn.</p>
+                                </div>
+                                <span class="answer-status" id="answerStatus">Chờ xác nhận</span>
+                            </div>
+                            <label class="field-label" for="answerData">Danh sách đáp án đúng</label>
+                            <textarea id="answerData" placeholder="Câu 1: A&#10;Câu 2: B"></textarea>
+                            <div class="answer-tip">Bấm ra vùng nền tối bên ngoài để tắt hiệu ứng làm nổi bật.</div>
+                        </div>
+                    </div>
+
+                    <div class="field-grid" style="margin-top:18px;">
+                        <div>
+                            <label class="field-label" for="timeLimit">Thời gian làm bài (phút)</label>
+                            <input id="timeLimit" type="number" min="1" placeholder="Ví dụ: 15">
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button type="button" onclick="confirmQuestionInput()">Xác nhận câu hỏi</button>
+                        <button type="button" id="generateQuizBtn" onclick="generateQuiz()" style="display:none;">Tạo Quiz</button>
+                    </div>
+
+                    <div class="hint-row">
+                        <div class="hint-box"><strong>1. Giữ thứ tự A-D</strong>Đề càng đều cấu trúc thì hệ thống đọc càng chuẩn và nhanh.</div>
+                        <div class="hint-box"><strong>2. Xác nhận trước</strong>Bước xác nhận giúp mở phần nhập đáp án và báo sớm nếu đề lỗi cấu trúc.</div>
+                        <div class="hint-box"><strong>3. Đáp án riêng</strong>Điền theo mẫu như `Câu 1: A` hoặc `Câu 4: A, C`.</div>
+                    </div>
                 </div>
-                <div class="field-grid" style="margin-top:18px;">
-                    <div><label class="field-label" for="timeLimit">Thời gian làm bài (phút)</label><input id="timeLimit" type="number" min="1" placeholder="Ví dụ: 15"></div>
-                </div>
-                <div class="action-row">
-                    <button type="button" onclick="confirmQuestionInput()">Xác nhận câu hỏi</button>
-                    <button type="button" id="generateQuizBtn" onclick="generateQuiz()" style="display:none;">Tạo Quiz</button>
-                </div>
-                <div class="hint-row">
-                    <div class="hint-box"><strong>1. Đúng thứ tự</strong>Mỗi câu nên giữ theo A, B, C, D.</div>
-                    <div class="hint-box"><strong>2. Xác nhận trước</strong>Sau khi dán câu hỏi, bấm xác nhận để mở khối nhập đáp án.</div>
-                    <div class="hint-box"><strong>3. Nhập đáp án riêng</strong>Điền theo mẫu như "Câu 1: A", "Câu 2: B".</div>
+
+                <div class="panel" id="quizPanel">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Quiz</span>
+                            <h2 class="panel-title">Khu vực làm bài được tối ưu để tập trung</h2>
+                            <p class="panel-subtitle">Sau khi tạo xong, quiz sẽ hiển thị tại đây với điều hướng nhanh, đồng hồ thời gian và phản hồi ngay sau khi xác nhận từng câu.</p>
+                        </div>
+                    </div>
+                    <form id="quizForm"></form>
+                    <div class="result-actions">
+                        <button type="button" id="endBtn" style="display:none;" onclick="submitQuiz()">Kết thúc bài</button>
+                        <button type="button" id="retryBtn" style="display:none;" onclick="retryQuiz()">Làm lại bài</button>
+                        <button type="button" id="newQuizBtn" style="display:none;" onclick="newQuiz()">Tạo lại câu hỏi</button>
+                    </div>
+                    <div id="result"></div>
                 </div>
             </div>
-            <div class="panel" id="quizPanel">
-                <div class="panel-header"><div><span class="eyebrow">Quiz</span><h2 class="panel-title">Khu vực làm bài</h2><p class="panel-subtitle">Sau khi tạo xong, câu hỏi sẽ hiện ở đây. Sinh viên làm bài theo từng câu và nhận kết quả cuối bài.</p></div></div>
-                <form id="quizForm"></form>
-                <div class="result-actions">
-                    <button type="button" id="endBtn" style="display:none;" onclick="submitQuiz()">Kết thúc bài</button>
-                    <button type="button" id="retryBtn" style="display:none;" onclick="retryQuiz()">Làm lại bài</button>
-                    <button type="button" id="newQuizBtn" style="display:none;" onclick="newQuiz()">Tạo lại câu hỏi</button>
+
+            <div class="side-column">
+                <div class="panel" id="goodLuckBox">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Template</span>
+                            <h2 class="panel-title">Tạo biểu mẫu để sinh đề với AI</h2>
+                            <p class="panel-subtitle">Nhập số câu và tên môn học để tạo prompt mẫu. Bạn có thể dùng ngay cho AI hoặc làm khung để soạn đề nhanh và đồng nhất.</p>
+                        </div>
+                    </div>
+
+                    <div class="field-grid">
+                        <div>
+                            <label class="field-label" for="soCau">Số câu</label>
+                            <input id="soCau" type="number" placeholder="Ví dụ: 20">
+                        </div>
+                        <div>
+                            <label class="field-label" for="monHoc">Môn học</label>
+                            <input id="monHoc" type="text" placeholder="Ví dụ: Cơ sở dữ liệu">
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button type="button" onclick="taoBieuMau()">Tạo biểu mẫu</button>
+                    </div>
+                    <div id="mauOutput"></div>
                 </div>
-                <div id="result"></div>
-            </div>
-        </div>
-        <div class="side-column">
-            <div class="panel" id="goodLuckBox">
-                <div class="panel-header"><div><span class="eyebrow">Template</span><h2 class="panel-title">Tạo biểu mẫu để sinh đề</h2><p class="panel-subtitle">Nhập số câu và môn học để tạo một khung đề bài mẫu. Bạn có thể sao chép và đưa cho AI hoặc dùng để viết bộ đề nhanh hơn.</p></div></div>
-                <div class="field-grid">
-                    <div><label class="field-label" for="soCau">Số câu</label><input id="soCau" type="number" placeholder="Ví dụ: 20"></div>
-                    <div><label class="field-label" for="monHoc">Môn học</label><input id="monHoc" type="text" placeholder="Ví dụ: Cơ sở dữ liệu"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Quality</span>
+                            <h2 class="panel-title">Chuẩn nhập đề để tránh lỗi</h2>
+                            <p class="panel-subtitle">Ba quy tắc ngắn giúp trang xử lý đề ổn định hơn và giảm thời gian chỉnh tay.</p>
+                        </div>
+                    </div>
+
+                    <ul class="helper-list">
+                        <li><strong>Mỗi câu là một khối rõ:</strong> dòng câu hỏi và bốn đáp án A, B, C, D nằm tách bạch.</li>
+                        <li><strong>Nếu nhiều đáp án đúng:</strong> phần đáp án có thể ghi `A, B` và hệ thống vẫn nhận diện được.</li>
+                        <li><strong>Giữ nhịp soạn đề nhất quán:</strong> cùng cách đánh số và cùng kiểu viết đáp án để giảm lỗi parse.</li>
+                    </ul>
                 </div>
-                <div class="action-row"><button type="button" onclick="taoBieuMau()">Tạo biểu mẫu</button></div>
-                <div id="mauOutput"></div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">Overview</span>
+                            <h2 class="panel-title">Tổng quan trải nghiệm mới</h2>
+                        </div>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric-card">
+                            <strong>Premium</strong>
+                            <span>Màu nền sâu, thẻ sáng nổi khối và khoảng trắng rộng hơn để nhìn sang hơn.</span>
+                        </div>
+                        <div class="metric-card">
+                            <strong>Fast</strong>
+                            <span>Không dùng hiệu ứng nặng, animation ngắn và số lớp hiển thị được tiết chế.</span>
+                        </div>
+                        <div class="metric-card">
+                            <strong>Focus</strong>
+                            <span>Chế độ làm bài tự thu gọn giao diện phụ để tập trung tối đa vào câu hỏi.</span>
+                        </div>
+                        <div class="metric-card">
+                            <strong>Responsive</strong>
+                            <span>Bố cục chuyển một cột gọn gàng trên mobile, vẫn giữ thao tác thuận tay.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="panel">
-                <div class="panel-header"><div><span class="eyebrow">Guide</span><h2 class="panel-title">Gợi ý để nhập đề đúng chuẩn</h2></div></div>
-                <ul class="helper-list">
-                    <li><strong>Mỗi câu một khối rõ ràng:</strong> dòng câu hỏi và 4 đáp án A, B, C, D.</li>
-                    <li><strong>Nếu đáp án nhiều lựa chọn:</strong> có thể ghi theo dạng A, B và hệ thống sẽ xử lý được.</li>
-                    <li><strong>Nhập đáp án sau:</strong> dùng mẫu như "Câu 1: A", "Câu 2: B".</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+        </section>
+    </div>
 </div>
+
 <script>
 let quizData = [];
 let currentIndex = 0;
@@ -843,11 +1452,28 @@ function parseAnswerInput(text, totalQuestions) {
 function buildAnswerTemplate(totalQuestions) {
     return Array.from({ length: totalQuestions }, (_, index) => `Câu ${index + 1}: `).join("\n");
 }
+function highlightAnswerPanel() {
+    const section = document.getElementById("answerInputSection");
+    const answerStatus = document.getElementById("answerStatus");
+    if (!section) return;
+    document.body.classList.add("answer-focus-active");
+    section.classList.remove("is-hidden");
+    section.classList.add("is-highlighted");
+    if (answerStatus) answerStatus.textContent = "Sẵn sàng";
+}
+function clearAnswerHighlight() {
+    document.body.classList.remove("answer-focus-active");
+    const section = document.getElementById("answerInputSection");
+    if (section) section.classList.remove("is-highlighted");
+}
 function resetConfirmedQuestionInput() {
     draftQuestions = [];
+    clearAnswerHighlight();
     document.getElementById("answerInputSection").style.display = "none";
+    document.getElementById("answerInputSection").classList.add("is-hidden");
     document.getElementById("generateQuizBtn").style.display = "none";
     document.getElementById("answerData").value = "";
+    document.getElementById("answerStatus").textContent = "Chờ xác nhận";
 }
 function confirmQuestionInput() {
     const rawText = document.getElementById("inputData").value.trim();
@@ -859,11 +1485,16 @@ function confirmQuestionInput() {
     }
     draftQuestions = parsed;
     document.getElementById("answerInputSection").style.display = "block";
+    document.getElementById("answerInputSection").classList.remove("is-hidden");
     const answerData = document.getElementById("answerData");
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
     if (!answerData.value.trim()) answerData.value = buildAnswerTemplate(parsed.length);
     document.getElementById("generateQuizBtn").style.display = "inline-flex";
     document.getElementById("result").innerHTML = `<div class='result-summary'><h3>Đã xác nhận ${parsed.length} câu hỏi</h3><div>Tiếp theo hãy nhập đáp án theo mẫu bên dưới rồi bấm Tạo Quiz.</div></div>`;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    highlightAnswerPanel();
+    answerData.focus({ preventScroll: true });
+    requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
 }
 function generateQuiz() {
     const timeLimitValue = document.getElementById("timeLimit").value.trim();
@@ -890,6 +1521,7 @@ function generateQuiz() {
     confirmedAnswers = {};
     timeLimitMinutes = timeLimitValue && Number(timeLimitValue) > 0 ? Number(timeLimitValue) : 0;
     timeRemainingSeconds = timeLimitMinutes * 60;
+    clearAnswerHighlight();
     document.body.classList.add("quiz-mode");
     document.getElementById("inputBox").style.display = "none";
     document.getElementById("goodLuckBox").style.display = "none";
@@ -941,9 +1573,14 @@ function renderSingleQuestion() {
                         <div class="question-nav" id="controlNextPrev"><button id="nextBtn" type="button" onclick="nextQuestion()">Tiếp</button></div>
                     </div>
                 </div>
-                <div class="question-nav"><button type="button" class="danger-outline" onclick="restartToInput()">Tạo lại câu hỏi</button></div>
+                <div class="question-nav" style="margin-top:12px;"><button type="button" class="danger-outline" onclick="restartToInput()">Tạo lại câu hỏi</button></div>
             </div>
             <aside class="question-sidebar">
+                <div class="sidebar-heading">
+                    <strong>Điều hướng câu hỏi</strong>
+                    <span>${quizData.length} câu</span>
+                </div>
+                <div class="sidebar-note">Màu của từng ô cho biết trạng thái câu hỏi: đã chọn, đúng, đúng một phần hoặc sai sau khi xác nhận.</div>
                 <div class="question-grid">${navButtons}</div>
             </aside>
         </div>`;
@@ -999,10 +1636,10 @@ function showCorrectAnswer(isRestore) {
     const correctAns = quizData[currentIndex].correct;
     labels.forEach(label => {
         const input = label.querySelector("input");
-        label.style.color = "var(--text)";
+        label.style.color = "var(--text-dark)";
         label.style.fontWeight = "600";
-        label.style.borderColor = "rgba(148, 163, 184, 0.2)";
-        label.style.background = "rgba(248, 250, 252, 0.98)";
+        label.style.borderColor = "rgba(145, 159, 181, 0.2)";
+        label.style.background = "rgba(255, 255, 255, 0.9)";
         if (correctAns.includes(input.value)) {
             label.style.color = "#166534";
             label.style.fontWeight = "800";
@@ -1093,16 +1730,19 @@ function restartToInput() {
     timeLimitMinutes = 0;
     timeRemainingSeconds = 0;
     stopTimer();
+    clearAnswerHighlight();
     document.body.classList.remove("quiz-mode");
     document.getElementById("inputBox").style.display = "block";
     document.getElementById("goodLuckBox").style.display = "block";
     document.getElementById("answerInputSection").style.display = "none";
+    document.getElementById("answerInputSection").classList.add("is-hidden");
     document.getElementById("generateQuizBtn").style.display = "none";
     document.getElementById("quizForm").innerHTML = "";
     document.getElementById("result").innerHTML = "";
     document.getElementById("endBtn").style.display = "none";
     document.getElementById("retryBtn").style.display = "none";
     document.getElementById("newQuizBtn").style.display = "none";
+    document.getElementById("answerStatus").textContent = "Chờ xác nhận";
 }
 function newQuiz() {
     restartToInput();
@@ -1111,6 +1751,9 @@ function newQuiz() {
     document.getElementById("timeLimit").value = "";
 }
 document.getElementById("inputData").addEventListener("input", resetConfirmedQuestionInput);
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") clearAnswerHighlight();
+});
 </script>
 </body>
 </html>
