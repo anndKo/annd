@@ -440,11 +440,17 @@ body.quiz-mode .question-grid::-webkit-scrollbar-thumb:hover {
     color: #166534;
     border-color: rgba(34, 197, 94, 0.35);
 }
+.question-dot.partial-answer {
+    background: rgba(254, 249, 195, 0.98);
+    color: #a16207;
+    border-color: rgba(234, 179, 8, 0.42);
+}
 .question-dot.wrong-answer {
     background: rgba(254, 226, 226, 0.98);
     color: #b91c1c;
     border-color: rgba(239, 68, 68, 0.38);
 }
+.question-dot.active.partial-answer,
 .question-dot.active.wrong-answer,
 .question-dot.active.answered,
 .question-dot.active.checked {
@@ -579,23 +585,29 @@ input[type="radio"], input[type="checkbox"] {
     <section class="content-grid">
         <div class="main-column">
             <div class="panel" id="inputBox">
-                <div class="panel-header"><div><span class="eyebrow">Input</span><h2 class="panel-title">Dán bộ câu hỏi vào đây</h2><p class="panel-subtitle">Hệ thống hỗ trợ tách câu hỏi có 4 đáp án A, B, C, D và dòng đáp án ở cuối mỗi câu. Càng đúng cấu trúc, quiz sẽ càng chạy ổn định.</p></div></div>
+                <div class="panel-header"><div><span class="eyebrow">Input</span><h2 class="panel-title">Dán bộ câu hỏi vào đây</h2><p class="panel-subtitle">Bước 1 dán phần câu hỏi gồm nội dung và 4 đáp án A, B, C, D. Sau khi xác nhận, hệ thống sẽ hiện thêm khối nhập đáp án theo dạng Câu 1: A.</p></div></div>
                 <textarea id="inputData" placeholder="Dán câu hỏi vào đây...
 
 Câu 1: Nội dung câu hỏi
 A. Đáp án A
 B. Đáp án B
 C. Đáp án C
-D. Đáp án D
-Đáp án: A"></textarea>
+D. Đáp án D"></textarea>
+                <div id="answerInputSection" style="display:none;margin-top:18px;">
+                    <label class="field-label" for="answerData">Nhập đáp án sau khi xác nhận câu hỏi</label>
+                    <textarea id="answerData" placeholder="Câu 1: A&#10;Câu 2: B"></textarea>
+                </div>
                 <div class="field-grid" style="margin-top:18px;">
                     <div><label class="field-label" for="timeLimit">Thời gian làm bài (phút)</label><input id="timeLimit" type="number" min="1" placeholder="Ví dụ: 15"></div>
                 </div>
-                <div class="action-row"><button type="button" onclick="generateQuiz()">Tạo Quiz</button></div>
+                <div class="action-row">
+                    <button type="button" onclick="confirmQuestionInput()">Xác nhận câu hỏi</button>
+                    <button type="button" id="generateQuizBtn" onclick="generateQuiz()" style="display:none;">Tạo Quiz</button>
+                </div>
                 <div class="hint-row">
                     <div class="hint-box"><strong>1. Đúng thứ tự</strong>Mỗi câu nên giữ theo A, B, C, D.</div>
-                    <div class="hint-box"><strong>2. Có dòng đáp án</strong>Cuối mỗi câu cần có dòng "Đáp án:".</div>
-                    <div class="hint-box"><strong>3. Dán một lần</strong>Bạn có thể dán nguyên bộ đề và tạo quiz ngay.</div>
+                    <div class="hint-box"><strong>2. Xác nhận trước</strong>Sau khi dán câu hỏi, bấm xác nhận để mở khối nhập đáp án.</div>
+                    <div class="hint-box"><strong>3. Nhập đáp án riêng</strong>Điền theo mẫu như "Câu 1: A", "Câu 2: B".</div>
                 </div>
             </div>
             <div class="panel" id="quizPanel">
@@ -622,9 +634,9 @@ D. Đáp án D
             <div class="panel">
                 <div class="panel-header"><div><span class="eyebrow">Guide</span><h2 class="panel-title">Gợi ý để nhập đề đúng chuẩn</h2></div></div>
                 <ul class="helper-list">
-                    <li><strong>Mỗi câu một khối rõ ràng:</strong> dòng câu hỏi, 4 đáp án và dòng đáp án ở cuối.</li>
+                    <li><strong>Mỗi câu một khối rõ ràng:</strong> dòng câu hỏi và 4 đáp án A, B, C, D.</li>
                     <li><strong>Nếu đáp án nhiều lựa chọn:</strong> có thể ghi theo dạng A, B và hệ thống sẽ xử lý được.</li>
-                    <li><strong>Dễ học dễ nhớ:</strong> khi làm sai, sinh viên nhìn ngay đáp án đúng để sửa lại kiến thức.</li>
+                    <li><strong>Nhập đáp án sau:</strong> dùng mẫu như "Câu 1: A", "Câu 2: B".</li>
                 </ul>
             </div>
         </div>
@@ -638,11 +650,20 @@ let confirmedAnswers = {};
 let timeLimitMinutes = 0;
 let timeRemainingSeconds = 0;
 let timerInterval = null;
+let draftQuestions = [];
 function isQuestionCorrect(index) {
     if (!confirmedAnswers[index]) return false;
     const userAns = answersUser[index] || [];
     const correctAns = quizData[index]?.correct || [];
     return userAns.length === correctAns.length && userAns.every(answer => correctAns.includes(answer));
+}
+function isQuestionPartial(index) {
+    if (!confirmedAnswers[index]) return false;
+    const userAns = answersUser[index] || [];
+    const correctAns = quizData[index]?.correct || [];
+    if (correctAns.length <= 1 || userAns.length === 0) return false;
+    if (userAns.length === correctAns.length && userAns.every(answer => correctAns.includes(answer))) return false;
+    return userAns.some(answer => correctAns.includes(answer));
 }
 function formatTime(seconds) {
     const safeSeconds = Math.max(0, seconds);
@@ -712,6 +733,13 @@ function extractAnswerValues(answerLine) {
         .map(item => item.trim().toUpperCase())
         .filter(Boolean);
 }
+function extractAnswerValuesLoose(answerText) {
+    return normalizeVietnamese(answerText)
+        .replace(/^(Cau|Bai)?\s*\d+\s*[:.)-]?\s*/i, "")
+        .split(",")
+        .map(item => item.trim().toUpperCase())
+        .filter(item => ["A", "B", "C", "D", "E", "F"].includes(item));
+}
 function taoBieuMau() {
     const soCau = document.getElementById("soCau").value.trim();
     const monHoc = document.getElementById("monHoc").value.trim();
@@ -739,21 +767,13 @@ function taoBieuMau() {
         document.body.removeChild(textarea);
     }
 }
-function parseQuestionBlocks(text) {
+function parseQuestionOnlyBlocks(text) {
     text = text.replace(/â¸»+/g, "");
     text = text.replace(/\*+/g, "");
     const half = Math.floor(text.length / 2);
     const firstPart = text.slice(0, half).trim();
     const secondPart = text.slice(half).trim();
     if (firstPart && secondPart.includes(firstPart.slice(0, 50))) text = firstPart;
-    const rawLines = text.split("\n");
-    let lastAnswerIndex = -1;
-    rawLines.forEach((line, index) => {
-        if (isAnswerLine(cleanLine(line))) lastAnswerIndex = index;
-    });
-    if (lastAnswerIndex !== -1) {
-        text = rawLines.slice(0, lastAnswerIndex).concat(rawLines[lastAnswerIndex]).join("\n");
-    }
     const lines = text.split("\n").map(line => cleanLine(line)).filter(line => line !== "" && !/^-+$/.test(line));
     const firstQuestionIndex = lines.findIndex(line => isQuestionStart(line));
     if (firstQuestionIndex > -1) lines.splice(0, firstQuestionIndex);
@@ -774,32 +794,97 @@ function parseQuestionBlocks(text) {
     const parsed = [];
     let currentBlock = [];
     lines.forEach(line => {
-        currentBlock.push(line);
-        if (isAnswerLine(line)) {
+        if (isQuestionStart(line) && currentBlock.length > 0) {
             const questionLine = currentBlock[0] || "";
-            const options = currentBlock.slice(1, -1);
-            const answerLine = currentBlock[currentBlock.length - 1];
+            const options = currentBlock.slice(1);
             const A = options[0] ? options[0].replace(/^A[:.]\s*/i, "").trim() : "";
             const B = options[1] ? options[1].replace(/^B[:.]\s*/i, "").trim() : "";
             const C = options[2] ? options[2].replace(/^C[:.]\s*/i, "").trim() : "";
             const D = options[3] ? options[3].replace(/^D[:.]\s*/i, "").trim() : "";
-            const correct = extractAnswerValues(answerLine);
-            if (questionLine && A && B && C && D && correct.length > 0) parsed.push({ question: questionLine, A, B, C, D, correct });
+            if (questionLine && A && B && C && D) parsed.push({ question: questionLine, A, B, C, D });
             currentBlock = [];
         }
+        currentBlock.push(line);
     });
+    if (currentBlock.length > 0) {
+        const questionLine = currentBlock[0] || "";
+        const options = currentBlock.slice(1);
+        const A = options[0] ? options[0].replace(/^A[:.]\s*/i, "").trim() : "";
+        const B = options[1] ? options[1].replace(/^B[:.]\s*/i, "").trim() : "";
+        const C = options[2] ? options[2].replace(/^C[:.]\s*/i, "").trim() : "";
+        const D = options[3] ? options[3].replace(/^D[:.]\s*/i, "").trim() : "";
+        if (questionLine && A && B && C && D) parsed.push({ question: questionLine, A, B, C, D });
+    }
     return parsed;
 }
-function generateQuiz() {
+function parseAnswerInput(text, totalQuestions) {
+    const lines = text.split("\n").map(line => cleanLine(line)).filter(Boolean);
+    const answerMap = new Map();
+    let sequentialIndex = 0;
+    lines.forEach(line => {
+        const normalized = normalizeVietnamese(line);
+        const match = normalized.match(/^(?:Cau|Bai)?\s*(\d+)\s*[:.)-]\s*(.+)$/i);
+        if (match) {
+            const questionNumber = Number(match[1]);
+            const values = extractAnswerValuesLoose(match[2]);
+            if (questionNumber >= 1 && questionNumber <= totalQuestions && values.length > 0) {
+                answerMap.set(questionNumber - 1, values);
+            }
+            return;
+        }
+        const values = extractAnswerValuesLoose(line);
+        if (values.length > 0 && sequentialIndex < totalQuestions) {
+            answerMap.set(sequentialIndex, values);
+            sequentialIndex++;
+        }
+    });
+    return Array.from({ length: totalQuestions }, (_, index) => answerMap.get(index) || []);
+}
+function buildAnswerTemplate(totalQuestions) {
+    return Array.from({ length: totalQuestions }, (_, index) => `Câu ${index + 1}: `).join("\n");
+}
+function resetConfirmedQuestionInput() {
+    draftQuestions = [];
+    document.getElementById("answerInputSection").style.display = "none";
+    document.getElementById("generateQuizBtn").style.display = "none";
+    document.getElementById("answerData").value = "";
+}
+function confirmQuestionInput() {
     const rawText = document.getElementById("inputData").value.trim();
-    const timeLimitValue = document.getElementById("timeLimit").value.trim();
     if (!rawText) { alert("Vui lòng nhập câu hỏi!"); return; }
-    const parsed = parseQuestionBlocks(rawText);
+    const parsed = parseQuestionOnlyBlocks(rawText);
     if (parsed.length === 0) {
-        document.getElementById("result").innerHTML = "<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Không đọc được bộ câu hỏi. Hãy kiểm tra lại cấu trúc: mỗi câu gồm nội dung, 4 đáp án A B C D và dòng Đáp án ở cuối.</div>";
+        document.getElementById("result").innerHTML = "<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Không đọc được bộ câu hỏi. Hãy kiểm tra lại cấu trúc: mỗi câu gồm nội dung và 4 đáp án A B C D.</div>";
         return;
     }
-    quizData = parsed;
+    draftQuestions = parsed;
+    document.getElementById("answerInputSection").style.display = "block";
+    const answerData = document.getElementById("answerData");
+    if (!answerData.value.trim()) answerData.value = buildAnswerTemplate(parsed.length);
+    document.getElementById("generateQuizBtn").style.display = "inline-flex";
+    document.getElementById("result").innerHTML = `<div class='result-summary'><h3>Đã xác nhận ${parsed.length} câu hỏi</h3><div>Tiếp theo hãy nhập đáp án theo mẫu bên dưới rồi bấm Tạo Quiz.</div></div>`;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function generateQuiz() {
+    const timeLimitValue = document.getElementById("timeLimit").value.trim();
+    const rawText = document.getElementById("inputData").value.trim();
+    if (!rawText) { alert("Vui lòng nhập câu hỏi!"); return; }
+    if (draftQuestions.length === 0) {
+        confirmQuestionInput();
+    }
+    if (draftQuestions.length === 0) return;
+    const answerText = document.getElementById("answerData").value.trim();
+    if (!answerText) {
+        alert("Vui lòng nhập đáp án theo dạng Câu 1: A");
+        return;
+    }
+    const parsedAnswers = parseAnswerInput(answerText, draftQuestions.length);
+    const missingAnswers = parsedAnswers.map((answer, index) => answer.length === 0 ? index + 1 : null).filter(Boolean);
+    if (missingAnswers.length > 0) {
+        document.getElementById("result").innerHTML = `<div class='wrong' style='border-left-color:#ea580c;background:#fff7ed;'>Thiếu đáp án ở các câu: ${missingAnswers.join(", ")}. Hãy nhập theo mẫu "Câu 1: A".</div>`;
+        return;
+    }
+    quizData = draftQuestions.map((question, index) => ({ ...question, correct: parsedAnswers[index] }));
     currentIndex = 0;
     answersUser = {};
     confirmedAnswers = {};
@@ -828,7 +913,11 @@ function renderSingleQuestion() {
         const classes = ["question-dot"];
         if (index === currentIndex) classes.push("active");
         if ((answersUser[index] || []).length > 0) classes.push("answered");
-        if (confirmedAnswers[index]) classes.push(isQuestionCorrect(index) ? "checked" : "wrong-answer");
+        if (confirmedAnswers[index]) {
+            if (isQuestionCorrect(index)) classes.push("checked");
+            else if (isQuestionPartial(index)) classes.push("partial-answer");
+            else classes.push("wrong-answer");
+        }
         return `<button type="button" class="${classes.join(" ")}" onclick="goToQuestion(${index})">${index + 1}</button>`;
     }).join("");
     div.innerHTML = `
@@ -997,6 +1086,7 @@ function retryQuiz() {
 function submitQuiz() { endQuizSingle(); }
 function restartToInput() {
     quizData = [];
+    draftQuestions = [];
     answersUser = {};
     confirmedAnswers = {};
     currentIndex = 0;
@@ -1006,6 +1096,8 @@ function restartToInput() {
     document.body.classList.remove("quiz-mode");
     document.getElementById("inputBox").style.display = "block";
     document.getElementById("goodLuckBox").style.display = "block";
+    document.getElementById("answerInputSection").style.display = "none";
+    document.getElementById("generateQuizBtn").style.display = "none";
     document.getElementById("quizForm").innerHTML = "";
     document.getElementById("result").innerHTML = "";
     document.getElementById("endBtn").style.display = "none";
@@ -1015,8 +1107,10 @@ function restartToInput() {
 function newQuiz() {
     restartToInput();
     document.getElementById("inputData").value = "";
+    document.getElementById("answerData").value = "";
     document.getElementById("timeLimit").value = "";
 }
+document.getElementById("inputData").addEventListener("input", resetConfirmedQuestionInput);
 </script>
 </body>
 </html>
